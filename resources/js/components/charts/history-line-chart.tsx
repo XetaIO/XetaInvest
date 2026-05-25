@@ -1,0 +1,172 @@
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    ChartContainer,
+    ChartLegend,
+    ChartLegendContent,
+    ChartTooltip,
+    ChartTooltipContent,
+} from '@/components/ui/chart';
+import type { ChartConfig } from '@/components/ui/chart';
+import { formatEur } from '@/lib/format';
+import type { HistoryPoint } from '@/types';
+
+type Props = {
+    title?: string;
+    description?: string;
+    data: HistoryPoint[];
+};
+
+const config = {
+    value_eur: {
+        label: 'Valeur',
+        color: 'var(--chart-1)',
+    },
+    invested_eur: {
+        label: 'Investi',
+        color: 'var(--muted-foreground)',
+    },
+} satisfies ChartConfig;
+
+function formatShortDate(iso: string): string {
+    const d = new Date(iso);
+
+    if (Number.isNaN(d.getTime())) {
+        return iso;
+    }
+
+    return new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit' }).format(d);
+}
+
+function formatTooltipDate(iso: string): string {
+    const d = new Date(iso);
+
+    if (Number.isNaN(d.getTime())) {
+        return iso;
+    }
+
+    return new Intl.DateTimeFormat('fr-FR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+    }).format(d);
+}
+
+function formatAxisEur(value: number): string {
+    const abs = Math.abs(value);
+
+    if (abs >= 1_000_000) {
+        return `${(value / 1_000_000).toFixed(1)}M €`;
+    }
+
+    if (abs >= 1_000) {
+        return `${Math.round(value / 1_000)}k €`;
+    }
+
+    return `${Math.round(value)} €`;
+}
+
+export function HistoryLineChart({
+    title = 'Évolution de la valeur',
+    description,
+    data = [],
+}: Props) {
+    if (data.length === 0) {
+        return (
+            <Card className="py-6">
+                <CardHeader className="pb-0">
+                    <CardTitle className="text-base">{title}</CardTitle>
+                    {description && <CardDescription>{description}</CardDescription>}
+                </CardHeader>
+                <CardContent className="pb-2">
+                    <div className="flex h-[260px] items-center justify-center text-sm text-muted-foreground">
+                        Pas encore d'historique. Les snapshots quotidiens sont capturés chaque soir.
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
+
+    return (
+        <Card className="py-6">
+            <CardHeader className="pb-0">
+                <CardTitle className="text-base">{title}</CardTitle>
+                {description && <CardDescription>{description}</CardDescription>}
+            </CardHeader>
+            <CardContent className="pb-2">
+                <ChartContainer config={config} className="aspect-auto h-[280px] w-full">
+                    <LineChart data={data} margin={{ left: 12, right: 12, top: 8, bottom: 0 }}>
+                        <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                        <XAxis
+                            dataKey="date"
+                            tickLine={false}
+                            axisLine={false}
+                            tickMargin={8}
+                            minTickGap={32}
+                            tickFormatter={formatShortDate}
+                        />
+                        <YAxis
+                            tickLine={false}
+                            axisLine={false}
+                            tickMargin={8}
+                            width={64}
+                            tickFormatter={formatAxisEur}
+                        />
+                        <ChartTooltip
+                            cursor={true}
+                            content={
+                                <ChartTooltipContent
+                                    labelFormatter={(label) => formatTooltipDate(String(label))}
+                                    formatter={(value, name) => {
+                                        const numeric = Number(value);
+                                        const key = String(name);
+                                        const meta = config[key as keyof typeof config];
+                                        const color = meta?.color;
+
+                                        return (
+                                            <div className="flex w-full items-center gap-2">
+                                                {color && (
+                                                    <span
+                                                        className="inline-block h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                                                        style={{ backgroundColor: color }}
+                                                    />
+                                                )}
+                                                <span className="text-muted-foreground">
+                                                    {meta?.label ?? key}
+                                                </span>
+                                                <span className="ml-auto font-mono font-medium tabular-nums text-foreground">
+                                                    {formatEur(numeric)}
+                                                </span>
+                                            </div>
+                                        );
+                                    }}
+                                />
+                            }
+                        />
+                        <Line
+                            type="monotone"
+                            dataKey="value_eur"
+                            stroke="var(--chart-1)"
+                            strokeWidth={2}
+                            dot={false}
+                            isAnimationActive={false}
+                        />
+                        <Line
+                            type="monotone"
+                            dataKey="invested_eur"
+                            stroke="var(--muted-foreground)"
+                            strokeWidth={1.5}
+                            strokeDasharray="4 4"
+                            dot={false}
+                            isAnimationActive={false}
+                        />
+                        <ChartLegend
+                            content={<ChartLegendContent />}
+                            verticalAlign="bottom"
+                        />
+                    </LineChart>
+                </ChartContainer>
+            </CardContent>
+        </Card>
+    );
+}

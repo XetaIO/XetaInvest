@@ -43,6 +43,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'registrationEnabled' => (bool) config('fortify.registration_enabled'),
             'portfolioTicker' => fn () => $request->user()
                 ? app(PortfolioTickerService::class)->buildFor($request->user())
                 : null,

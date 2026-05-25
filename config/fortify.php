@@ -19,6 +19,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Registration Enabled
+    |--------------------------------------------------------------------------
+    |
+    | Toggle public user registration via the REGISTRATION_ENABLED env var.
+    | When false, the /register route is removed and the signup link on the
+    | login page is hidden.
+    |
+    */
+
+    'registration_enabled' => (bool) env('REGISTRATION_ENABLED', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Fortify Password Broker
     |--------------------------------------------------------------------------
     |
@@ -160,8 +173,8 @@ return [
     |
     */
 
-    'features' => [
-        Features::registration(),
+    'features' => array_filter([
+        env('REGISTRATION_ENABLED', true) ? Features::registration() : null,
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([
@@ -172,6 +185,6 @@ return [
         Features::passkeys([
             'confirmPassword' => true,
         ]),
-    ],
+    ]),
 
 ];

@@ -38,7 +38,7 @@ abstract class BaseReportGenerator
      */
     public function generate(User $user, mixed $scope = null, ?CarbonImmutable $date = null): AiReport
     {
-        $date ??= CarbonImmutable::now()->startOfDay();
+        $date ??= CarbonImmutable::now()->addDay()->startOfDay();
         $scopeId = $this->scopeId($scope);
 
         $report = AiReport::query()->updateOrCreate(

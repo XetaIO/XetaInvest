@@ -293,12 +293,18 @@ class FinanceQueryClient
         $symbol = $from.$to.'=X';
         $key = sprintf('fq:fx:%s', $symbol);
 
-        $rate = Cache::remember($key, $this->fxTtl, function () use ($symbol): ?float {
+        /** @var float|null $rate */
+        $rate = Cache::get($key);
+
+        if ($rate === null) {
             $payload = $this->get('/v2/quotes', ['symbols' => $symbol]);
             $price = $payload['quotes'][$symbol]['regularMarketPrice'] ?? null;
 
-            return is_numeric($price) ? (float) $price : null;
-        });
+            if (is_numeric($price) && (float) $price > 0.0) {
+                $rate = (float) $price;
+                Cache::put($key, $rate, $this->fxTtl);
+            }
+        }
 
         if ($rate === null || $rate <= 0.0) {
             throw new FinanceQueryException(sprintf('Unable to resolve FX rate %s -> %s', $from, $to));

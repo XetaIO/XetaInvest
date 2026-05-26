@@ -56,12 +56,8 @@ class NewsScreenerReportGenerator extends BaseReportGenerator
                     ['field' => 'quarterlyrevenuegrowth.quarterly', 'operator' => 'gt', 'value' => $minGrowth],
                     ['field' => 'percentchange', 'operator' => 'gt', 'value' => $minPct],
                 ],
-                'fields' => [
-                    'intradayprice', 'percentchange', 'intradaymarketcap',
-                    'peratio.lasttwelvemonths', 'quarterlyrevenuegrowth.quarterly',
-                    'sector', 'industry', 'currency',
-                ],
-                'sort' => ['field' => 'percentchange', 'direction' => 'desc'],
+                'sortType' => 'DESC',
+                'sortField' => 'percentchange',
                 'limit' => $limit,
             ];
 

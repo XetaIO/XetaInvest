@@ -47,8 +47,3 @@ export type PriceUpdate = {
     market_hours?: string;
     time?: string;
 };
-
-export type ChartPoint = {
-    t: number;
-    [symbol: string]: number;
-};

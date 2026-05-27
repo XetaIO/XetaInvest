@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { PriceUpdate } from '@/types';
 
 type Options = {
@@ -90,6 +90,38 @@ export function useFinanceQueryStream({ symbols, wsUrl, onUpdate, enabled = true
     const reconnectTimerRef = useRef<number | null>(null);
     const closedByUsRef = useRef<boolean>(false);
     const onUpdateRef = useRef(onUpdate);
+    const syncSubscriptionsRef = useRef<() => void>(() => { });
+
+    const symbolsKey = useMemo(
+        () => symbols.map((s) => s.toUpperCase()).sort().join('|'),
+        [symbols],
+    );
+
+    useEffect(() => {
+        syncSubscriptionsRef.current = () => {
+            const ws = wsRef.current;
+
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                return;
+            }
+
+            const desired = new Set(symbols.map((s) => s.toUpperCase()));
+            const current = subscribedRef.current;
+
+            const toAdd = [...desired].filter((s) => !current.has(s));
+            const toRemove = [...current].filter((s) => !desired.has(s));
+
+            if (toAdd.length > 0) {
+                ws.send(JSON.stringify({ subscribe: toAdd }));
+                toAdd.forEach((s) => current.add(s));
+            }
+
+            if (toRemove.length > 0) {
+                ws.send(JSON.stringify({ unsubscribe: toRemove }));
+                toRemove.forEach((s) => current.delete(s));
+            }
+        };
+    });
 
     useEffect(() => {
         onUpdateRef.current = onUpdate;
@@ -115,7 +147,7 @@ export function useFinanceQueryStream({ symbols, wsUrl, onUpdate, enabled = true
 
                 reconnectDelayRef.current = 3000;
                 subscribedRef.current = new Set();
-                syncSubscriptions();
+                syncSubscriptionsRef.current();
             };
 
             ws.onmessage = (event) => {
@@ -180,35 +212,11 @@ export function useFinanceQueryStream({ symbols, wsUrl, onUpdate, enabled = true
             wsRef.current = null;
             subscribedRef.current = new Set();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [enabled, wsUrl]);
 
-    const syncSubscriptions = () => {
-        const ws = wsRef.current;
-
-        if (!ws || ws.readyState !== WebSocket.OPEN) {
-            return;
-        }
-
-        const desired = new Set(symbols.map((s) => s.toUpperCase()));
-        const current = subscribedRef.current;
-
-        const toAdd = [...desired].filter((s) => !current.has(s));
-        const toRemove = [...current].filter((s) => !desired.has(s));
-
-        if (toAdd.length > 0) {
-            ws.send(JSON.stringify({ subscribe: toAdd }));
-            toAdd.forEach((s) => current.add(s));
-        }
-
-        if (toRemove.length > 0) {
-            ws.send(JSON.stringify({ unsubscribe: toRemove }));
-            toRemove.forEach((s) => current.delete(s));
-        }
-    };
-
     useEffect(() => {
-        syncSubscriptions();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [symbols.join('|')]);
+        syncSubscriptionsRef.current();
+
+    }, [symbolsKey]);
 }

@@ -1,3 +1,5 @@
+import type { AiReport } from './ai';
+
 export type PortfolioSummary = {
     id: number;
     name: string;
@@ -80,8 +82,8 @@ export type DashboardProps = {
     portfolios: PortfolioSummary[];
     active: ActivePortfolio | null;
     transactionTypes: TransactionTypeOption[];
-    aiReport?: import('./ai').AiReport | null;
-    aiGlobalReport?: import('./ai').AiReport | null;
+    aiReport?: AiReport | null;
+    aiGlobalReport?: AiReport | null;
 };
 
 export type StatsScope =

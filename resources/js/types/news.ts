@@ -1,3 +1,5 @@
+import type { AiReport } from './ai';
+
 export type NewsItem = {
     symbol: string;
     title: string;
@@ -28,5 +30,5 @@ export type NewsProps = {
     news: Paginated<NewsItem>;
     available_symbols: string[];
     scope: { symbol: string | null };
-    aiNewsReport?: import('./ai').AiReport | null;
+    aiNewsReport?: AiReport | null;
 };

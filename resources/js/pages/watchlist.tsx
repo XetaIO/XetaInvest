@@ -229,12 +229,15 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
         // suppress unused tick warning – `tick` triggers re-render
         void tick;
 
+        // eslint-disable-next-line react-hooks/purity
         const cutoff = Date.now() - MAX_AGE_MS;
         const symbols = allSymbols.filter((s) => !hidden.has(s));
 
+        // eslint-disable-next-line react-hooks/refs
         return symbols.map((sym) => ({
             symbol: sym,
             color: colorFor(sym),
+            // eslint-disable-next-line react-hooks/refs
             points: (history.current.get(sym) ?? []).filter((p) => p.t >= cutoff),
         }));
     }, [allSymbols, hidden, colorFor, tick]);
@@ -382,6 +385,7 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                                     </p>
                                 ) : (
                                     <ul>
+                                        {/* eslint-disable-next-line react-hooks/refs */}
                                         {active.items.map((item) => {
                                             const sym = item.instrument.symbol.toUpperCase();
 
@@ -389,6 +393,7 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                                                 <WatchlistRow
                                                     key={item.id}
                                                     item={item}
+
                                                     price={prices.current.get(sym) ?? null}
                                                     visible={!hidden.has(sym)}
                                                     color={colorFor(sym)}

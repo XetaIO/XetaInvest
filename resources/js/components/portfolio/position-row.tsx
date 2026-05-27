@@ -145,7 +145,7 @@ export function PositionRow({ position, transactionTypes }: Props) {
                                     <Button
                                         type="button"
                                         size="sm"
-                                        variant="ghost"
+                                        variant="outline"
                                         onClick={handleDeletePosition}
                                         className="text-rose-500 hover:text-rose-600"
                                     >
@@ -206,7 +206,7 @@ export function PositionRow({ position, transactionTypes }: Props) {
                                                         <Button
                                                             type="button"
                                                             size="sm"
-                                                            variant="ghost"
+                                                            variant="outline"
                                                             onClick={() => openEditTx(line.transaction_id, line)}
                                                         >
                                                             Modifier
@@ -214,7 +214,7 @@ export function PositionRow({ position, transactionTypes }: Props) {
                                                         <Button
                                                             type="button"
                                                             size="icon"
-                                                            variant="ghost"
+                                                            variant="outline"
                                                             onClick={() => handleDeleteTx(line.transaction_id)}
                                                         >
                                                             <Trash2 className="h-3.5 w-3.5 text-rose-500" />

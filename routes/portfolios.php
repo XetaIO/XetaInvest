@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\WatchlistApiController;
 use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\CalculatorController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PortfolioController;
@@ -21,6 +22,8 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
     Route::get('budget', [BudgetController::class, 'show'])->name('budget.show');
     Route::put('budget', [BudgetController::class, 'update'])->name('budget.update');
+
+    Route::get('calculator', [CalculatorController::class, 'show'])->name('calculator.show');
 
     Route::get('symbol-search', SymbolSearchController::class)->name('symbol.search');
     Route::get('symbol/{symbol}', [SymbolController::class, 'show'])->name('symbol.show');

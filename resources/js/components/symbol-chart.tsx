@@ -47,6 +47,7 @@ function isIntradayRange(range: SymbolRange): boolean {
 function parseDate(value: string | number): Date {
     if (typeof value === 'number' || /^\d+$/.test(String(value))) {
         const n = Number(value);
+
         // Unix seconds vs milliseconds
         return new Date(n < 1e12 ? n * 1000 : n);
     }

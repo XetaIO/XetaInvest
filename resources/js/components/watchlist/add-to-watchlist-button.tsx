@@ -1,6 +1,6 @@
+import { router } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -24,7 +24,9 @@ export function AddToWatchlistButton({ symbol, variant = 'outline', size = 'sm' 
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (!open || lists !== null) return;
+        if (!open || lists !== null) {
+            return;
+        }
 
         let cancelled = false;
         (async () => {
@@ -34,12 +36,19 @@ export function AddToWatchlistButton({ symbol, variant = 'outline', size = 'sm' 
                     credentials: 'same-origin',
                 });
 
-                if (!res.ok) throw new Error('Failed');
+                if (!res.ok) {
+                    throw new Error('Failed');
+                }
+
                 const payload = (await res.json()) as { data: WatchlistSummary[] };
 
-                if (!cancelled) setLists(payload.data);
+                if (!cancelled) {
+                    setLists(payload.data);
+                }
             } catch {
-                if (!cancelled) setLists([]);
+                if (!cancelled) {
+                    setLists([]);
+                }
             }
         })();
 

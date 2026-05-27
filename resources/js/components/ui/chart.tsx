@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as RechartsPrimitive from 'recharts';
+import { Sankey } from 'recharts';
 
 import { cn } from '@/lib/utils';
 

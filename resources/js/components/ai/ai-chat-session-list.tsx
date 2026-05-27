@@ -1,6 +1,6 @@
+import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Plus, Trash2 } from 'lucide-react';
 import type { AiChatSession } from '@/types';
 
 interface AiChatSessionListProps {

@@ -21,6 +21,7 @@ export function AppSidebarHeader({
             }
         };
         window.addEventListener('keydown', handler);
+
         return () => window.removeEventListener('keydown', handler);
     }, []);
 

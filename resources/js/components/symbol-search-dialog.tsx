@@ -2,7 +2,6 @@ import { router } from '@inertiajs/react';
 import { Loader2, Search } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { AddToWatchlistButton } from '@/components/watchlist/add-to-watchlist-button';
 import {
     Dialog,
     DialogContent,
@@ -11,6 +10,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { AddToWatchlistButton } from '@/components/watchlist/add-to-watchlist-button';
 import type { SymbolSearchResult } from '@/types';
 
 type Props = {

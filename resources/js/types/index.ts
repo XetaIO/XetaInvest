@@ -1,5 +1,6 @@
 export type * from './ai';
 export type * from './auth';
+export type * from './budget';
 export type * from './navigation';
 export type * from './news';
 export type * from './portfolio';

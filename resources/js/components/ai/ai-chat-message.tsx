@@ -1,8 +1,8 @@
-import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { AiToolCallTrace } from './ai-tool-call-trace';
+import { cn } from '@/lib/utils';
 import type { AiChatMessage as AiChatMessageType } from '@/types';
+import { AiToolCallTrace } from './ai-tool-call-trace';
 
 interface AiChatMessageProps {
     message: AiChatMessageType;

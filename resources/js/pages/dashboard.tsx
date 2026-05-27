@@ -1,8 +1,8 @@
 import { Head, router } from '@inertiajs/react';
 import { AlertTriangle, Plus, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { AddInvestmentDialog } from '@/components/portfolio/add-investment-dialog';
 import { AiReportCard } from '@/components/ai/ai-report-card';
+import { AddInvestmentDialog } from '@/components/portfolio/add-investment-dialog';
 import { KpiCard } from '@/components/portfolio/kpi-card';
 import { PortfolioSwitcher } from '@/components/portfolio/portfolio-switcher';
 import { PositionRow } from '@/components/portfolio/position-row';

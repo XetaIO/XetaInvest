@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\WatchlistApiController;
+use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PortfolioController;
@@ -17,6 +18,9 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', [DashboardController::class, 'show'])->name('dashboard');
     Route::get('statistics', [StatisticsController::class, 'show'])->name('statistics');
     Route::get('news', [NewsController::class, 'show'])->name('news');
+
+    Route::get('budget', [BudgetController::class, 'show'])->name('budget.show');
+    Route::put('budget', [BudgetController::class, 'update'])->name('budget.update');
 
     Route::get('symbol-search', SymbolSearchController::class)->name('symbol.search');
     Route::get('symbol/{symbol}', [SymbolController::class, 'show'])->name('symbol.show');

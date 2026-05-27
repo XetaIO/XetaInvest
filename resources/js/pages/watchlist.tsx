@@ -1,14 +1,15 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ListPlus, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { WatchlistChart, type ChartSeries } from '@/components/watchlist/watchlist-chart';
-import { WatchlistFormDialog } from '@/components/watchlist/watchlist-form-dialog';
-import { WatchlistRow } from '@/components/watchlist/watchlist-row';
 import { AiReportCard } from '@/components/ai/ai-report-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { WatchlistChart } from '@/components/watchlist/watchlist-chart';
+import type { ChartSeries } from '@/components/watchlist/watchlist-chart';
+import { WatchlistFormDialog } from '@/components/watchlist/watchlist-form-dialog';
+import { WatchlistRow } from '@/components/watchlist/watchlist-row';
 import { useFinanceQueryStream } from '@/hooks/use-finance-query-stream';
 import type { AiReport, PriceUpdate, Watchlist, WatchlistLimits } from '@/types';
 
@@ -79,7 +80,11 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
 
         if (!last || last.t !== t) {
             list.push({ t, v: u.price });
-            if (list.length > MAX_POINTS) list.shift();
+
+            if (list.length > MAX_POINTS) {
+                list.shift();
+            }
+
             history.current.set(sym, list);
         } else {
             last.v = u.price;
@@ -108,7 +113,10 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
     useEffect(() => {
         // Seed history with recent baseline so the chart isn't empty when markets are closed
         const missing = allSymbols.filter((s) => !history.current.has(s));
-        if (missing.length === 0) return;
+
+        if (missing.length === 0) {
+            return;
+        }
 
         let cancelled = false;
         const url = `/api/watchlists/history?symbols=${encodeURIComponent(missing.join(','))}`;
@@ -116,13 +124,16 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
         fetch(url, { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
             .then((r) => (r.ok ? r.json() : null))
             .then((payload: { data?: Record<string, LivePoint[]> } | null) => {
-                if (cancelled || !payload?.data) return;
+                if (cancelled || !payload?.data) {
+                    return;
+                }
 
                 for (const [sym, points] of Object.entries(payload.data)) {
                     if (!history.current.has(sym) && Array.isArray(points) && points.length > 0) {
                         history.current.set(sym, points.slice(-MAX_POINTS));
                     }
                 }
+
                 setTick((n) => (n + 1) % 1_000_000);
             })
             .catch(() => {
@@ -137,6 +148,7 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
     const colorFor = useCallback(
         (symbol: string) => {
             const idx = allSymbols.indexOf(symbol.toUpperCase());
+
             return PALETTE[Math.max(0, idx) % PALETTE.length];
         },
         [allSymbols],
@@ -148,7 +160,10 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
 
     const submitAdd = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!active || !addSymbol.trim()) return;
+
+        if (!active || !addSymbol.trim()) {
+            return;
+        }
 
         router.post(
             `/watchlists/${active.id}/items`,
@@ -163,9 +178,19 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
     const addCompare = (e: React.FormEvent) => {
         e.preventDefault();
         const s = compareSymbol.trim().toUpperCase();
-        if (!s) return;
-        if (compareSymbols.includes(s)) return;
-        if (itemSymbols.includes(s)) return;
+
+        if (!s) {
+            return;
+        }
+
+        if (compareSymbols.includes(s)) {
+            return;
+        }
+
+        if (itemSymbols.includes(s)) {
+            return;
+        }
+
         setCompareSymbols((prev) => [...prev, s]);
         setCompareSymbol('');
     };
@@ -177,15 +202,26 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
     const toggleHidden = (sym: string) => {
         setHidden((prev) => {
             const next = new Set(prev);
-            if (next.has(sym)) next.delete(sym);
-            else next.add(sym);
+
+            if (next.has(sym)) {
+                next.delete(sym);
+            } else {
+                next.add(sym);
+            }
+
             return next;
         });
     };
 
     const deleteActive = () => {
-        if (!active) return;
-        if (!confirm(`Supprimer la liste « ${active.name} » ?`)) return;
+        if (!active) {
+            return;
+        }
+
+        if (!confirm(`Supprimer la liste « ${active.name} » ?`)) {
+            return;
+        }
+
         router.delete(`/watchlists/${active.id}`, { preserveScroll: false });
     };
 
@@ -195,6 +231,7 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
 
         const cutoff = Date.now() - MAX_AGE_MS;
         const symbols = allSymbols.filter((s) => !hidden.has(s));
+
         return symbols.map((sym) => ({
             symbol: sym,
             color: colorFor(sym),
@@ -347,6 +384,7 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                                     <ul>
                                         {active.items.map((item) => {
                                             const sym = item.instrument.symbol.toUpperCase();
+
                                             return (
                                                 <WatchlistRow
                                                     key={item.id}

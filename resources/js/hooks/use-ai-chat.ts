@@ -17,6 +17,7 @@ interface UseAiChatResult {
 
 function getXsrfToken(): string {
     const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+
     return match ? decodeURIComponent(match[1]) : '';
 }
 
@@ -31,6 +32,7 @@ async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
     if (method !== 'GET' && method !== 'HEAD') {
         headers['Content-Type'] = headers['Content-Type'] ?? 'application/json';
         const token = getXsrfToken();
+
         if (token) {
             headers['X-XSRF-TOKEN'] = token;
         }
@@ -45,6 +47,7 @@ async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
     if (!response.ok) {
         const err = new Error(`HTTP ${response.status}`) as Error & { status?: number };
         err.status = response.status;
+
         throw err;
     }
 
@@ -82,9 +85,11 @@ export function useAiChat(): UseAiChatResult {
             setSessions((prev) => [data.data, ...prev]);
             setActiveSession(data.data);
             setMessages([]);
+
             return data.data;
         } catch (e) {
             setError(e instanceof Error ? e.message : 'create_failed');
+
             return null;
         }
     }, []);
@@ -92,6 +97,7 @@ export function useAiChat(): UseAiChatResult {
     const selectSession = useCallback(
         async (id: number) => {
             setLoading(true);
+
             try {
                 const session = sessions.find((s) => s.id === id) ?? null;
                 setActiveSession(session);
@@ -110,12 +116,18 @@ export function useAiChat(): UseAiChatResult {
 
     const sendMessage = useCallback(
         async (content: string) => {
-            if (!content.trim()) return;
+            if (!content.trim()) {
+                return;
+            }
 
             let session = activeSession;
+
             if (!session) {
                 session = await createSession();
-                if (!session) return;
+
+                if (!session) {
+                    return;
+                }
             }
 
             const optimistic: AiChatMessage = {
@@ -143,15 +155,18 @@ export function useAiChat(): UseAiChatResult {
 
                 setSessions((prev) => {
                     const others = prev.filter((s) => s.id !== data.data.session.id);
+
                     return [data.data.session, ...others];
                 });
             } catch (e) {
                 const status = (e as { status?: number }).status;
+
                 if (status === 429) {
                     setError("Quota IA dépassé pour aujourd'hui.");
                 } else {
                     setError(e instanceof Error ? e.message : 'send_failed');
                 }
+
                 setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
             } finally {
                 setSending(false);
@@ -165,6 +180,7 @@ export function useAiChat(): UseAiChatResult {
             try {
                 await apiFetch(`/api/ai/chat/sessions/${id}`, { method: 'DELETE' });
                 setSessions((prev) => prev.filter((s) => s.id !== id));
+
                 if (activeSession?.id === id) {
                     setActiveSession(null);
                     setMessages([]);
@@ -177,7 +193,10 @@ export function useAiChat(): UseAiChatResult {
     );
 
     useEffect(() => {
-        if (loadedRef.current) return;
+        if (loadedRef.current) {
+            return;
+        }
+
         loadedRef.current = true;
         void loadSessions();
     }, [loadSessions]);

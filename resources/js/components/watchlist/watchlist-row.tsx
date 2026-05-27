@@ -26,7 +26,9 @@ export function WatchlistRow({ item, price, visible, color, onToggleVisible }: P
     const isUp = change >= 0;
 
     const remove = () => {
-        if (!confirm(`Retirer ${item.instrument.symbol} de la liste ?`)) return;
+        if (!confirm(`Retirer ${item.instrument.symbol} de la liste ?`)) {
+            return;
+        }
 
         router.delete(`/watchlist-items/${item.id}`, { preserveScroll: true });
     };

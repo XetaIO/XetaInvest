@@ -1,5 +1,5 @@
-import { Badge } from '@/components/ui/badge';
 import { Wrench } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import type { AiToolCall } from '@/types';
 
 interface AiToolCallTraceProps {
@@ -7,7 +7,9 @@ interface AiToolCallTraceProps {
 }
 
 export function AiToolCallTrace({ toolCalls }: AiToolCallTraceProps) {
-    if (!toolCalls?.length) return null;
+    if (!toolCalls?.length) {
+        return null;
+    }
 
     return (
         <div className="space-y-1">

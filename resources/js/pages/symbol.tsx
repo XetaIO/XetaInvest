@@ -1,7 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowDownRight, ArrowUpRight, ExternalLink } from 'lucide-react';
 import { SymbolChart } from '@/components/symbol-chart';
-import { AddToWatchlistButton } from '@/components/watchlist/add-to-watchlist-button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -9,6 +8,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { AddToWatchlistButton } from '@/components/watchlist/add-to-watchlist-button';
 import { formatNumber, formatPercent } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { SymbolProps } from '@/types';

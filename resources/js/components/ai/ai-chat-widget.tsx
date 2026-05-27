@@ -1,9 +1,9 @@
+import { MessageCircle, Send, Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useAiChat } from '@/hooks/use-ai-chat';
-import { MessageCircle, Send, Loader2 } from 'lucide-react';
 import { AiChatMessage } from './ai-chat-message';
 import { AiChatSessionList } from './ai-chat-session-list';
 
@@ -31,7 +31,11 @@ export function AiChatWidget() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!input.trim() || sending) return;
+
+        if (!input.trim() || sending) {
+            return;
+        }
+
         const content = input;
         setInput('');
         await sendMessage(content);

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\Contracts\PasskeyUser;
@@ -20,6 +21,7 @@ class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory;
+
     use Notifiable;
     use PasskeyAuthenticatable;
     use TwoFactorAuthenticatable;
@@ -56,5 +58,10 @@ class User extends Authenticatable implements PasskeyUser
     public function aiChatSessions(): HasMany
     {
         return $this->hasMany(AiChatSession::class);
+    }
+
+    public function budget(): HasOne
+    {
+        return $this->hasOne(Budget::class);
     }
 }

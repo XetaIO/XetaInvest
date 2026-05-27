@@ -22,35 +22,49 @@ const formatPct = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`;
 export function WatchlistChart({ series }: Props) {
     const config = useMemo<ChartConfig>(() => {
         const c: ChartConfig = {};
+
         for (const s of series) {
             c[s.symbol] = { label: s.symbol, color: s.color };
         }
+
         return c;
     }, [series]);
 
     const data = useMemo(() => {
-        if (series.length === 0) return [];
+        if (series.length === 0) {
+            return [];
+        }
 
         const baselines: Record<string, number | null> = {};
+
         for (const s of series) {
             baselines[s.symbol] = s.points[0]?.v ?? null;
         }
 
         const all = new Set<number>();
+
         for (const s of series) {
-            for (const p of s.points) all.add(p.t);
+            for (const p of s.points) {
+                all.add(p.t);
+            }
         }
 
         const sorted = [...all].sort((a, b) => a - b);
         const last: Record<string, number | null> = {};
-        for (const s of series) last[s.symbol] = null;
+
+        for (const s of series) {
+            last[s.symbol] = null;
+        }
 
         return sorted.map((t) => {
             const row: Record<string, number | string> = { t };
 
             for (const s of series) {
                 const point = s.points.find((p) => p.t === t);
-                if (point) last[s.symbol] = point.v;
+
+                if (point) {
+                    last[s.symbol] = point.v;
+                }
 
                 const base = baselines[s.symbol];
                 const cur = last[s.symbol];
@@ -94,6 +108,7 @@ export function WatchlistChart({ series }: Props) {
                     minTickGap={32}
                     tickFormatter={(t) => {
                         const d = new Date(Number(t));
+
                         return new Intl.DateTimeFormat('fr-FR', {
                             day: '2-digit',
                             month: '2-digit',
@@ -118,6 +133,7 @@ export function WatchlistChart({ series }: Props) {
                             labelFormatter={(_label, payload) => {
                                 const first = (payload as Array<{ payload?: { t?: number } }> | undefined)?.[0];
                                 const t = first?.payload?.t;
+
                                 return t ? new Date(Number(t)).toLocaleString() : '';
                             }}
                             formatter={(value, name) => (

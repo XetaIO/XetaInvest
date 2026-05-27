@@ -39,11 +39,17 @@ const num = (v: unknown): number | undefined => (typeof v === 'number' && Number
 const str = (v: unknown): string | undefined => (typeof v === 'string' ? v : undefined);
 
 function normalizePriceUpdate(raw: unknown): PriceUpdate | null {
-    if (!raw || typeof raw !== 'object') return null;
+    if (!raw || typeof raw !== 'object') {
+        return null;
+    }
+
     const r = raw as RawPriceUpdate;
 
     const id = str(r.id);
-    if (!id) return null;
+
+    if (!id) {
+        return null;
+    }
 
     const price = num(r.price) ?? 0;
     const change = num(r.change) ?? 0;
@@ -51,6 +57,7 @@ function normalizePriceUpdate(raw: unknown): PriceUpdate | null {
 
     let time: string | undefined;
     const t = r.time;
+
     if (typeof t === 'number' && Number.isFinite(t)) {
         time = new Date(t).toISOString();
     } else if (typeof t === 'string' && t.length > 0) {
@@ -102,8 +109,10 @@ export function useFinanceQueryStream({ symbols, wsUrl, onUpdate, enabled = true
             ws.onopen = () => {
                 if (closedByUsRef.current) {
                     ws.close();
+
                     return;
                 }
+
                 reconnectDelayRef.current = 3000;
                 subscribedRef.current = new Set();
                 syncSubscriptions();
@@ -116,9 +125,19 @@ export function useFinanceQueryStream({ symbols, wsUrl, onUpdate, enabled = true
 
                     for (const raw of updates) {
                         const u = normalizePriceUpdate(raw);
-                        if (!u) continue;
-                        if (u.quote_type === 'HEARTBEAT') continue;
-                        if (!u.id) continue;
+
+                        if (!u) {
+                            continue;
+                        }
+
+                        if (u.quote_type === 'HEARTBEAT') {
+                            continue;
+                        }
+
+                        if (!u.id) {
+                            continue;
+                        }
+
                         onUpdateRef.current(u);
                     }
                 } catch {
@@ -130,7 +149,9 @@ export function useFinanceQueryStream({ symbols, wsUrl, onUpdate, enabled = true
                 wsRef.current = null;
                 subscribedRef.current = new Set();
 
-                if (closedByUsRef.current) return;
+                if (closedByUsRef.current) {
+                    return;
+                }
 
                 reconnectTimerRef.current = window.setTimeout(connect, reconnectDelayRef.current);
                 reconnectDelayRef.current = Math.min(reconnectDelayRef.current * 2, 30000);
@@ -151,9 +172,11 @@ export function useFinanceQueryStream({ symbols, wsUrl, onUpdate, enabled = true
             }
 
             const ws = wsRef.current;
+
             if (ws && ws.readyState === WebSocket.OPEN) {
                 ws.close();
             }
+
             wsRef.current = null;
             subscribedRef.current = new Set();
         };
@@ -162,7 +185,10 @@ export function useFinanceQueryStream({ symbols, wsUrl, onUpdate, enabled = true
 
     const syncSubscriptions = () => {
         const ws = wsRef.current;
-        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            return;
+        }
 
         const desired = new Set(symbols.map((s) => s.toUpperCase()));
         const current = subscribedRef.current;

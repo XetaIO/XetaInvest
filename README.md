@@ -1,4 +1,3 @@
-
 <p align="center">
    <img src="art/logo-brand-light-mode.png#gh-light-mode-only" alt="XetaInvest Logo" height="230"/>
    <img src="art/logo-brand-dark-mode.png#gh-dark-mode-only" alt="XetaInvest Logo" height="230"/>
@@ -11,13 +10,18 @@
 
 **XetaInvest** is a modern web application for managing investment portfolios, financial analysis, and budgeting, designed for individual investors and finance enthusiasts.
 
+
 ## Main Features
 
-- **Multi-portfolio management**: Add, edit, and track multiple portfolios (stocks, ETFs, crypto, etc.).
+- **Multi-portfolio management**: Add, edit, and track multiple portfolios (stocks, ETFs, etc.).
 - **Position tracking**: Record your transactions (buy, sell, dividends) and visualize your holdings over time.
 - **Advanced statistics**: Analyze your portfolio performance (gains, returns, allocation, etc.).
 - **Budget & savings**: Monthly budgeting module, automatic calculation of available savings for investment.
 - **Compound interest calculator**: Project your capital growth over several scenarios (optimistic, median, pessimistic) with customizable compounding frequency.
+- **AI features**:
+   - **AI Chat Assistant**: Ask questions about your investments, markets, or financial concepts in natural language.
+   - **Portfolio report generation**: Get detailed, AI-generated reports and insights on your portfolios.
+   - **Watchlist analysis**: Generate smart summaries and risk/return analysis for your watchlists.
 - **Financial news**: Aggregation of news and analysis for your tracked assets.
 - **Watchlists**: Create custom watchlists.
 - **Security**: Strong authentication (2FA, passkeys), strict policies on all sensitive data.
@@ -88,6 +92,19 @@ php artisan test
 npm run lint
 ```
 
+## Scheduled Tasks
+
+XetaInvest uses Laravel's scheduler to automate recurring tasks (such as data imports, report generation, portfolios reports, etc.).
+
+To ensure scheduled commands run as expected, set up a cron job on your server to execute:
+
+```bash
+* * * * * cd /path/to/XetaInvest && php artisan schedule:run >> /dev/null 2>&1
+```
+
+This will trigger Laravel's scheduler every minute, and it will run any due tasks defined in `app/Console/Kernel.php`.
+
+
 ## Security
 - Strong authentication (2FA, passkeys, email)
 - All sensitive routes protected by policies
@@ -101,11 +118,7 @@ You can find presentation screenshots of XetaInvest in the [`docs/screenshots/`]
 
 ## finance-query Library
 
-XetaInvest integrates the [finance-query](https://github.com/Verdenroz/finance-query) library to provide advanced financial data extraction and analysis features:
-
-- **Natural language financial queries**: Users can ask questions about their portfolios or the market in plain English or French.
-- **Data extraction**: The library parses and interprets financial statements, ratios, and metrics from various sources.
-- **Integration**: Used in AI chat modules and reporting tools for smart insights and recommendations.
+XetaInvest integrates the [finance-query](https://github.com/Verdenroz/finance-query) library to provide advanced financial data extraction and analysis features.
 
 For more details, see the [finance-query documentation](https://github.com/Verdenroz/finance-query).
 

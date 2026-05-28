@@ -52,25 +52,22 @@ function formatTooltipDate(iso: string): string {
     }).format(d);
 }
 
-function formatAxisEur(value: number): string {
-    const abs = Math.abs(value);
-
-    if (abs >= 1_000_000) {
-        return `${(value / 1_000_000).toFixed(1)}M €`;
-    }
-
-    if (abs >= 1_000) {
-        return `${Math.round(value / 1_000)}k €`;
-    }
-
-    return `${Math.round(value)} €`;
-}
-
 export function HistoryLineChart({
     title = 'Évolution de la valeur',
     description,
     data = [],
 }: Props) {
+    // Calcul dynamique du domaine Y (min/max des valeurs affichées)
+    const allValues = data.flatMap((d) => [d.value_eur, d.invested_eur]);
+    let minY = Math.min(...allValues);
+    let maxY = Math.max(...allValues);
+    // Ajoute une marge visuelle de 5%
+    const range = maxY - minY;
+    if (range > 0) {
+        minY = minY - range * 0.05;
+        maxY = maxY + range * 0.05;
+    }
+
     if (data.length === 0) {
         return (
             <Card className="py-6">
@@ -79,7 +76,7 @@ export function HistoryLineChart({
                     {description && <CardDescription>{description}</CardDescription>}
                 </CardHeader>
                 <CardContent className="pb-2">
-                    <div className="flex h-[260px] items-center justify-center text-sm text-muted-foreground">
+                    <div className="flex h-65 items-center justify-center text-sm text-muted-foreground">
                         Pas encore d'historique. Les snapshots quotidiens sont capturés chaque soir.
                     </div>
                 </CardContent>
@@ -94,7 +91,7 @@ export function HistoryLineChart({
                 {description && <CardDescription>{description}</CardDescription>}
             </CardHeader>
             <CardContent className="pb-2">
-                <ChartContainer config={config} className="aspect-auto h-[280px] w-full">
+                <ChartContainer config={config} className="aspect-auto h-70 w-full">
                     <LineChart data={data} margin={{ left: 12, right: 12, top: 8, bottom: 0 }}>
                         <CartesianGrid vertical={false} strokeDasharray="3 3" />
                         <XAxis
@@ -106,11 +103,12 @@ export function HistoryLineChart({
                             tickFormatter={formatShortDate}
                         />
                         <YAxis
+                            domain={[minY, maxY]}
                             tickLine={false}
                             axisLine={false}
                             tickMargin={8}
                             width={64}
-                            tickFormatter={formatAxisEur}
+                            tickFormatter={(value) => `${Math.round(value)} €`}
                         />
                         <ChartTooltip
                             cursor={true}

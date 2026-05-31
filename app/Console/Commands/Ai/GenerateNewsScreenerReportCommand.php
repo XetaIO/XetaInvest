@@ -6,15 +6,15 @@ namespace App\Console\Commands\Ai;
 
 use App\Models\User;
 use App\Services\Ai\Reports\NewsScreenerReportGenerator;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Throwable;
 
+#[Signature('ai:generate-news-screener-report {--user= : Limit to a single user ID}')]
+#[Description('Generate the daily AI news screener report (FR + US high-growth stocks). One report per user.')]
 class GenerateNewsScreenerReportCommand extends Command
 {
-    protected $signature = 'ai:generate-news-screener-report {--user= : Limit to a single user ID}';
-
-    protected $description = 'Generate the daily AI news screener report (FR + US high-growth stocks). One report per user.';
-
     public function handle(NewsScreenerReportGenerator $generator): int
     {
         $query = User::query();

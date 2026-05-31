@@ -6,15 +6,15 @@ namespace App\Console\Commands\Ai;
 
 use App\Models\User;
 use App\Services\Ai\Reports\WatchlistReportGenerator;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Throwable;
 
+#[Signature('ai:generate-watchlist-reports {--user= : Limit to a single user ID}')]
+#[Description('Generate a daily AI watchlist report for each user.')]
 class GenerateWatchlistReportsCommand extends Command
 {
-    protected $signature = 'ai:generate-watchlist-reports {--user= : Limit to a single user ID}';
-
-    protected $description = 'Generate a daily AI watchlist report for each user.';
-
     public function handle(WatchlistReportGenerator $generator): int
     {
         $query = User::query()->whereHas('watchlists');

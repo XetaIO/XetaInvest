@@ -6,15 +6,15 @@ namespace App\Console\Commands\Ai;
 
 use App\Models\User;
 use App\Services\Ai\Reports\GlobalPortfolioReportGenerator;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Throwable;
 
+#[Signature('ai:generate-global-reports {--user= : Limit to a single user ID}')]
+#[Description('Generate a daily global AI report for each user (across all portfolios).')]
 class GenerateGlobalReportsCommand extends Command
 {
-    protected $signature = 'ai:generate-global-reports {--user= : Limit to a single user ID}';
-
-    protected $description = 'Generate a daily global AI report for each user (across all portfolios).';
-
     public function handle(GlobalPortfolioReportGenerator $generator): int
     {
         $query = User::query();

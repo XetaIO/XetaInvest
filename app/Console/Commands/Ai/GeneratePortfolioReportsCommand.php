@@ -8,17 +8,15 @@ use App\Models\Portfolio;
 use App\Models\User;
 use App\Services\Ai\Exceptions\AiQuotaExceededException;
 use App\Services\Ai\Reports\PortfolioReportGenerator;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Throwable;
 
+#[Signature('ai:generate-portfolio-reports {--user= : Limit to a single user ID} {--portfolio= : Limit to a single portfolio ID}')]
+#[Description('Generate daily AI reports for every portfolio (per user).')]
 class GeneratePortfolioReportsCommand extends Command
 {
-    protected $signature = 'ai:generate-portfolio-reports
-        {--user= : Limit to a single user ID}
-        {--portfolio= : Limit to a single portfolio ID}';
-
-    protected $description = 'Generate daily AI reports for every portfolio (per user).';
-
     public function handle(PortfolioReportGenerator $generator): int
     {
         $userId = $this->option('user');

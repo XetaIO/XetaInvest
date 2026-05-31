@@ -1,11 +1,15 @@
 <p align="center">
+   <a href="./README_FR.md">🇫🇷</a>
+</p>
+
+<p align="center">
    <img src="art/logo-brand-light-mode.png#gh-light-mode-only" alt="XetaInvest Logo" height="230"/>
    <img src="art/logo-brand-dark-mode.png#gh-dark-mode-only" alt="XetaInvest Logo" height="230"/>
 </p>
 
-|Unit Tests|Stable Version|Downloads|Laravel|License|
-|:------:|:-------:|:------:|:-------:|:------:|
-|[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/XetaIO/XetaInvest/tests.yml?style=flat-square)](https://github.com/XetaIO/Xetainvest/actions/workflows/tests.yml)|[![Latest Stable Version](https://img.shields.io/github/v/release/xetaio/xetainvest?style=flat-square)](https://github.com/XetaIO/XetaInvest/releases)|[![Total Downloads](https://img.shields.io/github/downloads/xetaio/xetainvest/total?style=flat-square)](https://packagist.org/packages/xetaio/xetaravel)| [![Laravel 13.0](https://img.shields.io/badge/Laravel-13.0-f4645f.svg?style=flat-square)](http://laravel.com) |[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://github.com/XetaIO/XetaInvest/blob/master/LICENSE)|
+|Unit Tests|Stable Version|Laravel|License|
+|:------:|:-------:|:------:|:-------:|
+|[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/XetaIO/XetaInvest/tests.yml?style=flat-square)](https://github.com/XetaIO/Xetainvest/actions/workflows/tests.yml)|[![Latest Stable Version](https://img.shields.io/github/v/release/xetaio/xetainvest?style=flat-square)](https://github.com/XetaIO/XetaInvest/releases)| [![Laravel 13.0](https://img.shields.io/badge/Laravel-13.0-f4645f.svg?style=flat-square)](http://laravel.com) |[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://github.com/XetaIO/XetaInvest/blob/master/LICENSE)|
 
 
 **XetaInvest** is a modern web application for managing investment portfolios, financial analysis, and budgeting, designed for individual investors and finance enthusiasts.

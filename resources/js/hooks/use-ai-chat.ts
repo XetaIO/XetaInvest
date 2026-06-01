@@ -45,7 +45,21 @@ async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
     });
 
     if (!response.ok) {
-        const err = new Error(`HTTP ${response.status}`) as Error & { status?: number };
+        let message = `HTTP ${response.status}`;
+
+        if (response.status === 422 || response.status === 429) {
+            try {
+                const body = (await response.json()) as { message?: string };
+
+                if (body.message) {
+                    message = body.message;
+                }
+            } catch {
+                // ignore json parse errors
+            }
+        }
+
+        const err = new Error(message) as Error & { status?: number };
         err.status = response.status;
 
         throw err;
@@ -159,14 +173,7 @@ export function useAiChat(): UseAiChatResult {
                     return [data.data.session, ...others];
                 });
             } catch (e) {
-                const status = (e as { status?: number }).status;
-
-                if (status === 429) {
-                    setError("Quota IA dépassé pour aujourd'hui.");
-                } else {
-                    setError(e instanceof Error ? e.message : 'send_failed');
-                }
-
+                setError(e instanceof Error ? e.message : 'send_failed');
                 setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
             } finally {
                 setSending(false);

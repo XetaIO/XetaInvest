@@ -125,13 +125,13 @@ export function SymbolSearchDialog({ open, onOpenChange }: Props) {
 
                     {!loading && trimmed.length < 2 && (
                         <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-                        {t('symbol.search_min_chars')}
+                            {t('symbol.search_min_chars')}
                         </p>
                     )}
 
                     {!loading && trimmed.length >= 2 && displayResults.length === 0 && (
                         <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-                        {t('symbol.search_no_results')}
+                            {t('symbol.search_no_results')}
                         </p>
                     )}
 

@@ -33,7 +33,7 @@ class PositionController extends Controller
         }
 
         if ($quote === null) {
-            return back()->withErrors(['symbol' => __('Symbole introuvable.')]);
+            return back()->withErrors(['symbol' => __('messages.position.symbol_not_found')]);
         }
 
         DB::transaction(function () use ($portfolio, $symbol, $quote, $data): void {
@@ -64,7 +64,7 @@ class PositionController extends Controller
             }
         });
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Investissement ajouté.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.position.added')]);
 
         return back();
     }
@@ -75,7 +75,7 @@ class PositionController extends Controller
 
         $position->delete();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Position supprimée.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.position.deleted')]);
 
         return back();
     }

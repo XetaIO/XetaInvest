@@ -1,5 +1,6 @@
 import { Link, router } from '@inertiajs/react';
 import { LogOut, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function UserMenuContent({ user }: Props) {
+    const { t } = useTranslation();
     const cleanup = useMobileNavigation();
 
     const handleLogout = () => {
@@ -41,7 +43,7 @@ export function UserMenuContent({ user }: Props) {
                         onClick={cleanup}
                     >
                         <Settings className="mr-2" />
-                        Settings
+                        {t('user_menu.settings')}
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -55,7 +57,7 @@ export function UserMenuContent({ user }: Props) {
                     data-test="logout-button"
                 >
                     <LogOut className="mr-2" />
-                    Log out
+                    {t('user_menu.logout')}
                 </Link>
             </DropdownMenuItem>
         </>

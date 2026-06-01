@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CalculatorChart } from '@/components/calculator/calculator-chart';
 import { CalculatorForm } from '@/components/calculator/calculator-form';
 import { CalculatorSummary } from '@/components/calculator/calculator-summary';
@@ -23,19 +24,19 @@ function buildInputs(defaults: CalculatorDefaults): CalculatorInputs {
 }
 
 export default function CalculatorPage({ defaults }: CalculatorPageProps) {
+    const { t } = useTranslation();
     const [inputs, setInputs] = useState<CalculatorInputs>(() => buildInputs(defaults));
 
     const projection = useMemo(() => computeProjection(inputs), [inputs]);
 
     return (
         <>
-            <Head title="Calculateur d'intérêts composés" />
+            <Head title={t('calculator.title')} />
             <div className="flex flex-col gap-6 p-4 md:p-6">
                 <div>
-                    <h1 className="text-2xl font-semibold">Calculateur d'intérêts composés</h1>
+                    <h1 className="text-2xl font-semibold">{t('calculator.title')}</h1>
                     <p className="text-sm text-muted-foreground">
-                        Projetez la croissance de votre patrimoine grâce aux intérêts composés. Les
-                        valeurs par défaut proviennent de vos portefeuilles et de votre budget.
+                        {t('calculator.subtitle')}
                     </p>
                 </div>
 

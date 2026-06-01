@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { ChevronDown, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,29 +21,30 @@ type Props = {
 };
 
 export function PositionRow({ position, transactionTypes }: Props) {
+    const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const [txDialogOpen, setTxDialogOpen] = useState(false);
     const [editingTx, setEditingTx] = useState<{ id?: number; initial?: Partial<TransactionFormValues> }>({});
 
     const handleDeletePosition = () => {
-        if (!confirm(`Supprimer la position ${position.instrument.symbol} et toutes ses transactions ?`)) {
+        if (!confirm(t('position.confirm_delete', { symbol: position.instrument.symbol }))) {
             return;
         }
 
         router.delete(destroyPosition(position.position_id).url, {
             preserveScroll: true,
-            onError: () => toast.error('Impossible de supprimer cette position.'),
+            onError: () => toast.error(t('position.error_delete')),
         });
     };
 
     const handleDeleteTx = (txId: number) => {
-        if (!confirm('Supprimer cette transaction ?')) {
+        if (!confirm(t('position.confirm_delete_tx'))) {
             return;
         }
 
         router.delete(destroyTransaction(txId).url, {
             preserveScroll: true,
-            onError: () => toast.error('Impossible de supprimer cette transaction.'),
+            onError: () => toast.error(t('position.error_delete_tx')),
         });
     };
 
@@ -97,21 +99,21 @@ export function PositionRow({ position, transactionTypes }: Props) {
                             </div>
                             <div className="hidden grid-cols-4 gap-4 text-right text-sm tabular-nums md:grid">
                                 <div>
-                                    <div className="text-xs text-muted-foreground">Qté</div>
+                                    <div className="text-xs text-muted-foreground">{t('position.col_qty')}</div>
                                     <div>{formatNumber(position.quantity)}</div>
                                 </div>
                                 <div>
-                                    <div className="text-xs text-muted-foreground">Valeur</div>
+                                    <div className="text-xs text-muted-foreground">{t('position.col_value')}</div>
                                     <div>{formatEur(position.current_value_eur)}</div>
                                 </div>
                                 <div>
-                                    <div className="text-xs text-muted-foreground">P&amp;L</div>
+                                    <div className="text-xs text-muted-foreground">{t('position.col_pnl')}</div>
                                     <div className={deltaToneClass(position.pnl_eur)}>
                                         {formatEur(position.pnl_eur)}
                                     </div>
                                 </div>
                                 <div>
-                                    <div className="text-xs text-muted-foreground">P&amp;L %</div>
+                                    <div className="text-xs text-muted-foreground">{t('position.col_pnl_pct')}</div>
                                     <div className={deltaToneClass(position.pnl_pct)}>
                                         {formatPercent(position.pnl_pct)}
                                     </div>
@@ -122,25 +124,25 @@ export function PositionRow({ position, transactionTypes }: Props) {
                     <CollapsibleContent>
                         <div className="border-t bg-muted/20 p-4">
                             <div className="mb-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-5">
-                                <Stat label="Prix actuel" value={formatNative(position.price, position.currency)} />
-                                <Stat label="PRU" value={formatNative(position.avg_cost_native, position.currency)} />
+                                <Stat label={t('position.current_price')} value={formatNative(position.price, position.currency)} />
+                                <Stat label={t('position.avg_cost')} value={formatNative(position.avg_cost_native, position.currency)} />
                                 <Stat
-                                    label="Variation jour"
+                                    label={t('position.daily_change')}
                                     value={formatEur(position.daily_change_eur)}
                                     tone={position.daily_change_eur}
                                 />
-                                <Stat label="Investi" value={formatEur(position.invested_eur)} />
+                                <Stat label={t('position.invested')} value={formatEur(position.invested_eur)} />
                                 <Stat
-                                    label="Réalisé"
+                                    label={t('position.realized')}
                                     value={formatEur(position.realized_pnl_eur)}
                                     tone={position.realized_pnl_eur}
                                 />
                             </div>
                             <div className="mb-2 flex items-center justify-between">
-                                <h4 className="text-sm font-semibold">Lignes d'achat ouvertes</h4>
+                                <h4 className="text-sm font-semibold">{t('position.open_lines')}</h4>
                                 <div className="flex gap-2">
                                     <Button type="button" size="sm" variant="outline" onClick={openCreateTx}>
-                                        <Plus className="mr-1 h-3.5 w-3.5" /> Transaction
+                                        <Plus className="mr-1 h-3.5 w-3.5" /> {t('position.add_transaction')}
                                     </Button>
                                     <Button
                                         type="button"
@@ -149,7 +151,7 @@ export function PositionRow({ position, transactionTypes }: Props) {
                                         onClick={handleDeletePosition}
                                         className="text-rose-500 hover:text-rose-600"
                                     >
-                                        <Trash2 className="mr-1 h-3.5 w-3.5" /> Supprimer la position
+                                        <Trash2 className="mr-1 h-3.5 w-3.5" /> {t('position.delete')}
                                     </Button>
                                 </div>
                             </div>
@@ -157,13 +159,13 @@ export function PositionRow({ position, transactionTypes }: Props) {
                                 <table className="w-full text-sm">
                                     <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
                                         <tr>
-                                            <th className="px-3 py-2 text-left">Date</th>
-                                            <th className="px-3 py-2 text-right">Qté init.</th>
-                                            <th className="px-3 py-2 text-right">Qté restante</th>
-                                            <th className="px-3 py-2 text-right">PU</th>
-                                            <th className="px-3 py-2 text-right">Investi</th>
-                                            <th className="px-3 py-2 text-right">Valeur</th>
-                                            <th className="px-3 py-2 text-right">P&amp;L</th>
+                                            <th className="px-3 py-2 text-left">{t('position.date')}</th>
+                                            <th className="px-3 py-2 text-right">{t('position.col_qty_init')}</th>
+                                            <th className="px-3 py-2 text-right">{t('position.col_qty_remaining')}</th>
+                                            <th className="px-3 py-2 text-right">{t('position.col_pu')}</th>
+                                            <th className="px-3 py-2 text-right">{t('position.invested')}</th>
+                                            <th className="px-3 py-2 text-right">{t('position.col_value')}</th>
+                                            <th className="px-3 py-2 text-right">{t('position.col_pnl')}</th>
                                             <th className="px-3 py-2"></th>
                                         </tr>
                                     </thead>
@@ -171,7 +173,7 @@ export function PositionRow({ position, transactionTypes }: Props) {
                                         {position.lines.length === 0 && (
                                             <tr>
                                                 <td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">
-                                                    Aucune ligne ouverte
+                                                    {t('position.no_lines')}
                                                 </td>
                                             </tr>
                                         )}
@@ -209,7 +211,7 @@ export function PositionRow({ position, transactionTypes }: Props) {
                                                             variant="outline"
                                                             onClick={() => openEditTx(line.transaction_id, line)}
                                                         >
-                                                            Modifier
+                                                            {t('position.edit')}
                                                         </Button>
                                                         <Button
                                                             type="button"

@@ -1,5 +1,6 @@
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,23 +27,12 @@ const RANGE_LABELS: Record<SymbolRange, string> = {
     ytd: 'YTD',
 };
 
-const config = {
-    close: {
-        label: 'Cours',
-        color: 'var(--chart-1)',
-    },
-} satisfies ChartConfig;
-
 type Props = {
     symbol: string;
     initial: { range: SymbolRange; points: ChartPoint[] };
     availableRanges: SymbolRange[];
     currency?: string | null;
 };
-
-function isIntradayRange(range: SymbolRange): boolean {
-    return range === '1d' || range === '5d';
-}
 
 function parseDate(value: string | number): Date {
     if (typeof value === 'number' || /^\d+$/.test(String(value))) {
@@ -62,8 +52,17 @@ function formatXAxisTick(value: string, range: SymbolRange): string {
         return value;
     }
 
-    if (isIntradayRange(range)) {
+    if (range === '1d') {
         return new Intl.DateTimeFormat('fr-FR', {
+            hour: '2-digit',
+            minute: '2-digit',
+        }).format(d);
+    }
+
+    if (range === '5d') {
+        return new Intl.DateTimeFormat('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
             hour: '2-digit',
             minute: '2-digit',
         }).format(d);
@@ -83,7 +82,7 @@ function formatTooltipLabel(value: string, range: SymbolRange): string {
         return value;
     }
 
-    if (isIntradayRange(range)) {
+    if (range === '1d' || range === '5d') {
         return new Intl.DateTimeFormat('fr-FR', {
             day: '2-digit',
             month: '2-digit',
@@ -100,10 +99,18 @@ function formatTooltipLabel(value: string, range: SymbolRange): string {
 }
 
 export function SymbolChart({ symbol, initial, availableRanges, currency }: Props) {
+    const { t } = useTranslation();
     const [range, setRange] = useState<SymbolRange>(initial.range);
     const [points, setPoints] = useState<ChartPoint[]>(initial.points);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const config = {
+        close: {
+            label: t('symbol.chart_price'),
+            color: 'var(--chart-1)',
+        },
+    } satisfies ChartConfig;
 
     const handleRangeChange = async (next: SymbolRange) => {
         if (next === range || loading) {
@@ -127,7 +134,7 @@ export function SymbolChart({ symbol, initial, availableRanges, currency }: Prop
             const json: { points?: ChartPoint[] } = await response.json();
             setPoints(json.points ?? []);
         } catch {
-            setError('Impossible de charger le graphique.');
+            setError(t('symbol.chart_error'));
             setPoints([]);
         } finally {
             setLoading(false);
@@ -137,7 +144,7 @@ export function SymbolChart({ symbol, initial, availableRanges, currency }: Prop
     return (
         <Card className="py-6">
             <CardHeader className="flex flex-row items-center justify-between gap-3 pb-0">
-                <CardTitle className="text-base">Historique du cours</CardTitle>
+                <CardTitle className="text-base">{t('symbol.chart_title')}</CardTitle>
                 <div className="flex flex-wrap gap-1">
                     {availableRanges.map((r) => (
                         <Button
@@ -158,7 +165,7 @@ export function SymbolChart({ symbol, initial, availableRanges, currency }: Prop
                 {loading && (
                     <div className="flex h-72 items-center justify-center gap-2 text-sm text-muted-foreground">
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Chargement...
+                        {t('symbol.chart_loading')}
                     </div>
                 )}
 
@@ -170,7 +177,7 @@ export function SymbolChart({ symbol, initial, availableRanges, currency }: Prop
 
                 {!loading && !error && points.length === 0 && (
                     <div className="flex h-72 items-center justify-center text-sm text-muted-foreground">
-                        Aucune donnée disponible pour cette période.
+                        {t('symbol.chart_no_data')}
                     </div>
                 )}
 
@@ -203,7 +210,7 @@ export function SymbolChart({ symbol, initial, availableRanges, currency }: Prop
                                         }
                                         formatter={(value) => (
                                             <div className="flex w-full items-center gap-2">
-                                                <span className="text-muted-foreground">Cours</span>
+                                                <span className="text-muted-foreground">{t('symbol.chart_price')}</span>
                                                 <span className="ml-auto font-mono font-medium tabular-nums text-foreground">
                                                     {formatNumber(Number(value), 2)}
                                                     {currency ? ` ${currency}` : ''}

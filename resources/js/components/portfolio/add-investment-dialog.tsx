@@ -1,6 +1,7 @@
 import { useForm } from '@inertiajs/react';
 import { Plus, Search, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -31,6 +32,7 @@ type Props = {
 };
 
 export function AddInvestmentDialog({ open, onOpenChange, portfolioId }: Props) {
+    const { t } = useTranslation();
     const [step, setStep] = useState<'search' | 'lines'>('search');
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<SearchResult[]>([]);
@@ -151,7 +153,7 @@ export function AddInvestmentDialog({ open, onOpenChange, portfolioId }: Props) 
             <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>
-                        {step === 'search' ? 'Ajouter un investissement' : `Lignes d'achat — ${selected?.symbol}`}
+                        {step === 'search' ? t('position.add_dialog_title') : t('position.add_dialog_lines', { symbol: selected?.symbol })}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -161,7 +163,7 @@ export function AddInvestmentDialog({ open, onOpenChange, portfolioId }: Props) 
                             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 autoFocus
-                                placeholder="Rechercher un symbole (AAPL, TSLA, PSP5.PA…)"
+                                placeholder={t('position.search_placeholder')}
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 className="pl-9"
@@ -170,7 +172,7 @@ export function AddInvestmentDialog({ open, onOpenChange, portfolioId }: Props) 
                         </div>
                         <div className="max-h-80 space-y-1 overflow-y-auto">
                             {results.length === 0 && query.trim().length >= 2 && !searching && (
-                                <p className="px-2 py-4 text-center text-sm text-muted-foreground">Aucun résultat</p>
+                                <p className="px-2 py-4 text-center text-sm text-muted-foreground">{t('position.no_results')}</p>
                             )}
                             {results.map((r) => (
                                 <button
@@ -204,7 +206,7 @@ export function AddInvestmentDialog({ open, onOpenChange, portfolioId }: Props) 
                             {form.data.lines.map((line, i) => (
                                 <div key={i} className="grid grid-cols-1 gap-2 rounded-md border p-3 md:grid-cols-12">
                                     <div className="md:col-span-2">
-                                        <Label className="text-xs">Quantité</Label>
+                                        <Label className="text-xs">{t('position.quantity')}</Label>
                                         <Input
                                             type="number"
                                             step="any"
@@ -215,7 +217,7 @@ export function AddInvestmentDialog({ open, onOpenChange, portfolioId }: Props) 
                                         />
                                     </div>
                                     <div className="md:col-span-3">
-                                        <Label className="text-xs">Prix unitaire</Label>
+                                        <Label className="text-xs">{t('position.unit_price')}</Label>
                                         <Input
                                             type="number"
                                             step="any"
@@ -226,7 +228,7 @@ export function AddInvestmentDialog({ open, onOpenChange, portfolioId }: Props) 
                                         />
                                     </div>
                                     <div className="md:col-span-3">
-                                        <Label className="text-xs">Date</Label>
+                                        <Label className="text-xs">{t('position.date')}</Label>
                                         <Input
                                             type="date"
                                             value={line.executed_at}
@@ -236,7 +238,7 @@ export function AddInvestmentDialog({ open, onOpenChange, portfolioId }: Props) 
                                         />
                                     </div>
                                     <div className="md:col-span-3">
-                                        <Label className="text-xs">Note</Label>
+                                        <Label className="text-xs">{t('position.note')}</Label>
                                         <Input
                                             value={line.notes}
                                             onChange={(e) => updateLine(i, 'notes', e.target.value)}
@@ -264,14 +266,14 @@ export function AddInvestmentDialog({ open, onOpenChange, portfolioId }: Props) 
                         )}
                         <div className="flex justify-between">
                             <Button type="button" variant="outline" size="sm" onClick={addLine}>
-                                <Plus className="mr-1 h-4 w-4" /> Ajouter une ligne
+                                <Plus className="mr-1 h-4 w-4" /> {t('position.add_line')}
                             </Button>
                             <div className="flex gap-2">
                                 <Button type="button" variant="outline" onClick={() => setStep('search')}>
-                                    Retour
+                                    {t('position.back')}
                                 </Button>
                                 <Button type="submit" disabled={form.processing}>
-                                    Enregistrer
+                                    {t('position.save')}
                                 </Button>
                             </div>
                         </div>
@@ -281,7 +283,7 @@ export function AddInvestmentDialog({ open, onOpenChange, portfolioId }: Props) 
                 {step === 'search' && (
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                            Annuler
+                            {t('position.cancel')}
                         </Button>
                     </DialogFooter>
                 )}

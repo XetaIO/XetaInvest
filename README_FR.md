@@ -1,5 +1,5 @@
 <p align="center">
-   <a href="./README.md">🇬🇧</a>
+   <a href="./README.md">EN</a>
 </p>
 <p align="center">
    <img src="art/logo-brand-light-mode.png#gh-light-mode-only" alt="XetaInvest Logo" height="230"/>

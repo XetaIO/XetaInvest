@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatEur, formatPercent } from '@/lib/format';
 import type { CalculatorPoint } from '@/types';
@@ -8,6 +9,7 @@ type Props = {
 };
 
 export function CalculatorSummary({ data }: Props) {
+    const { t } = useTranslation();
     const stats = useMemo(() => {
         if (data.length === 0) {
             return null;
@@ -39,35 +41,35 @@ export function CalculatorSummary({ data }: Props) {
     return (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <Kpi
-                label="Scénario médian"
+                label={t('calculator.scenario_median_full')}
                 value={formatEur(stats.medianFinal)}
                 tone="primary"
-                sub={`Plus-values : ${formatEur(stats.medianGain)} (${formatPercent(stats.medianGainPct)})`}
+                sub={t('calculator.gains_label', { gain: formatEur(stats.medianGain), pct: formatPercent(stats.medianGainPct) })}
             />
             <Kpi
-                label="Scénario optimiste"
+                label={t('calculator.scenario_optimistic_full')}
                 value={formatEur(stats.optimisticFinal)}
                 tone="positive"
             />
             <Kpi
-                label="Scénario pessimiste"
+                label={t('calculator.scenario_pessimistic_full')}
                 value={formatEur(stats.pessimisticFinal)}
                 tone="negative"
             />
             <Kpi
-                label="Capital initial"
+                label={t('calculator.field_initial_capital')}
                 value={formatEur(stats.initial)}
-                sub="Point de départ"
+                sub={t('calculator.start_point')}
             />
             <Kpi
-                label="Versements complémentaires"
+                label={t('calculator.additional_contributions')}
                 value={formatEur(stats.contributions)}
-                sub="Cumul des épargnes mensuelles"
+                sub={t('calculator.monthly_savings_cumul')}
             />
             <Kpi
-                label="Versé au total"
+                label={t('calculator.total_contributed')}
                 value={formatEur(stats.totalDeposits)}
-                sub="Capital + versements"
+                sub={t('calculator.capital_plus_savings')}
             />
         </div>
     );

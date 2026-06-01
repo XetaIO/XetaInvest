@@ -1,6 +1,7 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { ListPlus, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AiReportCard } from '@/components/ai/ai-report-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,7 @@ const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 type LivePoint = { t: number; v: number };
 
 export default function WatchlistPage({ watchlists, activeWatchlistId, limits, aiWatchlistReport = null }: PageProps) {
+    const { t } = useTranslation();
     const page = usePage<{ financeQueryWsUrl?: string } & SharedExtra>();
     const wsUrl = page.props.financeQueryWsUrl ?? '';
 
@@ -218,7 +220,7 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
             return;
         }
 
-        if (!confirm(`Supprimer la liste « ${active.name} » ?`)) {
+        if (!confirm(t('watchlist.delete_confirm', { name: active.name }))) {
             return;
         }
 
@@ -247,7 +249,7 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
 
     return (
         <>
-            <Head title="Ma liste de suivi" />
+            <Head title={t('watchlist.title')} />
 
             <div className="flex h-full flex-1 flex-col gap-4 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -271,19 +273,19 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                             size="sm"
                             onClick={() => setCreateOpen(true)}
                             disabled={atListLimit}
-                            title={atListLimit ? `Maximum ${limits.maxPerUser} listes` : 'Créer une liste'}
+                            title={atListLimit ? t('watchlist.max_lists', { max: limits.maxPerUser }) : t('watchlist.create_hint')}
                         >
-                            <ListPlus className="mr-1 h-4 w-4" /> Nouvelle liste
+                            <ListPlus className="mr-1 h-4 w-4" /> {t('watchlist.new')}
                         </Button>
                     </div>
 
                     {active && (
                         <div className="flex items-center gap-2">
                             <Button variant="outline" size="sm" onClick={() => setRenameOpen(true)}>
-                                <Pencil className="mr-1 h-4 w-4" /> Renommer
+                                <Pencil className="mr-1 h-4 w-4" /> {t('watchlist.rename')}
                             </Button>
                             <Button variant="outline" size="sm" onClick={deleteActive}>
-                                <Trash2 className="mr-1 h-4 w-4" /> Supprimer
+                                <Trash2 className="mr-1 h-4 w-4" /> {t('watchlist.delete')}
                             </Button>
                         </div>
                     )}
@@ -293,10 +295,10 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                     <Card>
                         <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
                             <p className="text-sm text-muted-foreground">
-                                Aucune liste de suivi. Créez-en une pour commencer à suivre des symboles en direct.
+                                {t('watchlist.no_watchlist')}
                             </p>
                             <Button onClick={() => setCreateOpen(true)}>
-                                <Plus className="mr-1 h-4 w-4" /> Créer ma première liste
+                                <Plus className="mr-1 h-4 w-4" /> {t('watchlist.create_first')}
                             </Button>
                         </CardContent>
                     </Card>
@@ -306,8 +308,8 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_400px]">
                         <Card className="py-6">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-base">Évolution (% depuis ouverture session)</CardTitle>
-                                <span className="text-xs text-muted-foreground">Temps réel · WebSocket</span>
+                                <CardTitle className="text-base">{t('watchlist.evolution_title')}</CardTitle>
+                                <span className="text-xs text-muted-foreground">{t('watchlist.realtime')}</span>
                             </CardHeader>
                             <CardContent>
                                 <WatchlistChart series={series} />
@@ -316,11 +318,11 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                                     <Input
                                         value={compareSymbol}
                                         onChange={(e) => setCompareSymbol(e.target.value)}
-                                        placeholder="Comparer un autre symbol (ex: SPY)"
+                                        placeholder={t('watchlist.compare_placeholder')}
                                         className="max-w-xs"
                                     />
                                     <Button type="submit" variant="outline" size="sm">
-                                        <Plus className="mr-1 h-4 w-4" /> Comparer
+                                        <Plus className="mr-1 h-4 w-4" /> {t('watchlist.compare_btn')}
                                     </Button>
                                 </form>
 
@@ -338,7 +340,7 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                                                     type="button"
                                                     onClick={() => removeCompare(s)}
                                                     className="ml-1 hover:text-rose-500"
-                                                    aria-label={`Retirer ${s}`}
+                                                    aria-label={t('watchlist.remove_symbol', { symbol: s })}
                                                 >
                                                     <X className="h-3 w-3" />
                                                 </button>
@@ -361,7 +363,7 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                                     <Input
                                         value={addSymbol}
                                         onChange={(e) => setAddSymbol(e.target.value)}
-                                        placeholder="Ajouter un symbol (ex: AAPL)"
+                                        placeholder={t('watchlist.add_placeholder')}
                                         disabled={atItemLimit}
                                     />
                                     <Button type="submit" size="sm" disabled={atItemLimit || !addSymbol.trim()}>
@@ -370,18 +372,14 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                                 </form>
                                 {atItemLimit && (
                                     <p className="text-xs text-amber-500">
-                                        Limite de {limits.maxItems} symboles atteinte.
+                                        {t('watchlist.item_limit', { max: limits.maxItems })}
                                     </p>
                                 )}
                             </CardHeader>
                             <CardContent className="p-0">
                                 {active.items.length === 0 ? (
                                     <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-                                        Aucun symbol. Ajoutez-en depuis le champ ci-dessus ou la{' '}
-                                        <Link href="/symbol-search" className="underline">
-                                            recherche
-                                        </Link>
-                                        .
+                                        {t('watchlist.no_symbol_add')}
                                     </p>
                                 ) : (
                                     <ul>

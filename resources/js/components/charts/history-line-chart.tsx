@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -16,17 +17,6 @@ type Props = {
     description?: string;
     data: HistoryPoint[];
 };
-
-const config = {
-    value_eur: {
-        label: 'Valeur',
-        color: 'var(--chart-1)',
-    },
-    invested_eur: {
-        label: 'Investi',
-        color: 'var(--muted-foreground)',
-    },
-} satisfies ChartConfig;
 
 function formatShortDate(iso: string): string {
     const d = new Date(iso);
@@ -53,16 +43,31 @@ function formatTooltipDate(iso: string): string {
 }
 
 export function HistoryLineChart({
-    title = 'Évolution de la valeur',
+    title,
     description,
     data = [],
 }: Props) {
+    const { t } = useTranslation();
+
+    const config = {
+        value_eur: {
+            label: t('history_chart.label_value'),
+            color: 'var(--chart-1)',
+        },
+        invested_eur: {
+            label: t('history_chart.label_invested'),
+            color: 'var(--muted-foreground)',
+        },
+    } satisfies ChartConfig;
+
+    const chartTitle = title ?? t('history_chart.title');
     // Calcul dynamique du domaine Y (min/max des valeurs affichées)
     const allValues = data.flatMap((d) => [d.value_eur, d.invested_eur]);
     let minY = Math.min(...allValues);
     let maxY = Math.max(...allValues);
     // Ajoute une marge visuelle de 5%
     const range = maxY - minY;
+
     if (range > 0) {
         minY = minY - range * 0.05;
         maxY = maxY + range * 0.05;
@@ -72,12 +77,12 @@ export function HistoryLineChart({
         return (
             <Card className="py-6">
                 <CardHeader className="pb-0">
-                    <CardTitle className="text-base">{title}</CardTitle>
+                    <CardTitle className="text-base">{chartTitle}</CardTitle>
                     {description && <CardDescription>{description}</CardDescription>}
                 </CardHeader>
                 <CardContent className="pb-2">
                     <div className="flex h-65 items-center justify-center text-sm text-muted-foreground">
-                        Pas encore d'historique. Les snapshots quotidiens sont capturés chaque soir.
+                        {t('history_chart.no_history')}
                     </div>
                 </CardContent>
             </Card>
@@ -87,7 +92,7 @@ export function HistoryLineChart({
     return (
         <Card className="py-6">
             <CardHeader className="pb-0">
-                <CardTitle className="text-base">{title}</CardTitle>
+                <CardTitle className="text-base">{chartTitle}</CardTitle>
                 {description && <CardDescription>{description}</CardDescription>}
             </CardHeader>
             <CardContent className="pb-2">

@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { AlertTriangle, Plus, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AiReportCard } from '@/components/ai/ai-report-card';
 import { AddInvestmentDialog } from '@/components/portfolio/add-investment-dialog';
 import { KpiCard } from '@/components/portfolio/kpi-card';
@@ -14,6 +15,7 @@ import { dashboard } from '@/routes';
 import type { DashboardProps } from '@/types';
 
 export default function Dashboard({ portfolios, active, transactionTypes, aiReport = null, aiGlobalReport = null }: DashboardProps) {
+    const { t } = useTranslation();
     const [addOpen, setAddOpen] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -53,24 +55,24 @@ export default function Dashboard({ portfolios, active, transactionTypes, aiRepo
 
     return (
         <>
-            <Head title="Dashboard" />
+            <Head title={t('dashboard.title')} />
             <div className="flex h-full flex-1 flex-col gap-4 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <PortfolioSwitcher portfolios={portfolios} active={active?.portfolio ?? null} />
                         {active && (
                             <span className="text-xs text-muted-foreground">
-                                Mis à jour à {formatTime(active.last_updated)}
+                                {t('dashboard.updated_at', { time: formatTime(active.last_updated) })}
                             </span>
                         )}
                     </div>
                     <div className="flex items-center gap-2">
                         <Button variant="outline" size="sm" onClick={refresh} disabled={!active || isRefreshing}>
                             <RefreshCw className={isRefreshing ? 'mr-1 h-4 w-4 animate-spin' : 'mr-1 h-4 w-4'} />
-                            Actualiser
+                            {t('common.refresh')}
                         </Button>
                         <Button size="sm" onClick={() => setAddOpen(true)} disabled={!portfolioId}>
-                            <Plus className="mr-1 h-4 w-4" /> Investissement
+                            <Plus className="mr-1 h-4 w-4" /> {t('dashboard.add_investment')}
                         </Button>
                     </div>
                 </div>
@@ -79,8 +81,8 @@ export default function Dashboard({ portfolios, active, transactionTypes, aiRepo
                     <Card>
                         <CardContent className="p-10 text-center text-muted-foreground">
                             {portfolios.length === 0
-                                ? 'Créez votre premier portefeuille pour commencer.'
-                                : 'Sélectionnez un portefeuille pour voir ses positions.'}
+                                ? t('dashboard.create_first_portfolio')
+                                : t('dashboard.select_portfolio_hint')}
                         </CardContent>
                     </Card>
                 )}
@@ -90,16 +92,16 @@ export default function Dashboard({ portfolios, active, transactionTypes, aiRepo
                         {active.quote_error && (
                             <Alert variant="destructive">
                                 <AlertTriangle className="h-4 w-4" />
-                                <AlertTitle>Cours indisponibles</AlertTitle>
+                                <AlertTitle>{t('dashboard.quote_error_title')}</AlertTitle>
                                 <AlertDescription>{active.quote_error}</AlertDescription>
                             </Alert>
                         )}
 
                         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-                            <KpiCard label="Valeur actuelle" value={formatEur(active.kpis.current_value_eur)} />
-                            <KpiCard label="Investi" value={formatEur(active.kpis.total_invested_eur)} />
+                            <KpiCard label={t('dashboard.current_value')} value={formatEur(active.kpis.current_value_eur)} />
+                            <KpiCard label={t('dashboard.invested_label')} value={formatEur(active.kpis.total_invested_eur)} />
                             <KpiCard
-                                label="P&L total"
+                                label={t('statistics.pnl')}
                                 value={formatEur(active.kpis.pnl_eur)}
                                 delta={{
                                     value: formatPercent(active.kpis.pnl_pct),
@@ -107,7 +109,7 @@ export default function Dashboard({ portfolios, active, transactionTypes, aiRepo
                                 }}
                             />
                             <KpiCard
-                                label="Variation jour"
+                                label={t('dashboard.daily_change')}
                                 value={formatEur(active.kpis.daily_change_eur)}
                                 delta={{
                                     value: formatPercent(active.kpis.daily_change_pct),
@@ -120,8 +122,7 @@ export default function Dashboard({ portfolios, active, transactionTypes, aiRepo
                             {active.kpis.positions.length === 0 ? (
                                 <Card>
                                     <CardContent className="p-10 text-center text-muted-foreground">
-                                        Aucune position. Cliquez sur « Investissement » pour ajouter votre premier
-                                        actif.
+                                        {t('dashboard.no_position')}
                                     </CardContent>
                                 </Card>
                             ) : (

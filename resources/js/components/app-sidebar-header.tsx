@@ -1,9 +1,12 @@
 import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Breadcrumbs } from '@/components/breadcrumbs';
+import { LanguageSwitcher } from '@/components/language-switcher';
 import { SymbolSearchDialog } from '@/components/symbol-search-dialog';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { useLocale } from '@/hooks/use-locale';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
 
 export function AppSidebarHeader({
@@ -12,6 +15,8 @@ export function AppSidebarHeader({
     breadcrumbs?: BreadcrumbItemType[];
 }) {
     const [searchOpen, setSearchOpen] = useState(false);
+    const { t } = useTranslation();
+    useLocale();
 
     useEffect(() => {
         const handler = (event: KeyboardEvent) => {
@@ -31,16 +36,17 @@ export function AppSidebarHeader({
                 <SidebarTrigger className="-ml-1" />
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
+            <LanguageSwitcher />
             <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => setSearchOpen(true)}
                 className="ml-auto inline-flex items-center gap-2 text-muted-foreground"
-                aria-label="Rechercher un symbol"
+                aria-label={t('search.aria_label')}
             >
                 <Search className="h-4 w-4" />
-                <span className="hidden sm:inline">Rechercher un symbol...</span>
+                <span className="hidden sm:inline">{t('search.placeholder')}</span>
                 <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground md:inline-flex">
                     <span className="text-xs">⌘</span>K
                 </kbd>

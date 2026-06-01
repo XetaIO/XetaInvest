@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { BudgetLineDraft } from '@/types';
@@ -10,6 +11,8 @@ type Props = {
 };
 
 export function BudgetTabRevenues({ lines, onChange }: Props) {
+    const { t } = useTranslation();
+
     const updateLine = (index: number, next: BudgetLineDraft) => {
         const copy = [...lines];
         copy[index] = next;
@@ -27,12 +30,12 @@ export function BudgetTabRevenues({ lines, onChange }: Props) {
     return (
         <Card className="py-6">
             <CardHeader>
-                <CardTitle>Revenus</CardTitle>
+                <CardTitle>{t('budget.income_section_title')}</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 pb-6">
                 {lines.length === 0 && (
                     <p className="text-sm text-muted-foreground">
-                        Aucune source de revenu pour le moment.
+                        {t('budget.income_empty')}
                     </p>
                 )}
                 {lines.map((line, index) => (
@@ -40,7 +43,7 @@ export function BudgetTabRevenues({ lines, onChange }: Props) {
                         key={index}
                         name={line.name}
                         amount={line.amount}
-                        namePlaceholder="Ex. Salaire"
+                        namePlaceholder={t('budget.income_placeholder')}
                         onChange={(next) => updateLine(index, next)}
                         onRemove={() => removeLine(index)}
                     />
@@ -48,7 +51,7 @@ export function BudgetTabRevenues({ lines, onChange }: Props) {
                 <div>
                     <Button type="button" variant="outline" size="sm" onClick={addLine}>
                         <Plus className="mr-1 size-4" />
-                        Ajouter une source de revenu
+                        {t('budget.income_add')}
                     </Button>
                 </div>
             </CardContent>

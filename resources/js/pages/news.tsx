@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight, ExternalLink, Newspaper } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { AiReportCard } from '@/components/ai/ai-report-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,7 @@ function buildUrl(symbol: string, page: number): string {
 }
 
 export default function News({ news, available_symbols, scope, aiNewsReport = null }: NewsProps) {
+    const { t } = useTranslation();
     const currentSymbol = scope.symbol ?? 'all';
 
     const handleSymbolChange = (value: string) => {
@@ -46,19 +48,19 @@ export default function News({ news, available_symbols, scope, aiNewsReport = nu
 
     return (
         <>
-            <Head title="Actualités" />
+            <Head title={t('news.title')} />
             <div className="flex h-full flex-1 flex-col gap-4 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <Newspaper className="h-5 w-5 text-muted-foreground" />
-                        <h1 className="text-xl font-semibold">Actualités</h1>
+                        <h1 className="text-xl font-semibold">{t('news.title')}</h1>
                     </div>
                     <Select value={currentSymbol} onValueChange={handleSymbolChange}>
                         <SelectTrigger className="min-w-50">
-                            <SelectValue placeholder="Filtrer par symbol" />
+                            <SelectValue placeholder={t('news.filter_placeholder')} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Tous mes symbols</SelectItem>
+                            <SelectItem value="all">{t('news.filter_all')}</SelectItem>
                             {available_symbols.map((s) => (
                                 <SelectItem key={s} value={s}>
                                     {s}
@@ -74,8 +76,8 @@ export default function News({ news, available_symbols, scope, aiNewsReport = nu
                     <Card>
                         <CardContent className="p-10 text-center text-muted-foreground">
                             {available_symbols.length === 0
-                                ? 'Aucun symbol dans vos portefeuilles. Ajoutez des positions pour voir des actualités.'
-                                : 'Aucune actualité disponible pour le moment.'}
+                                ? t('news.no_portfolio')
+                                : t('news.no_news')}
                         </CardContent>
                     </Card>
                 ) : (
@@ -121,8 +123,8 @@ export default function News({ news, available_symbols, scope, aiNewsReport = nu
                         <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
                             <p className="text-xs text-muted-foreground">
                                 {news.from && news.to
-                                    ? `${news.from}–${news.to} sur ${news.total}`
-                                    : `${news.total} actualités`}
+                                    ? t('news.count', { from: news.from, to: news.to, total: news.total })
+                                    : t('news.count_simple', { total: news.total })}
                             </p>
                             <div className="flex items-center gap-1">
                                 <Button
@@ -132,10 +134,10 @@ export default function News({ news, available_symbols, scope, aiNewsReport = nu
                                     disabled={news.current_page <= 1}
                                 >
                                     <ChevronLeft className="h-4 w-4" />
-                                    Précédent
+                                    {t('common.previous')}
                                 </Button>
                                 <span className="px-3 text-sm text-muted-foreground">
-                                    Page {news.current_page} / {news.last_page}
+                                    {t('news.page_indicator', { current: news.current_page, total: news.last_page })}
                                 </span>
                                 <Button
                                     variant="outline"
@@ -143,7 +145,7 @@ export default function News({ news, available_symbols, scope, aiNewsReport = nu
                                     onClick={() => goToPage(news.current_page + 1)}
                                     disabled={news.current_page >= news.last_page}
                                 >
-                                    Suivant
+                                    {t('common.next')}
                                     <ChevronRight className="h-4 w-4" />
                                 </Button>
                             </div>

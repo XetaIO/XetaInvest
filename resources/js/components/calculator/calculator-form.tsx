@@ -1,4 +1,5 @@
 import { RotateCcw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function CalculatorForm({ inputs, onChange, onReset, defaults }: Props) {
+    const { t } = useTranslation();
     const set = <K extends keyof CalculatorInputs>(key: K, value: CalculatorInputs[K]) => {
         onChange({ ...inputs, [key]: value });
     };
@@ -31,43 +33,43 @@ export function CalculatorForm({ inputs, onChange, onReset, defaults }: Props) {
         <Card className="py-6">
             <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-base">Paramètres</CardTitle>
+                    <CardTitle className="text-base">{t('calculator.settings_title')}</CardTitle>
                     <Button variant="outline" size="sm" onClick={onReset} className="h-8">
                         <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-                        Réinitialiser
+                        {t('common.reset')}
                     </Button>
                 </div>
             </CardHeader>
             <CardContent className="flex flex-col gap-5">
                 <Field
                     id="initialCapital"
-                    label="Capital initial"
+                    label={t('calculator.field_initial_capital')}
                     suffix="EUR"
                     value={inputs.initialCapital}
                     onChange={(v) => numericChange('initialCapital', v)}
                     helper={
                         defaults.has_portfolios
-                            ? 'Basé sur le total investi de vos portefeuilles.'
-                            : 'Aucun portefeuille investi pour le moment.'
+                            ? t('calculator.helper_has_portfolios')
+                            : t('calculator.helper_no_portfolios')
                     }
                 />
 
                 <Field
                     id="monthlyContribution"
-                    label="Épargne mensuelle"
+                    label={t('calculator.field_monthly_savings')}
                     suffix="EUR / MOIS"
                     value={inputs.monthlyContribution}
                     onChange={(v) => numericChange('monthlyContribution', v)}
                     helper={
                         defaults.has_budget
-                            ? 'Basé sur votre Budget : reste à investir + investissements planifiés.'
-                            : 'Aucun budget renseigné. Renseignez-le pour un défaut personnalisé.'
+                            ? t('calculator.helper_has_budget')
+                            : t('calculator.helper_no_budget')
                     }
                 />
 
                 <Field
                     id="years"
-                    label="Horizon de placement"
+                    label={t('calculator.field_horizon')}
                     suffix="ANNÉES"
                     value={inputs.years}
                     onChange={(v) => numericChange('years', v)}
@@ -77,34 +79,34 @@ export function CalculatorForm({ inputs, onChange, onReset, defaults }: Props) {
 
                 <Field
                     id="annualRatePct"
-                    label="Taux d'intérêt annuel"
+                    label={t('calculator.field_annual_rate')}
                     suffix="%"
                     value={inputs.annualRatePct}
                     onChange={(v) => numericChange('annualRatePct', v)}
                     step="0.1"
-                    helper="Référence : ~7 % / an sur les 30 dernières années (indices actions mondiaux)."
+                    helper={t('calculator.helper_rate')}
                 />
 
                 <Field
                     id="compoundIntervalMonths"
-                    label="Intervalle de versement des intérêts"
+                    label={t('calculator.field_compound_interval')}
                     suffix="MOIS"
                     value={inputs.compoundIntervalMonths}
                     onChange={(v) => numericChange('compoundIntervalMonths', v)}
                     step="1"
                     min={1}
                     max={12}
-                    helper="Fréquence de capitalisation : 1 = mensuelle, 12 = annuelle."
+                    helper={t('calculator.helper_compound')}
                 />
 
                 <Field
                     id="scenarioDeltaPct"
-                    label="Écart scénarios (±)"
+                    label={t('calculator.field_scenario_delta')}
                     suffix="%"
                     value={inputs.scenarioDeltaPct}
                     onChange={(v) => numericChange('scenarioDeltaPct', v)}
                     step="0.1"
-                    helper="Optimiste = taux + écart, pessimiste = taux − écart."
+                    helper={t('calculator.helper_delta')}
                 />
             </CardContent>
         </Card>

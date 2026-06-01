@@ -31,7 +31,7 @@ class PortfolioController extends Controller
             ]);
         });
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Portefeuille créé.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.portfolio.created')]);
 
         return back();
     }
@@ -52,7 +52,7 @@ class PortfolioController extends Controller
             ]);
         });
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Portefeuille mis à jour.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.portfolio.updated')]);
 
         return back();
     }
@@ -69,7 +69,7 @@ class PortfolioController extends Controller
             $next?->update(['is_default' => true]);
         }
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Portefeuille supprimé.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.portfolio.deleted')]);
 
         return back();
     }

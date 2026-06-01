@@ -70,7 +70,7 @@ class WatchlistController extends Controller
             'position' => $position,
         ]);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Liste de suivi créée.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.watchlist.created')]);
 
         return redirect()->route('watchlists.index', ['watchlist' => $watchlist->id]);
     }
@@ -79,7 +79,7 @@ class WatchlistController extends Controller
     {
         $watchlist->update(['name' => $request->validated('name')]);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Liste renommée.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.watchlist.renamed')]);
 
         return back();
     }
@@ -90,7 +90,7 @@ class WatchlistController extends Controller
 
         $watchlist->delete();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Liste supprimée.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.watchlist.deleted')]);
 
         return redirect()->route('watchlists.index');
     }

@@ -5,6 +5,7 @@ export type * from './calculator';
 export type * from './navigation';
 export type * from './news';
 export type * from './portfolio';
+export type * from './shared';
 export type * from './symbol';
 export type * from './ticker';
 export type * from './ui';

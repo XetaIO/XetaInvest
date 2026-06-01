@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AllocationPie } from '@/components/charts/allocation-pie';
 import type { AllocationItem } from '@/components/charts/allocation-pie';
 import { HistoryLineChart } from '@/components/charts/history-line-chart';
@@ -47,6 +48,7 @@ function buildUrl(portfolio: string, refresh = false): string {
 }
 
 export default function Statistics({ portfolios, scope, stats }: StatisticsProps) {
+    const { t } = useTranslation();
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     const handleScopeChange = (value: string) => {
@@ -91,16 +93,16 @@ export default function Statistics({ portfolios, scope, stats }: StatisticsProps
 
     return (
         <>
-            <Head title="Statistiques" />
+            <Head title={t('statistics.title')} />
             <div className="flex h-full flex-1 flex-col gap-4 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <Select value={scope} onValueChange={handleScopeChange}>
                             <SelectTrigger className="min-w-[240px]">
-                                <SelectValue placeholder="Choisir un portefeuille" />
+                                <SelectValue placeholder={t('statistics.select_portfolio')} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">Tous mes portefeuilles</SelectItem>
+                                <SelectItem value="all">{t('statistics.all_portfolios')}</SelectItem>
                                 {portfolios.map((p) => (
                                     <SelectItem key={p.id} value={String(p.id)}>
                                         {p.name}
@@ -110,19 +112,19 @@ export default function Statistics({ portfolios, scope, stats }: StatisticsProps
                             </SelectContent>
                         </Select>
                         <span className="text-xs text-muted-foreground">
-                            Mis à jour à {formatTime(stats.generated_at)}
+                            {t('dashboard.updated_at', { time: formatTime(stats.generated_at) })}
                         </span>
                     </div>
                     <Button variant="outline" size="sm" onClick={refresh} disabled={isRefreshing}>
                         <RefreshCw className={cn('mr-1 h-4 w-4', isRefreshing && 'animate-spin')} />
-                        Actualiser
+                        {t('common.refresh')}
                     </Button>
                 </div>
 
                 {stats.quote_error && (
                     <Alert variant="destructive">
                         <AlertTriangle className="h-4 w-4" />
-                        <AlertTitle>Cours indisponibles</AlertTitle>
+                        <AlertTitle>{t('statistics.quote_error_title')}</AlertTitle>
                         <AlertDescription>{stats.quote_error}</AlertDescription>
                     </Alert>
                 )}
@@ -130,25 +132,25 @@ export default function Statistics({ portfolios, scope, stats }: StatisticsProps
                 {totals.position_count === 0 ? (
                     <Card>
                         <CardContent className="p-10 text-center text-muted-foreground">
-                            Aucune position à analyser sur ce périmètre.
+                            {t('statistics.no_positions')}
                         </CardContent>
                     </Card>
                 ) : (
                     <>
                         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
                             <KpiCard
-                                label="Valeur actuelle"
+                                label={t('statistics.current_value')}
                                 value={formatEur(totals.current_value_eur)}
-                                secondary={`${totals.instrument_count} instruments · ${totals.position_count} positions`}
+                                secondary={t('statistics.stat_details', { instruments: totals.instrument_count, positions: totals.position_count })}
                             />
-                            <KpiCard label="Investi" value={formatEur(totals.invested_eur)} />
+                            <KpiCard label={t('statistics.invested_label')} value={formatEur(totals.invested_eur)} />
                             <KpiCard
-                                label="P&L total"
+                                label={t('statistics.pnl')}
                                 value={formatEur(totals.pnl_eur)}
                                 delta={{ value: formatPercent(totals.pnl_pct), tone: totals.pnl_eur }}
                             />
                             <KpiCard
-                                label="Variation jour"
+                                label={t('statistics.daily_change')}
                                 value={formatEur(totals.daily_change_eur)}
                                 delta={{
                                     value: formatPercent(totals.daily_change_pct),
@@ -160,32 +162,32 @@ export default function Statistics({ portfolios, scope, stats }: StatisticsProps
                         <HistoryLineChart
                             description={
                                 stats.scope.type === 'portfolio'
-                                    ? 'Valeur et capital investi au fil du temps'
-                                    : 'Valeur cumulée de tous vos portefeuilles'
+                                    ? t('statistics.history_portfolio')
+                                    : t('statistics.history_all')
                             }
                             data={stats.history}
                         />
 
                         <div className="grid gap-3 lg:grid-cols-2">
                             <AllocationPie
-                                title="Répartition par instrument"
-                                description="Part de chaque actif dans la valeur totale"
+                                title={t('statistics.alloc_by_instrument')}
+                                description={t('statistics.alloc_instrument_desc')}
                                 data={instrumentData}
                             />
                             <AllocationPie
-                                title="Répartition par devise"
-                                description="Exposition par devise de cotation"
+                                title={t('statistics.alloc_by_currency')}
+                                description={t('statistics.alloc_currency_desc')}
                                 data={currencyData}
                             />
                             <AllocationPie
-                                title="Répartition par type d'actif"
-                                description="Mix Actions / ETF / autres"
+                                title={t('statistics.alloc_by_type')}
+                                description={t('statistics.alloc_type_desc')}
                                 data={typeData}
                             />
                             {showByPortfolio && (
                                 <AllocationPie
-                                    title="Répartition par portefeuille"
-                                    description="Poids de chaque portefeuille dans le total"
+                                    title={t('statistics.alloc_by_portfolio')}
+                                    description={t('statistics.alloc_portfolio_desc')}
                                     data={portfolioData}
                                 />
                             )}
@@ -193,36 +195,36 @@ export default function Statistics({ portfolios, scope, stats }: StatisticsProps
 
                         <div className="grid gap-3 lg:grid-cols-2">
                             <MoversBar
-                                title="Top gagnants"
-                                description="Meilleurs P&L en pourcentage"
+                                title={t('statistics.top_gainers')}
+                                description={t('statistics.top_gainers_desc')}
                                 items={performance.top_gainers}
                                 tone="up"
-                                emptyLabel="Aucune position en plus-value."
+                                emptyLabel={t('statistics.no_gainers')}
                             />
                             <MoversBar
-                                title="Top perdants"
-                                description="Plus fortes baisses en pourcentage"
+                                title={t('statistics.top_losers')}
+                                description={t('statistics.top_losers_desc')}
                                 items={performance.top_losers}
                                 tone="down"
-                                emptyLabel="Aucune position en moins-value."
+                                emptyLabel={t('statistics.no_losers')}
                             />
                         </div>
 
                         <Card className="py-6">
                             <CardHeader className="pb-2">
-                                <CardTitle className="text-base">Détail par instrument</CardTitle>
+                                <CardTitle className="text-base">{t('statistics.detail_title')}</CardTitle>
                             </CardHeader>
                             <CardContent className="overflow-x-auto p-0">
                                 <table className="w-full text-sm">
                                     <thead className="border-b text-xs uppercase text-muted-foreground">
                                         <tr>
-                                            <th className="px-3 py-2 text-left">Nom</th>
-                                            <th className="px-3 py-2 text-left">Symbole</th>
-                                            <th className="px-3 py-2 text-left">Devise</th>
-                                            <th className="px-3 py-2 text-right">Valeur</th>
-                                            <th className="px-3 py-2 text-right">Allocation</th>
-                                            <th className="px-3 py-2 text-right">P&L</th>
-                                            <th className="px-3 py-2 text-right">P&L %</th>
+                                            <th className="px-3 py-2 text-left">{t('statistics.col_name')}</th>
+                                            <th className="px-3 py-2 text-left">{t('statistics.col_symbol')}</th>
+                                            <th className="px-3 py-2 text-left">{t('statistics.col_currency')}</th>
+                                            <th className="px-3 py-2 text-right">{t('statistics.col_value')}</th>
+                                            <th className="px-3 py-2 text-right">{t('statistics.col_allocation')}</th>
+                                            <th className="px-3 py-2 text-right">{t('statistics.col_pnl')}</th>
+                                            <th className="px-3 py-2 text-right">{t('statistics.col_pnl_pct')}</th>
                                         </tr>
                                     </thead>
                                     <tbody>

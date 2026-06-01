@@ -18,7 +18,7 @@ class TransactionController extends Controller
     {
         $position->transactions()->create($request->validated());
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Transaction ajoutée.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.transaction.added')]);
 
         return back();
     }
@@ -27,7 +27,7 @@ class TransactionController extends Controller
     {
         $transaction->update($request->validated());
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Transaction mise à jour.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.transaction.updated')]);
 
         return back();
     }
@@ -38,7 +38,7 @@ class TransactionController extends Controller
 
         $transaction->delete();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Transaction supprimée.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.transaction.deleted')]);
 
         return back();
     }

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ResponsiveContainer, Sankey, Tooltip, useChartWidth } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { BudgetPayload } from '@/types';
@@ -54,6 +55,7 @@ function SankeyTooltipContent({
 const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
 export function BudgetSankey({ budget }: Props) {
+    const { t } = useTranslation();
     const containerWidth = useChartWidth();
 
     const data = useMemo(() => {
@@ -94,10 +96,10 @@ export function BudgetSankey({ budget }: Props) {
             return nodes.length - 1;
         };
 
-        const budgetNodeIdx = addNode('Budget');
+        const budgetNodeIdx = addNode(t('budget.sankey_budget_node'));
 
         for (const line of incomeLines) {
-            const idx = addNode(line.name || 'Revenu');
+            const idx = addNode(line.name || t('budget.sankey_income_node'));
             links.push({ source: idx, target: budgetNodeIdx, value: line.amount });
         }
 
@@ -108,11 +110,11 @@ export function BudgetSankey({ budget }: Props) {
                 continue;
             }
 
-            const groupIdx = addNode(group.name || 'Investissements');
+            const groupIdx = addNode(group.name || t('budget.sankey_investments_node'));
             links.push({ source: budgetNodeIdx, target: groupIdx, value: groupTotal });
 
             for (const line of group.lines) {
-                const lineIdx = addNode(line.name || 'Ligne');
+                const lineIdx = addNode(line.name || t('budget.sankey_investments_node'));
                 links.push({ source: groupIdx, target: lineIdx, value: line.amount });
             }
         }
@@ -124,11 +126,11 @@ export function BudgetSankey({ budget }: Props) {
                 continue;
             }
 
-            const groupIdx = addNode(group.name || 'Dépenses');
+            const groupIdx = addNode(group.name || t('budget.sankey_expenses_node'));
             links.push({ source: budgetNodeIdx, target: groupIdx, value: groupTotal });
 
             for (const line of group.lines) {
-                const lineIdx = addNode(line.name || 'Ligne');
+                const lineIdx = addNode(line.name || t('budget.sankey_expenses_node'));
                 links.push({ source: groupIdx, target: lineIdx, value: line.amount });
             }
         }
@@ -136,7 +138,7 @@ export function BudgetSankey({ budget }: Props) {
         const remaining = totalIncome - totalInvestments - totalExpenses;
 
         if (remaining > 0) {
-            const idx = addNode('Reste');
+            const idx = addNode(t('budget.sankey_remainder_node'));
             links.push({ source: budgetNodeIdx, target: idx, value: remaining });
         }
 
@@ -145,12 +147,12 @@ export function BudgetSankey({ budget }: Props) {
         }
 
         return { nodes, links };
-    }, [budget]);
+    }, [budget, t]);
 
     return (
         <Card className="py-6">
             <CardHeader>
-                <CardTitle>Flux du budget</CardTitle>
+                <CardTitle>{t('budget.sankey_title')}</CardTitle>
             </CardHeader>
             <CardContent className="pb-6">
                 {data ? (
@@ -200,7 +202,7 @@ export function BudgetSankey({ budget }: Props) {
                     </div>
                 ) : (
                     <p className="text-sm text-muted-foreground">
-                        Renseignez vos revenus et au moins une dépense ou un investissement pour afficher le graphique.
+                        {t('budget.sankey_empty')}
                     </p>
                 )}
             </CardContent>

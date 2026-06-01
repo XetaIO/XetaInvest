@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import type { BudgetPayload } from '@/types';
 
@@ -17,6 +18,7 @@ const pct = new Intl.NumberFormat('fr-FR', {
 type Props = { budget: BudgetPayload };
 
 export function BudgetSummary({ budget }: Props) {
+    const { t } = useTranslation();
     const stats = useMemo(() => {
         const totalIncome = budget.income.lines.reduce((s, l) => s + (l.amount || 0), 0);
         const totalInvestments = budget.investments.groups.reduce(
@@ -47,20 +49,21 @@ export function BudgetSummary({ budget }: Props) {
         <Card>
             <CardContent className="flex flex-col gap-3 py-6">
                 <p className="text-sm leading-relaxed">
-                    Votre taux d'épargne est de{' '}
-                    <strong>{pct.format(stats.savingsRate)}</strong> (taux d'épargne possible :{' '}
-                    <strong>{pct.format(stats.possibleSavingsRate)}</strong>).
+                    {t('budget.savings_rate_prefix')}{' '}
+                    <strong>{pct.format(stats.savingsRate)}</strong>{' '}
+                    {t('budget.savings_rate_possible')}{' '}
+                    <strong>{pct.format(stats.possibleSavingsRate)}</strong>)
                 </p>
                 <p className="text-sm text-muted-foreground">
-                    Reste à investir / épargner :{' '}
+                    {t('budget.remaining_label')} :{' '}
                     <strong
                         className={stats.remaining < 0 ? 'text-destructive' : 'text-foreground'}
                     >
                         {eur.format(stats.remaining)}
                     </strong>{' '}
-                    · Revenus : <strong>{eur.format(stats.totalIncome)}</strong> · Dépenses :{' '}
-                    <strong>{eur.format(stats.totalExpenses)}</strong> · Investissements :{' '}
-                    <strong>{eur.format(stats.totalInvestments)}</strong>
+                    · {t('budget.income_label')} : <strong>{eur.format(stats.totalIncome)}</strong>{' '}
+                    · {t('budget.expenses_label')} : <strong>{eur.format(stats.totalExpenses)}</strong>{' '}
+                    · {t('budget.investments_label')} : <strong>{eur.format(stats.totalInvestments)}</strong>
                 </p>
             </CardContent>
         </Card>

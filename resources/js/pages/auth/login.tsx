@@ -1,4 +1,5 @@
 import { Form, Head, usePage } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import InputError from '@/components/input-error';
 import PasskeyVerify from '@/components/passkey-verify';
 import PasswordInput from '@/components/password-input';
@@ -18,10 +19,11 @@ type Props = {
 
 export default function Login({ status, canResetPassword }: Props) {
     const { registrationEnabled } = usePage().props;
+    const { t } = useTranslation();
 
     return (
         <>
-            <Head title="Log in" />
+            <Head title={t('auth.login')} />
 
             <PasskeyVerify />
 
@@ -34,7 +36,7 @@ export default function Login({ status, canResetPassword }: Props) {
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">{t('auth.email')}</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -50,14 +52,14 @@ export default function Login({ status, canResetPassword }: Props) {
 
                             <div className="grid gap-2">
                                 <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                                    <Label htmlFor="password">{t('auth.password')}</Label>
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
                                             className="ml-auto text-sm"
                                             tabIndex={5}
                                         >
-                                            Forgot your password?
+                                            {t('auth.forgot_password')}
                                         </TextLink>
                                     )}
                                 </div>
@@ -78,7 +80,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">Remember me</Label>
+                                <Label htmlFor="remember">{t('auth.remember_me')}</Label>
                             </div>
 
                             <Button
@@ -89,15 +91,15 @@ export default function Login({ status, canResetPassword }: Props) {
                                 data-test="login-button"
                             >
                                 {processing && <Spinner />}
-                                Log in
+                                {t('auth.sign_in')}
                             </Button>
                         </div>
 
                         <div className="text-center text-sm text-muted-foreground">
-                            Don't have an account?{' '}
+                            {t('auth.no_account')}{' '}
                             {registrationEnabled ? (
                                 <TextLink href="/register" tabIndex={5}>
-                                    Sign up
+                                    {t('auth.sign_up')}
                                 </TextLink>
                             ) : (
                                 <span>Registration is currently closed.</span>

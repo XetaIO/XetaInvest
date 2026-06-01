@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { Loader2, Search } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import {
     Dialog,
@@ -19,6 +20,7 @@ type Props = {
 };
 
 export function SymbolSearchDialog({ open, onOpenChange }: Props) {
+    const { t } = useTranslation();
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<SymbolSearchResult[]>([]);
     const [loading, setLoading] = useState(false);
@@ -98,10 +100,10 @@ export function SymbolSearchDialog({ open, onOpenChange }: Props) {
                 <DialogHeader className="border-b px-4 py-3">
                     <DialogTitle className="flex items-center gap-2 text-base">
                         <Search className="h-4 w-4 text-muted-foreground" />
-                        Rechercher un symbol
+                        {t('symbol.search_title')}
                     </DialogTitle>
                     <DialogDescription className="sr-only">
-                        Tapez un nom d&apos;entreprise ou un ticker
+                        {t('symbol.search_description')}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="px-4 py-3">
@@ -117,19 +119,19 @@ export function SymbolSearchDialog({ open, onOpenChange }: Props) {
                     {loading && (
                         <div className="flex items-center justify-center gap-2 px-4 py-6 text-sm text-muted-foreground">
                             <Loader2 className="h-4 w-4 animate-spin" />
-                            Recherche...
+                            {t('symbol.search_loading')}
                         </div>
                     )}
 
                     {!loading && trimmed.length < 2 && (
                         <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-                            Tapez au moins 2 caractères pour rechercher.
+                            {t('symbol.search_min_chars')}
                         </p>
                     )}
 
                     {!loading && trimmed.length >= 2 && displayResults.length === 0 && (
                         <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-                            Aucun résultat.
+                            {t('symbol.search_no_results')}
                         </p>
                     )}
 

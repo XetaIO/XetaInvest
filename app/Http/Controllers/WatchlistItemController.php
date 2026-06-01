@@ -22,13 +22,13 @@ class WatchlistItemController extends Controller
         $instrument = $resolver->resolve($request->validated('symbol'));
 
         if ($instrument === null) {
-            Inertia::flash('toast', ['type' => 'error', 'message' => __('Symbole introuvable.')]);
+            Inertia::flash('toast', ['type' => 'error', 'message' => __('messages.watchlist_item.symbol_not_found')]);
 
             return back();
         }
 
         if ($watchlist->items()->where('instrument_id', $instrument->id)->exists()) {
-            Inertia::flash('toast', ['type' => 'info', 'message' => __('Symbole déjà présent.')]);
+            Inertia::flash('toast', ['type' => 'info', 'message' => __('messages.watchlist_item.already_present')]);
 
             return back();
         }
@@ -40,7 +40,7 @@ class WatchlistItemController extends Controller
             'position' => $position,
         ]);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Symbole ajouté.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.watchlist_item.added')]);
 
         return back();
     }
@@ -51,7 +51,7 @@ class WatchlistItemController extends Controller
 
         $item->delete();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Symbole retiré.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.watchlist_item.removed')]);
 
         return back();
     }

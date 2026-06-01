@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BudgetSankey } from '@/components/budget/budget-sankey';
 import { BudgetSummary } from '@/components/budget/budget-summary';
 import { BudgetTabGroups } from '@/components/budget/budget-tab-groups';
@@ -24,6 +25,7 @@ function buildPayload(
 }
 
 export default function BudgetPage({ budget }: BudgetPageProps) {
+    const { t } = useTranslation();
     const [tab, setTab] = useState<BudgetTab>('income');
     const [income, setIncome] = useState<BudgetLineDraft[]>(budget.income.lines);
     const [investments, setInvestments] = useState<BudgetGroupDraft[]>(budget.investments.groups);
@@ -68,25 +70,25 @@ export default function BudgetPage({ budget }: BudgetPageProps) {
 
     return (
         <>
-            <Head title="Budget" />
+            <Head title={t('budget.title')} />
             <div className="flex flex-col gap-6 p-4 md:p-6">
                 <div className="flex items-center justify-between gap-2">
                     <div>
-                        <h1 className="text-2xl font-semibold">Calculateur de budget</h1>
+                        <h1 className="text-2xl font-semibold">{t('budget.title')}</h1>
                         <p className="text-sm text-muted-foreground">
-                            Renseignez vos revenus, investissements et dépenses pour visualiser votre flux financier.
+                            {t('budget.subtitle')}
                         </p>
                     </div>
                     <span className="text-xs text-muted-foreground" aria-live="polite">
-                        {saving ? 'Enregistrement…' : 'Enregistré'}
+                        {saving ? t('budget.saving') : t('budget.saved')}
                     </span>
                 </div>
 
                 <Tabs value={tab} onValueChange={(v) => setTab(v as BudgetTab)}>
                     <TabsList>
-                        <TabsTrigger value="income">Revenus</TabsTrigger>
-                        <TabsTrigger value="investments">Investissements</TabsTrigger>
-                        <TabsTrigger value="expenses">Dépenses</TabsTrigger>
+                        <TabsTrigger value="income">{t('budget.income')}</TabsTrigger>
+                        <TabsTrigger value="investments">{t('budget.investments')}</TabsTrigger>
+                        <TabsTrigger value="expenses">{t('budget.expenses')}</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="income" className="mt-4">
@@ -94,26 +96,26 @@ export default function BudgetPage({ budget }: BudgetPageProps) {
                     </TabsContent>
                     <TabsContent value="investments" className="mt-4">
                         <BudgetTabGroups
-                            title="Investissements"
+                            title={t('budget.investments')}
                             groups={investments}
                             onChange={setInvestments}
-                            addGroupLabel="Ajouter une catégorie d'investissement"
-                            addLineLabel="Ajouter une ligne"
-                            groupPlaceholder="Nom de la catégorie (ex. Investissements mensuels)"
-                            linePlaceholder="Ex. Actions"
-                            emptyText="Aucune catégorie d'investissement pour le moment."
+                            addGroupLabel={t('budget.add_investment_group')}
+                            addLineLabel={t('budget.add_line_btn')}
+                            groupPlaceholder={t('budget.group_placeholder_investments')}
+                            linePlaceholder={t('budget.line_placeholder_investments')}
+                            emptyText={t('budget.empty_investments')}
                         />
                     </TabsContent>
                     <TabsContent value="expenses" className="mt-4">
                         <BudgetTabGroups
-                            title="Dépenses"
+                            title={t('budget.expenses')}
                             groups={expenses}
                             onChange={setExpenses}
-                            addGroupLabel="Ajouter une catégorie de dépense"
-                            addLineLabel="Ajouter une ligne"
-                            groupPlaceholder="Nom de la catégorie (ex. Logement)"
-                            linePlaceholder="Ex. Loyer"
-                            emptyText="Aucune catégorie de dépense pour le moment."
+                            addGroupLabel={t('budget.add_expense_group')}
+                            addLineLabel={t('budget.add_line_btn')}
+                            groupPlaceholder={t('budget.group_placeholder_expenses')}
+                            linePlaceholder={t('budget.line_placeholder_expenses')}
+                            emptyText={t('budget.empty_expenses')}
                         />
                     </TabsContent>
                 </Tabs>
@@ -125,14 +127,14 @@ export default function BudgetPage({ budget }: BudgetPageProps) {
                         onClick={() => goToTab(-1)}
                         disabled={TABS.indexOf(tab) === 0}
                     >
-                        Retour
+                        {t('common.back')}
                     </Button>
                     <Button
                         type="button"
                         onClick={() => goToTab(1)}
                         disabled={TABS.indexOf(tab) === TABS.length - 1}
                     >
-                        Suivant
+                        {t('common.next')}
                     </Button>
                 </div>
 

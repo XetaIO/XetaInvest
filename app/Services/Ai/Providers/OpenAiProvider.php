@@ -37,11 +37,15 @@ class OpenAiProvider implements AiProvider
      */
     public function chat(array $messages, array $tools = [], array $options = []): AiResponse
     {
+        $model = $options['model'] ?? config('ai.models.chat');
+        $maxTokens = $options['max_tokens'] ?? config('ai.defaults.max_tokens');
+        $maxTokensKey = $this->supportsMaxTokens((string) $model) ? 'max_tokens' : 'max_completion_tokens';
+
         $payload = [
-            'model' => $options['model'] ?? config('ai.models.chat'),
+            'model' => $model,
             'messages' => $messages,
             'temperature' => $options['temperature'] ?? config('ai.defaults.temperature'),
-            'max_tokens' => $options['max_tokens'] ?? config('ai.defaults.max_tokens'),
+            $maxTokensKey => $maxTokens,
         ];
 
         if ($tools !== []) {
@@ -126,5 +130,22 @@ class OpenAiProvider implements AiProvider
             provider: 'openai',
             raw: $payload,
         );
+    }
+
+    /**
+     * Newer OpenAI models (o1, o3, o4, gpt-5.x…) require `max_completion_tokens`.
+     * Legacy models (gpt-3.x, gpt-4.x) use the old `max_tokens` parameter.
+     */
+    private function supportsMaxTokens(string $model): bool
+    {
+        $newGenerationPrefixes = ['o1', 'o3', 'o4', 'gpt-5'];
+
+        foreach ($newGenerationPrefixes as $prefix) {
+            if (str_starts_with(strtolower($model), $prefix)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

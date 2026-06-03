@@ -10,7 +10,9 @@ use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
-    public function __construct(private readonly PortfolioTickerService $ticker) {}
+    public function __construct(private readonly PortfolioTickerService $ticker)
+    {
+    }
 
     /**
      * The root template that's loaded on the first page visit.

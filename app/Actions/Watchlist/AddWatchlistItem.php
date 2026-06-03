@@ -9,7 +9,9 @@ use App\Services\InstrumentResolver;
 
 class AddWatchlistItem
 {
-    public function __construct(private readonly InstrumentResolver $resolver) {}
+    public function __construct(private readonly InstrumentResolver $resolver)
+    {
+    }
 
     /**
      * @return 'added'|'symbol_not_found'|'already_present'

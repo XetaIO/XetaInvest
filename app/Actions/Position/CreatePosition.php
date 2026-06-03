@@ -14,7 +14,9 @@ use Illuminate\Support\Facades\DB;
 
 class CreatePosition
 {
-    public function __construct(private readonly FinanceQueryClient $client) {}
+    public function __construct(private readonly FinanceQueryClient $client)
+    {
+    }
 
     /**
      * @param  array<string, mixed>  $data

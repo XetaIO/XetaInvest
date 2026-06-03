@@ -9,6 +9,11 @@ use App\Models\Watchlist;
 
 class WatchlistPolicy
 {
+    public function create(User $user): bool
+    {
+        return $user->watchlists()->count() < Watchlist::MAX_PER_USER;
+    }
+
     public function view(User $user, Watchlist $watchlist): bool
     {
         return $watchlist->user_id === $user->id;

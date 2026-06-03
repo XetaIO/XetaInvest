@@ -1,14 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Instrument;
 
 class InstrumentResolver
 {
-    public function __construct(private readonly FinanceQueryClient $client)
-    {
-    }
+    public function __construct(private readonly FinanceQueryClient $client) {}
 
     public function resolve(string $symbol): ?Instrument
     {

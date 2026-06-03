@@ -45,7 +45,7 @@ function parseDate(value: string | number): Date {
     return new Date(String(value));
 }
 
-function formatXAxisTick(value: string, range: SymbolRange): string {
+function formatXAxisTick(value: string, range: SymbolRange, loc: string): string {
     const d = parseDate(value);
 
     if (Number.isNaN(d.getTime())) {
@@ -53,14 +53,14 @@ function formatXAxisTick(value: string, range: SymbolRange): string {
     }
 
     if (range === '1d') {
-        return new Intl.DateTimeFormat('fr-FR', {
+        return new Intl.DateTimeFormat(loc, {
             hour: '2-digit',
             minute: '2-digit',
         }).format(d);
     }
 
     if (range === '5d') {
-        return new Intl.DateTimeFormat('fr-FR', {
+        return new Intl.DateTimeFormat(loc, {
             day: '2-digit',
             month: '2-digit',
             hour: '2-digit',
@@ -69,13 +69,13 @@ function formatXAxisTick(value: string, range: SymbolRange): string {
     }
 
     if (range === '1mo' || range === '3mo' || range === '6mo' || range === 'ytd') {
-        return new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit' }).format(d);
+        return new Intl.DateTimeFormat(loc, { day: '2-digit', month: '2-digit' }).format(d);
     }
 
-    return new Intl.DateTimeFormat('fr-FR', { month: 'short', year: '2-digit' }).format(d);
+    return new Intl.DateTimeFormat(loc, { month: 'short', year: '2-digit' }).format(d);
 }
 
-function formatTooltipLabel(value: string, range: SymbolRange): string {
+function formatTooltipLabel(value: string, range: SymbolRange, loc: string): string {
     const d = parseDate(value);
 
     if (Number.isNaN(d.getTime())) {
@@ -83,7 +83,7 @@ function formatTooltipLabel(value: string, range: SymbolRange): string {
     }
 
     if (range === '1d' || range === '5d') {
-        return new Intl.DateTimeFormat('fr-FR', {
+        return new Intl.DateTimeFormat(loc, {
             day: '2-digit',
             month: '2-digit',
             hour: '2-digit',
@@ -91,7 +91,7 @@ function formatTooltipLabel(value: string, range: SymbolRange): string {
         }).format(d);
     }
 
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat(loc, {
         day: '2-digit',
         month: 'long',
         year: 'numeric',
@@ -99,7 +99,8 @@ function formatTooltipLabel(value: string, range: SymbolRange): string {
 }
 
 export function SymbolChart({ symbol, initial, availableRanges, currency }: Props) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const loc = i18n.resolvedLanguage ?? 'fr';
     const [range, setRange] = useState<SymbolRange>(initial.range);
     const [points, setPoints] = useState<ChartPoint[]>(initial.points);
     const [loading, setLoading] = useState(false);
@@ -191,7 +192,7 @@ export function SymbolChart({ symbol, initial, availableRanges, currency }: Prop
                                 axisLine={false}
                                 tickMargin={8}
                                 minTickGap={32}
-                                tickFormatter={(v) => formatXAxisTick(String(v), range)}
+                                tickFormatter={(v) => formatXAxisTick(String(v), range, loc)}
                             />
                             <YAxis
                                 tickLine={false}
@@ -206,7 +207,7 @@ export function SymbolChart({ symbol, initial, availableRanges, currency }: Prop
                                 content={
                                     <ChartTooltipContent
                                         labelFormatter={(label) =>
-                                            formatTooltipLabel(String(label), range)
+                                            formatTooltipLabel(String(label), range, loc)
                                         }
                                         formatter={(value) => (
                                             <div className="flex w-full items-center gap-2">

@@ -1,4 +1,4 @@
-export default function AppLogo() {
+export function AppLogo() {
     return (
         <>
             <div className="flex aspect-square items-center justify-center rounded-md">

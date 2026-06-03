@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Portfolio\CreatePortfolio;
+use App\Actions\Portfolio\UpdatePortfolio;
 use App\Http\Requests\Portfolio\StorePortfolioRequest;
 use App\Http\Requests\Portfolio\UpdatePortfolioRequest;
 use App\Models\Portfolio;
@@ -14,43 +16,18 @@ use Inertia\Inertia;
 
 class PortfolioController extends Controller
 {
-    public function store(StorePortfolioRequest $request): RedirectResponse
+    public function store(StorePortfolioRequest $request, CreatePortfolio $action): RedirectResponse
     {
-        $data = $request->validated();
-        $isDefault = (bool) ($data['is_default'] ?? false);
-        $count = $request->user()->portfolios()->count();
-
-        DB::transaction(function () use ($request, $data, $isDefault, $count): void {
-            if ($isDefault || $count === 0) {
-                $request->user()->portfolios()->update(['is_default' => false]);
-            }
-
-            $request->user()->portfolios()->create([
-                'name' => $data['name'],
-                'is_default' => $isDefault || $count === 0,
-            ]);
-        });
+        $action->handle($request->user(), $request->validated());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.portfolio.created')]);
 
         return back();
     }
 
-    public function update(UpdatePortfolioRequest $request, Portfolio $portfolio): RedirectResponse
+    public function update(UpdatePortfolioRequest $request, Portfolio $portfolio, UpdatePortfolio $action): RedirectResponse
     {
-        $data = $request->validated();
-        $isDefault = (bool) ($data['is_default'] ?? $portfolio->is_default);
-
-        DB::transaction(function () use ($request, $portfolio, $data, $isDefault): void {
-            if ($isDefault && ! $portfolio->is_default) {
-                $request->user()->portfolios()->update(['is_default' => false]);
-            }
-
-            $portfolio->update([
-                'name' => $data['name'],
-                'is_default' => $isDefault,
-            ]);
-        });
+        $action->handle($request->user(), $portfolio, $request->validated());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.portfolio.updated')]);
 

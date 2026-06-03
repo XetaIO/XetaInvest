@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Budget\EnsureBudgetExists;
 use App\Actions\Budget\SyncBudget;
 use App\Enums\BudgetGroupType;
 use App\Http\Requests\Budget\UpdateBudgetRequest;
@@ -16,9 +17,9 @@ use Inertia\Response;
 
 class BudgetController extends Controller
 {
-    public function show(Request $request, SyncBudget $sync): Response
+    public function show(Request $request, EnsureBudgetExists $ensure): Response
     {
-        $budget = $sync::ensureFor($request->user());
+        $budget = $ensure->handle($request->user());
         $budget->load(['groups' => fn ($q) => $q->orderBy('sort_order'), 'groups.lines' => fn ($q) => $q->orderBy('sort_order')]);
 
         return Inertia::render('budget', [
@@ -29,8 +30,6 @@ class BudgetController extends Controller
     public function update(UpdateBudgetRequest $request, SyncBudget $action): RedirectResponse
     {
         $budget = Budget::firstOrCreate(['user_id' => $request->user()->id]);
-
-        $this->authorize('update', $budget);
 
         $action->handle($budget, $request->validated());
 

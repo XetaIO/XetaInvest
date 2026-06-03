@@ -1,5 +1,6 @@
 import { Link, router } from '@inertiajs/react';
 import { Eye, EyeOff, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import type { PriceUpdate, WatchlistItem } from '@/types';
 
@@ -11,16 +12,17 @@ type Props = {
     onToggleVisible: () => void;
 };
 
-const formatPrice = (n: number, currency: string | null) =>
-    new Intl.NumberFormat('fr-FR', {
-        style: 'currency',
-        currency: currency ?? 'USD',
-        maximumFractionDigits: 4,
-    }).format(n);
-
 const formatPct = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`;
 
 export function WatchlistRow({ item, price, visible, color, onToggleVisible }: Props) {
+    const { i18n } = useTranslation();
+    const loc = i18n.resolvedLanguage ?? 'fr';
+    const formatPrice = (n: number, currency: string | null) =>
+        new Intl.NumberFormat(loc, {
+            style: 'currency',
+            currency: currency ?? 'USD',
+            maximumFractionDigits: 4,
+        }).format(n);
     const change = price?.change ?? 0;
     const changePct = price?.change_percent ?? 0;
     const isUp = change >= 0;

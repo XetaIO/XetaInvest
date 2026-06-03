@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\Budget\SyncBudget;
+use App\Actions\Budget\EnsureBudgetExists;
 use App\Enums\BudgetGroupType;
 use App\Models\Budget;
 use App\Services\PortfolioStatistics;
@@ -14,14 +14,14 @@ use Inertia\Response;
 
 class CalculatorController extends Controller
 {
-    public function show(Request $request, PortfolioStatistics $stats, SyncBudget $sync): Response
+    public function show(Request $request, PortfolioStatistics $stats, EnsureBudgetExists $ensure): Response
     {
         $user = $request->user();
 
         $payload = $stats->compute($user);
         $initialCapital = (float) ($payload['totals']['invested_eur'] ?? 0.0);
 
-        $monthlySavings = $this->computeMonthlySavings($sync::ensureFor($user));
+        $monthlySavings = $this->computeMonthlySavings($ensure->handle($user));
 
         return Inertia::render('calculator', [
             'defaults' => [

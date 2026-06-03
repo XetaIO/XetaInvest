@@ -1,23 +1,12 @@
 import { Link, usePage } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import { Area, AreaChart } from 'recharts';
-
 import { cn } from '@/lib/utils';
+import { show as symbolShow } from '@/routes/symbol';
 import type { PortfolioTickerEntry } from '@/types/ticker';
 
 const POSITIVE_COLOR = '#10b981';
 const NEGATIVE_COLOR = '#ef4444';
-
-function formatPrice(value: number, currency: string): string {
-    try {
-        return new Intl.NumberFormat('fr-FR', {
-            style: 'currency',
-            currency,
-            maximumFractionDigits: value >= 100 ? 2 : 4,
-        }).format(value);
-    } catch {
-        return value.toFixed(2);
-    }
-}
 
 function formatSignedNumber(value: number, fractionDigits = 2): string {
     const sign = value > 0 ? '+' : '';
@@ -26,6 +15,19 @@ function formatSignedNumber(value: number, fractionDigits = 2): string {
 }
 
 function TickerItem({ entry }: { entry: PortfolioTickerEntry }) {
+    const { i18n } = useTranslation();
+    const loc = i18n.resolvedLanguage ?? 'fr';
+    const formatPrice = (value: number, currency: string): string => {
+        try {
+            return new Intl.NumberFormat(loc, {
+                style: 'currency',
+                currency,
+                maximumFractionDigits: value >= 100 ? 2 : 4,
+            }).format(value);
+        } catch {
+            return value.toFixed(2);
+        }
+    };
     const isUp = entry.change >= 0;
     const colorClass = isUp ? 'text-emerald-500' : 'text-red-500';
 
@@ -40,7 +42,7 @@ function TickerItem({ entry }: { entry: PortfolioTickerEntry }) {
 
     return (
         <Link
-            href={`/symbol/${encodeURIComponent(entry.symbol)}`}
+            href={symbolShow(entry.symbol).url}
             className="group flex shrink-0 items-center gap-3 border-r border-border/40 px-5 py-2 transition-colors hover:bg-accent/50"
         >
             <div className="flex flex-col leading-tight">

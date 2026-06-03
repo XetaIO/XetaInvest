@@ -18,24 +18,24 @@ type Props = {
     data: HistoryPoint[];
 };
 
-function formatShortDate(iso: string): string {
+function formatShortDate(iso: string, loc: string): string {
     const d = new Date(iso);
 
     if (Number.isNaN(d.getTime())) {
         return iso;
     }
 
-    return new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit' }).format(d);
+    return new Intl.DateTimeFormat(loc, { day: '2-digit', month: '2-digit' }).format(d);
 }
 
-function formatTooltipDate(iso: string): string {
+function formatTooltipDate(iso: string, loc: string): string {
     const d = new Date(iso);
 
     if (Number.isNaN(d.getTime())) {
         return iso;
     }
 
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat(loc, {
         day: '2-digit',
         month: 'long',
         year: 'numeric',
@@ -47,7 +47,8 @@ export function HistoryLineChart({
     description,
     data = [],
 }: Props) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const loc = i18n.resolvedLanguage ?? 'fr';
 
     const config = {
         value_eur: {
@@ -105,7 +106,7 @@ export function HistoryLineChart({
                             axisLine={false}
                             tickMargin={8}
                             minTickGap={32}
-                            tickFormatter={formatShortDate}
+                            tickFormatter={(v) => formatShortDate(String(v), loc)}
                         />
                         <YAxis
                             domain={[minY, maxY]}
@@ -119,7 +120,7 @@ export function HistoryLineChart({
                             cursor={true}
                             content={
                                 <ChartTooltipContent
-                                    labelFormatter={(label) => formatTooltipDate(String(label))}
+                                    labelFormatter={(label) => formatTooltipDate(String(label), loc)}
                                     formatter={(value, name) => {
                                         const numeric = Number(value);
                                         const key = String(name);

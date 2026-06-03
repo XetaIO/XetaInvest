@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { AddToWatchlistButton } from '@/components/watchlist/add-to-watchlist-button';
+import { search as symbolSearch, show as symbolShow } from '@/routes/symbol';
 import type { SymbolSearchResult } from '@/types';
 
 type Props = {
@@ -41,7 +42,7 @@ export function SymbolSearchDialog({ open, onOpenChange }: Props) {
             setLoading(true);
 
             try {
-                const response = await fetch(`/symbol-search?q=${encodeURIComponent(q)}`, {
+                const response = await fetch(`${symbolSearch().url}?q=${encodeURIComponent(q)}`, {
                     headers: { Accept: 'application/json' },
                     credentials: 'same-origin',
                 });
@@ -82,7 +83,7 @@ export function SymbolSearchDialog({ open, onOpenChange }: Props) {
     const goToSymbol = useCallback(
         (symbol: string) => {
             onOpenChange(false);
-            router.visit(`/symbol/${encodeURIComponent(symbol)}`);
+            router.visit(symbolShow(symbol).url);
         },
         [onOpenChange],
     );

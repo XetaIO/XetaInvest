@@ -1,53 +1,32 @@
+import i18n from '@/lib/i18n';
+
 const PARIS_TZ = 'Europe/Paris';
 
-const eurFormatter = new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-});
-
-const percentFormatter = new Intl.NumberFormat('fr-FR', {
-    style: 'percent',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-    signDisplay: 'exceptZero',
-});
-
-const dateFormatter = new Intl.DateTimeFormat('fr-FR', {
-    timeZone: PARIS_TZ,
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-});
-
-const dateTimeFormatter = new Intl.DateTimeFormat('fr-FR', {
-    timeZone: PARIS_TZ,
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-});
-
-const timeFormatter = new Intl.DateTimeFormat('fr-FR', {
-    timeZone: PARIS_TZ,
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-});
+function locale(): string {
+    return i18n.resolvedLanguage ?? 'fr';
+}
 
 export function formatEur(value: number): string {
-    return eurFormatter.format(value);
+    return new Intl.NumberFormat(locale(), {
+        style: 'currency',
+        currency: 'EUR',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(value);
 }
 
 export function formatPercent(value: number): string {
     // Value is a percent (e.g., 12.34 means 12.34%)
-    return percentFormatter.format(value / 100);
+    return new Intl.NumberFormat(locale(), {
+        style: 'percent',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+        signDisplay: 'exceptZero',
+    }).format(value / 100);
 }
 
 export function formatNumber(value: number, fractionDigits = 4): string {
-    return new Intl.NumberFormat('fr-FR', {
+    return new Intl.NumberFormat(locale(), {
         minimumFractionDigits: 0,
         maximumFractionDigits: fractionDigits,
     }).format(value);
@@ -55,7 +34,7 @@ export function formatNumber(value: number, fractionDigits = 4): string {
 
 export function formatNative(value: number, currency: string): string {
     try {
-        return new Intl.NumberFormat('fr-FR', {
+        return new Intl.NumberFormat(locale(), {
             style: 'currency',
             currency: (currency || 'USD').toUpperCase(),
             minimumFractionDigits: 2,
@@ -73,7 +52,16 @@ export function formatDate(iso: string | null | undefined): string {
 
     const d = new Date(iso);
 
-    return Number.isNaN(d.getTime()) ? '—' : dateFormatter.format(d);
+    if (Number.isNaN(d.getTime())) {
+        return '—';
+    }
+
+    return new Intl.DateTimeFormat(locale(), {
+        timeZone: PARIS_TZ,
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    }).format(d);
 }
 
 export function formatDateTime(iso: string | null | undefined): string {
@@ -83,7 +71,18 @@ export function formatDateTime(iso: string | null | undefined): string {
 
     const d = new Date(iso);
 
-    return Number.isNaN(d.getTime()) ? '—' : dateTimeFormatter.format(d);
+    if (Number.isNaN(d.getTime())) {
+        return '—';
+    }
+
+    return new Intl.DateTimeFormat(locale(), {
+        timeZone: PARIS_TZ,
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    }).format(d);
 }
 
 export function formatTime(iso: string | null | undefined): string {
@@ -93,7 +92,16 @@ export function formatTime(iso: string | null | undefined): string {
 
     const d = new Date(iso);
 
-    return Number.isNaN(d.getTime()) ? '—' : timeFormatter.format(d);
+    if (Number.isNaN(d.getTime())) {
+        return '—';
+    }
+
+    return new Intl.DateTimeFormat(locale(), {
+        timeZone: PARIS_TZ,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    }).format(d);
 }
 
 export function deltaToneClass(value: number): string {

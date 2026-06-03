@@ -9,11 +9,7 @@ type Props = { budget: BudgetPayload };
 type SankeyNode = { name: string };
 type SankeyLink = { source: number; target: number; value: number };
 
-const eur = new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-    maximumFractionDigits: 0,
-});
+// eur formatter is created per-render in BudgetSankey using i18n.resolvedLanguage
 
 type SankeyTooltipPayload = {
     name?: string;
@@ -33,10 +29,17 @@ function SankeyTooltipContent({
     active?: boolean;
     payload?: SankeyTooltipPayload[];
 }) {
+    const { i18n } = useTranslation();
+
     if (!active || !payload?.length) {
         return null;
     }
 
+    const eur = new Intl.NumberFormat(i18n.resolvedLanguage ?? 'fr', {
+        style: 'currency',
+        currency: 'EUR',
+        maximumFractionDigits: 0,
+    });
     const item = payload[0];
     const data = item.payload;
     const value = eur.format(Number(item.value ?? data?.value ?? 0) || 0);

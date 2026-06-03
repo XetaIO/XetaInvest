@@ -406,7 +406,10 @@
         "profile": "Profil",
         "security": "Sécurité",
         "appearance": "Apparence",
-        "language": "Langue"
+        "language": "Langue",
+        "appearance_light": "Clair",
+        "appearance_dark": "Sombre",
+        "appearance_system": "Système"
     },
     "language_switcher": {
         "label": "Langue",

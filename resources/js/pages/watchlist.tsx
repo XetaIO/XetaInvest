@@ -1,4 +1,4 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router, setLayoutProps, usePage } from '@inertiajs/react';
 import { ListPlus, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -43,6 +43,7 @@ type LivePoint = { t: number; v: number };
 
 export default function WatchlistPage({ watchlists, activeWatchlistId, limits, aiWatchlistReport = null }: PageProps) {
     const { t } = useTranslation();
+    setLayoutProps({ breadcrumbs: [{ title: t('watchlist.title'), href: '/watchlists' }] });
     const page = usePage<{ financeQueryWsUrl?: string } & SharedExtra>();
     const wsUrl = page.props.financeQueryWsUrl ?? '';
 

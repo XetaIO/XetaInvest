@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Watchlist\AddWatchlistItem;
 use App\Http\Requests\Watchlist\StoreWatchlistItemRequest;
 use App\Models\Watchlist;
 use App\Models\WatchlistItem;
-use App\Services\InstrumentResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,30 +17,16 @@ class WatchlistItemController extends Controller
     public function store(
         StoreWatchlistItemRequest $request,
         Watchlist $watchlist,
-        InstrumentResolver $resolver,
+        AddWatchlistItem $action,
     ): RedirectResponse {
-        $instrument = $resolver->resolve($request->validated('symbol'));
+        $result = $action->handle($watchlist, $request->validated('symbol'));
 
-        if ($instrument === null) {
-            Inertia::flash('toast', ['type' => 'error', 'message' => __('messages.watchlist_item.symbol_not_found')]);
-
-            return back();
-        }
-
-        if ($watchlist->items()->where('instrument_id', $instrument->id)->exists()) {
-            Inertia::flash('toast', ['type' => 'info', 'message' => __('messages.watchlist_item.already_present')]);
-
-            return back();
-        }
-
-        $position = (int) $watchlist->items()->max('position') + 1;
-
-        $watchlist->items()->create([
-            'instrument_id' => $instrument->id,
-            'position' => $position,
-        ]);
-
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.watchlist_item.added')]);
+        match ($result) {
+            'symbol_not_found' => Inertia::flash('toast', ['type' => 'error', 'message' => __('messages.watchlist_item.symbol_not_found')]),
+            'already_present' => Inertia::flash('toast', ['type' => 'info', 'message' => __('messages.watchlist_item.already_present')]),
+            'added' => Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.watchlist_item.added')]),
+            'limit_reached' => Inertia::flash('toast', ['type' => 'error', 'message' => __('messages.watchlist_item.limit_reached', ['max' => Watchlist::MAX_ITEMS])]),
+        };
 
         return back();
     }

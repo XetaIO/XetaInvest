@@ -1,6 +1,6 @@
 import { usePage } from '@inertiajs/react';
 import { useEffect } from 'react';
-import i18n from '@/lib/i18n';
+import { useTranslation } from 'react-i18next';
 import type { SharedData } from '@/types';
 
 /**
@@ -9,12 +9,13 @@ import type { SharedData } from '@/types';
  */
 export function useLocale(): 'fr' | 'en' {
     const { locale } = usePage<SharedData>().props;
+    const { i18n } = useTranslation();
 
     useEffect(() => {
-        if (locale && i18n.language !== locale) {
+        if (locale && i18n.resolvedLanguage !== locale) {
             void i18n.changeLanguage(locale);
         }
-    }, [locale]);
+    }, [locale, i18n]);
 
     return locale ?? 'fr';
 }

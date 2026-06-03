@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use App\Services\PortfolioTickerService;
@@ -8,6 +10,10 @@ use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
+    public function __construct(private readonly PortfolioTickerService $ticker)
+    {
+    }
+
     /**
      * The root template that's loaded on the first page visit.
      *
@@ -46,9 +52,11 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'registrationEnabled' => (bool) config('fortify.registration_enabled'),
             'portfolioTicker' => fn () => $request->user()
-                ? app(PortfolioTickerService::class)->buildFor($request->user())
+                ? $this->ticker->buildFor($request->user())
                 : null,
-            'financeQueryWsUrl' => config('services.finance_query.ws_url'),
+            'financeQueryWsUrl' => $request->user()
+                ? config('services.finance_query.ws_url')
+                : null,
         ];
     }
 }

@@ -10,22 +10,10 @@ import {
     ChartTooltipContent,
 } from '@/components/ui/chart';
 import type { ChartConfig } from '@/components/ui/chart';
-import { formatNumber } from '@/lib/format';
+import { CHART_MARGINS, CHART_RANGE_LABELS } from '@/lib/constants';
+import { formatChartAxisTick, formatChartTooltipDate, formatNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { ChartPoint, SymbolRange } from '@/types';
-
-const RANGE_LABELS: Record<SymbolRange, string> = {
-    '1d': '1J',
-    '5d': '5J',
-    '1mo': '1M',
-    '3mo': '3M',
-    '6mo': '6M',
-    '1y': '1A',
-    '2y': '2A',
-    '5y': '5A',
-    '10y': '10A',
-    ytd: 'YTD',
-};
 
 type Props = {
     symbol: string;
@@ -34,72 +22,9 @@ type Props = {
     currency?: string | null;
 };
 
-function parseDate(value: string | number): Date {
-    if (typeof value === 'number' || /^\d+$/.test(String(value))) {
-        const n = Number(value);
-
-        // Unix seconds vs milliseconds
-        return new Date(n < 1e12 ? n * 1000 : n);
-    }
-
-    return new Date(String(value));
-}
-
-function formatXAxisTick(value: string, range: SymbolRange): string {
-    const d = parseDate(value);
-
-    if (Number.isNaN(d.getTime())) {
-        return value;
-    }
-
-    if (range === '1d') {
-        return new Intl.DateTimeFormat('fr-FR', {
-            hour: '2-digit',
-            minute: '2-digit',
-        }).format(d);
-    }
-
-    if (range === '5d') {
-        return new Intl.DateTimeFormat('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-        }).format(d);
-    }
-
-    if (range === '1mo' || range === '3mo' || range === '6mo' || range === 'ytd') {
-        return new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit' }).format(d);
-    }
-
-    return new Intl.DateTimeFormat('fr-FR', { month: 'short', year: '2-digit' }).format(d);
-}
-
-function formatTooltipLabel(value: string, range: SymbolRange): string {
-    const d = parseDate(value);
-
-    if (Number.isNaN(d.getTime())) {
-        return value;
-    }
-
-    if (range === '1d' || range === '5d') {
-        return new Intl.DateTimeFormat('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-        }).format(d);
-    }
-
-    return new Intl.DateTimeFormat('fr-FR', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-    }).format(d);
-}
-
 export function SymbolChart({ symbol, initial, availableRanges, currency }: Props) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const loc = i18n.resolvedLanguage ?? 'fr';
     const [range, setRange] = useState<SymbolRange>(initial.range);
     const [points, setPoints] = useState<ChartPoint[]>(initial.points);
     const [loading, setLoading] = useState(false);
@@ -156,7 +81,7 @@ export function SymbolChart({ symbol, initial, availableRanges, currency }: Prop
                             onClick={() => handleRangeChange(r)}
                             disabled={loading}
                         >
-                            {RANGE_LABELS[r] ?? r}
+                            {CHART_RANGE_LABELS[r] ?? r}
                         </Button>
                     ))}
                 </div>
@@ -183,7 +108,7 @@ export function SymbolChart({ symbol, initial, availableRanges, currency }: Prop
 
                 {!loading && !error && points.length > 0 && (
                     <ChartContainer config={config} className="aspect-auto h-72 w-full">
-                        <LineChart data={points} margin={{ left: 12, right: 12, top: 8, bottom: 0 }}>
+                        <LineChart data={points} margin={CHART_MARGINS.DEFAULT}>
                             <CartesianGrid vertical={false} strokeDasharray="3 3" />
                             <XAxis
                                 dataKey="date"
@@ -191,7 +116,7 @@ export function SymbolChart({ symbol, initial, availableRanges, currency }: Prop
                                 axisLine={false}
                                 tickMargin={8}
                                 minTickGap={32}
-                                tickFormatter={(v) => formatXAxisTick(String(v), range)}
+                                tickFormatter={(v) => formatChartAxisTick(String(v), range, loc)}
                             />
                             <YAxis
                                 tickLine={false}
@@ -206,7 +131,7 @@ export function SymbolChart({ symbol, initial, availableRanges, currency }: Prop
                                 content={
                                     <ChartTooltipContent
                                         labelFormatter={(label) =>
-                                            formatTooltipLabel(String(label), range)
+                                            formatChartTooltipDate(String(label), range, loc)
                                         }
                                         formatter={(value) => (
                                             <div className="flex w-full items-center gap-2">

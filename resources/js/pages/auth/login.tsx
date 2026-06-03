@@ -1,9 +1,9 @@
 import { Form, Head, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import InputError from '@/components/input-error';
-import PasskeyVerify from '@/components/passkey-verify';
-import PasswordInput from '@/components/password-input';
-import TextLink from '@/components/text-link';
+import { InputError } from '@/components/input-error';
+import { PasskeyVerify } from '@/components/passkey-verify';
+import { PasswordInput } from '@/components/password-input';
+import { TextLink } from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';

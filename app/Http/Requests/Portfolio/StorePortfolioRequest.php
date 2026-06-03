@@ -12,8 +12,7 @@ class StorePortfolioRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() !== null
-            && $this->user()->portfolios()->count() < Portfolio::MAX_PER_USER;
+        return $this->user()->can('create', Portfolio::class);
     }
 
     /**

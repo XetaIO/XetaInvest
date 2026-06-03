@@ -1,35 +1,18 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
+import { calculateBudgetTotals } from '@/lib/budget';
 import type { BudgetPayload } from '@/types';
-
-const eur = new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-    maximumFractionDigits: 0,
-});
-
-const pct = new Intl.NumberFormat('fr-FR', {
-    style: 'percent',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-});
 
 type Props = { budget: BudgetPayload };
 
 export function BudgetSummary({ budget }: Props) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const loc = i18n.resolvedLanguage ?? 'fr';
+    const eur = useMemo(() => new Intl.NumberFormat(loc, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }), [loc]);
+    const pct = useMemo(() => new Intl.NumberFormat(loc, { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 }), [loc]);
     const stats = useMemo(() => {
-        const totalIncome = budget.income.lines.reduce((s, l) => s + (l.amount || 0), 0);
-        const totalInvestments = budget.investments.groups.reduce(
-            (s, g) => s + g.lines.reduce((ss, l) => ss + (l.amount || 0), 0),
-            0,
-        );
-        const totalExpenses = budget.expenses.groups.reduce(
-            (s, g) => s + g.lines.reduce((ss, l) => ss + (l.amount || 0), 0),
-            0,
-        );
-        const remaining = totalIncome - totalExpenses - totalInvestments;
+        const { totalIncome, totalInvestments, totalExpenses, remaining } = calculateBudgetTotals(budget);
         const savingsRate =
             totalIncome > 0 ? (totalInvestments + Math.max(remaining, 0)) / totalIncome : 0;
         const possibleSavingsRate =

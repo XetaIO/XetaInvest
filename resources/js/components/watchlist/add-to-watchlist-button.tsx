@@ -10,6 +10,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { apiFetch } from '@/lib/api';
 import type { WatchlistSummary } from '@/types';
 
 type Props = {
@@ -31,16 +32,7 @@ export function AddToWatchlistButton({ symbol, variant = 'outline', size = 'sm' 
         let cancelled = false;
         (async () => {
             try {
-                const res = await fetch('/api/watchlists/summary', {
-                    headers: { Accept: 'application/json' },
-                    credentials: 'same-origin',
-                });
-
-                if (!res.ok) {
-                    throw new Error('Failed');
-                }
-
-                const payload = (await res.json()) as { data: WatchlistSummary[] };
+                const payload = await apiFetch<{ data: WatchlistSummary[] }>('/api/watchlists/summary');
 
                 if (!cancelled) {
                     setLists(payload.data);

@@ -152,5 +152,5 @@ test('users cannot affect another user budget', function () {
     ]);
 
     expect($otherBudget->fresh()->groups()->first()->name)->not->toBe('Mine');
-    expect($this->user->budget->groupsOfType(BudgetGroupType::Income)->first()->lines->first()->name)->toBe('Mine');
+    expect($this->user->fresh()->budget->groupsOfType(BudgetGroupType::Income)->first()->lines->first()->name)->toBe('Mine');
 });

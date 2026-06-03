@@ -12,8 +12,7 @@ class StoreWatchlistRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() !== null
-            && $this->user()->watchlists()->count() < Watchlist::MAX_PER_USER;
+        return $this->user()->can('create', Watchlist::class);
     }
 
     /**

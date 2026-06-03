@@ -1,5 +1,5 @@
-import { Head, router } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import { Head, router, setLayoutProps } from '@inertiajs/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BudgetSankey } from '@/components/budget/budget-sankey';
 import { BudgetSummary } from '@/components/budget/budget-summary';
@@ -7,6 +7,8 @@ import { BudgetTabGroups } from '@/components/budget/budget-tab-groups';
 import { BudgetTabRevenues } from '@/components/budget/budget-tab-revenues';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useDebounce } from '@/hooks/use-debounce';
+import { AUTOSAVE_DEBOUNCE_MS } from '@/lib/constants';
 import { update as updateBudget } from '@/routes/budget';
 import type { BudgetGroupDraft, BudgetLineDraft, BudgetPageProps, BudgetTab } from '@/types';
 
@@ -26,38 +28,34 @@ function buildPayload(
 
 export default function BudgetPage({ budget }: BudgetPageProps) {
     const { t } = useTranslation();
+    setLayoutProps({ breadcrumbs: [{ title: t('budget.title'), href: '/budget' }] });
     const [tab, setTab] = useState<BudgetTab>('income');
     const [income, setIncome] = useState<BudgetLineDraft[]>(budget.income.lines);
     const [investments, setInvestments] = useState<BudgetGroupDraft[]>(budget.investments.groups);
     const [expenses, setExpenses] = useState<BudgetGroupDraft[]>(budget.expenses.groups);
     const [saving, setSaving] = useState(false);
-    const firstRender = useRef(true);
+
+    // Debounce the combined payload to avoid saving on every keystroke
+    const payload = useMemo(() => buildPayload(income, investments, expenses), [income, investments, expenses]);
+    const debouncedPayload = useDebounce(payload, AUTOSAVE_DEBOUNCE_MS);
+    const isFirstSave = useRef(true);
 
     useEffect(() => {
-        if (firstRender.current) {
-            firstRender.current = false;
+        if (isFirstSave.current) {
+            isFirstSave.current = false;
 
             return;
         }
 
-        const handle = window.setTimeout(() => {
-            setSaving(true);
-            router.put(updateBudget().url, buildPayload(income, investments, expenses), {
-                preserveScroll: true,
-                preserveState: true,
-                onFinish: () => setSaving(false),
-            });
-        }, 800);
+        setSaving(true);
+        router.put(updateBudget().url, debouncedPayload, {
+            preserveScroll: true,
+            preserveState: true,
+            onFinish: () => setSaving(false),
+        });
+    }, [debouncedPayload]);
 
-        return () => window.clearTimeout(handle);
-    }, [income, investments, expenses]);
-
-    const liveBudget = {
-        ...budget,
-        income: { lines: income },
-        investments: { groups: investments },
-        expenses: { groups: expenses },
-    };
+    const liveBudget = { ...budget, ...payload };
 
     const goToTab = (offset: number) => {
         const currentIdx = TABS.indexOf(tab);

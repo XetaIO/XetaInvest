@@ -2,18 +2,13 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ResponsiveContainer, Sankey, Tooltip, useChartWidth } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CHART_COLORS } from '@/lib/constants';
 import type { BudgetPayload } from '@/types';
 
 type Props = { budget: BudgetPayload };
 
 type SankeyNode = { name: string };
 type SankeyLink = { source: number; target: number; value: number };
-
-const eur = new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-    maximumFractionDigits: 0,
-});
 
 type SankeyTooltipPayload = {
     name?: string;
@@ -33,10 +28,17 @@ function SankeyTooltipContent({
     active?: boolean;
     payload?: SankeyTooltipPayload[];
 }) {
+    const { i18n } = useTranslation();
+
     if (!active || !payload?.length) {
         return null;
     }
 
+    const eur = new Intl.NumberFormat(i18n.resolvedLanguage ?? 'fr', {
+        style: 'currency',
+        currency: 'EUR',
+        maximumFractionDigits: 0,
+    });
     const item = payload[0];
     const data = item.payload;
     const value = eur.format(Number(item.value ?? data?.value ?? 0) || 0);
@@ -51,8 +53,6 @@ function SankeyTooltipContent({
         </div>
     );
 }
-
-const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
 export function BudgetSankey({ budget }: Props) {
     const { t } = useTranslation();
@@ -168,7 +168,7 @@ export function BudgetSankey({ budget }: Props) {
                                 link={{ stroke: '#94a3b8', strokeOpacity: 0.25 }}
                                 node={(props: { x: number; y: number; width: number; height: number; index: number; payload: SankeyNode & { sourceLinks?: unknown[]; targetLinks?: unknown[] } }) => {
                                     const { x, y, width, height, index, payload } = props;
-                                    const color = COLORS[index % COLORS.length];
+                                    const color = CHART_COLORS.PALETTE[index % CHART_COLORS.PALETTE.length];
                                     const isStart = !payload.targetLinks || payload.targetLinks.length === 0;
                                     const isOut = isStart && x + width + 6 > (containerWidth ?? 0);
 

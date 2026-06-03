@@ -10,7 +10,13 @@ class UpdateBudgetRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        $budget = $this->user()?->budget;
+
+        if ($budget === null) {
+            return $this->user() !== null;
+        }
+
+        return $this->user()->can('update', $budget);
     }
 
     /**

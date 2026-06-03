@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, setLayoutProps } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight, ExternalLink, Newspaper } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { AiReportCard } from '@/components/ai/ai-report-card';
@@ -12,30 +12,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { buildNewsUrl } from '@/lib/url-builders';
 import type { NewsProps } from '@/types';
-
-function buildUrl(symbol: string, page: number): string {
-    const params = new URLSearchParams();
-
-    if (symbol !== 'all') {
-        params.set('symbol', symbol);
-    }
-
-    if (page > 1) {
-        params.set('page', String(page));
-    }
-
-    const qs = params.toString();
-
-    return qs ? `/news?${qs}` : '/news';
-}
 
 export default function News({ news, available_symbols, scope, aiNewsReport = null }: NewsProps) {
     const { t } = useTranslation();
+    setLayoutProps({ breadcrumbs: [{ title: t('news.title'), href: '/news' }] });
     const currentSymbol = scope.symbol ?? 'all';
 
     const handleSymbolChange = (value: string) => {
-        router.visit(buildUrl(value, 1), { preserveScroll: false });
+        router.visit(buildNewsUrl(value, 1), { preserveScroll: false });
     };
 
     const goToPage = (page: number) => {
@@ -43,7 +29,7 @@ export default function News({ news, available_symbols, scope, aiNewsReport = nu
             return;
         }
 
-        router.visit(buildUrl(currentSymbol, page), { preserveScroll: false });
+        router.visit(buildNewsUrl(currentSymbol, page), { preserveScroll: false });
     };
 
     return (
@@ -156,12 +142,3 @@ export default function News({ news, available_symbols, scope, aiNewsReport = nu
         </>
     );
 }
-
-News.layout = {
-    breadcrumbs: [
-        {
-            title: 'Actualités',
-            href: '/news',
-        },
-    ],
-};

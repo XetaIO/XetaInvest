@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Area, AreaChart, CartesianGrid, Legend, XAxis, YAxis } from 'recharts';
 import {
     ChartContainer,
@@ -6,6 +7,7 @@ import {
     ChartTooltipContent,
 } from '@/components/ui/chart';
 import type { ChartConfig } from '@/components/ui/chart';
+import { formatSignedPercent } from '@/lib/format';
 
 export type ChartSeries = {
     symbol: string;
@@ -17,9 +19,9 @@ type Props = {
     series: ChartSeries[];
 };
 
-const formatPct = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`;
-
 export function WatchlistChart({ series }: Props) {
+    const { i18n } = useTranslation();
+    const loc = i18n.resolvedLanguage ?? 'fr';
     const config = useMemo<ChartConfig>(() => {
         const c: ChartConfig = {};
 
@@ -109,7 +111,7 @@ export function WatchlistChart({ series }: Props) {
                     tickFormatter={(t) => {
                         const d = new Date(Number(t));
 
-                        return new Intl.DateTimeFormat('fr-FR', {
+                        return new Intl.DateTimeFormat(loc, {
                             day: '2-digit',
                             month: '2-digit',
                             hour: '2-digit',
@@ -140,7 +142,7 @@ export function WatchlistChart({ series }: Props) {
                                 <div className="flex w-full items-center gap-2">
                                     <span className="text-muted-foreground">{String(name)}</span>
                                     <span className="ml-auto font-mono font-medium tabular-nums text-foreground">
-                                        {formatPct(Number(value))}
+                                        {formatSignedPercent(Number(value))}
                                     </span>
                                 </div>
                             )}

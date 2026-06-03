@@ -68,7 +68,7 @@ export function AllocationPie({ title, description, data, emptyLabel = 'Aucune d
                         {emptyLabel}
                     </div>
                 ) : (
-                    <ChartContainer config={config} className="mx-auto aspect-square max-h-[260px]">
+                    <ChartContainer config={config} className="mx-auto aspect-square max-h-65">
                         <PieChart>
                             <ChartTooltip
                                 cursor={false}

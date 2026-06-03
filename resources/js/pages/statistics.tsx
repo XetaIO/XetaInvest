@@ -1,6 +1,5 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, setLayoutProps } from '@inertiajs/react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AllocationPie } from '@/components/charts/allocation-pie';
 import type { AllocationItem } from '@/components/charts/allocation-pie';
@@ -17,7 +16,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { usePageRefresh } from '@/hooks/use-page-refresh';
 import { formatEur, formatPercent, formatTime } from '@/lib/format';
+import { buildStatisticsUrl } from '@/lib/url-builders';
 import { cn } from '@/lib/utils';
 import type { StatisticsProps } from '@/types';
 
@@ -37,31 +38,16 @@ function formatType(type: string): string {
     return TYPE_LABELS[type.toLowerCase()] ?? type.toUpperCase();
 }
 
-function buildUrl(portfolio: string, refresh = false): string {
-    const params = new URLSearchParams({ portfolio });
-
-    if (refresh) {
-        params.set('refresh', '1');
-    }
-
-    return `/statistics?${params.toString()}`;
-}
-
 export default function Statistics({ portfolios, scope, stats }: StatisticsProps) {
     const { t } = useTranslation();
-    const [isRefreshing, setIsRefreshing] = useState(false);
+    setLayoutProps({ breadcrumbs: [{ title: t('statistics.title'), href: '/statistics' }] });
+    const { isRefreshing, refresh } = usePageRefresh(
+        () => buildStatisticsUrl(scope, true),
+        ['stats'],
+    );
 
     const handleScopeChange = (value: string) => {
-        router.visit(buildUrl(value), { preserveScroll: true });
-    };
-
-    const refresh = () => {
-        setIsRefreshing(true);
-        router.visit(buildUrl(scope, true), {
-            preserveScroll: true,
-            only: ['stats'],
-            onFinish: () => setIsRefreshing(false),
-        });
+        router.visit(buildStatisticsUrl(value), { preserveScroll: true });
     };
 
     const { totals, allocations, performance } = stats;
@@ -279,12 +265,3 @@ export default function Statistics({ portfolios, scope, stats }: StatisticsProps
         </>
     );
 }
-
-Statistics.layout = {
-    breadcrumbs: [
-        {
-            title: 'Statistiques',
-            href: '/statistics',
-        },
-    ],
-};

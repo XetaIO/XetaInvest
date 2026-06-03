@@ -5,14 +5,16 @@ use App\Http\Controllers\Api\QuotesController;
 use App\Http\Controllers\Api\SearchController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => auth()->check()
+Route::get(
+    '/',
+    fn () => auth()->check()
     ? redirect()->route('dashboard')
     : redirect()->route('login')
 )->name('home');
 
 Route::middleware(['auth'])->prefix('api')->name('api.')->group(function (): void {
-    Route::get('search', SearchController::class)->name('search');
-    Route::get('quotes', QuotesController::class)->name('quotes');
+    Route::get('search', SearchController::class)->middleware('throttle:60,1')->name('search');
+    Route::get('quotes', QuotesController::class)->middleware('throttle:30,1')->name('quotes');
 
     Route::prefix('ai/chat')->name('ai.chat.')->middleware('throttle:30,1')->group(function (): void {
         Route::get('sessions', [AiChatController::class, 'sessions'])->name('sessions');

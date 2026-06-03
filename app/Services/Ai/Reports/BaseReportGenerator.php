@@ -125,6 +125,20 @@ abstract class BaseReportGenerator
         $decoded = json_decode($raw, true);
 
         if (is_array($decoded)) {
+            // Some models collapse everything into a single narrative_md key whose value
+            // is itself a JSON string (e.g. gpt-5.x). Unwrap it transparently.
+            if (
+                count($decoded) === 1
+                && isset($decoded['narrative_md'])
+                && is_string($decoded['narrative_md'])
+            ) {
+                $inner = json_decode($decoded['narrative_md'], true);
+
+                if (is_array($inner)) {
+                    return $inner;
+                }
+            }
+
             return $decoded;
         }
 

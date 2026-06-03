@@ -9,7 +9,8 @@ import {
     ChartTooltipContent,
 } from '@/components/ui/chart';
 import type { ChartConfig } from '@/components/ui/chart';
-import { formatEur } from '@/lib/format';
+import { CHART_MARGINS } from '@/lib/constants';
+import { formatEur, formatHistoryAxisDate, formatHistoryTooltipDate } from '@/lib/format';
 import type { HistoryPoint } from '@/types';
 
 type Props = {
@@ -17,30 +18,6 @@ type Props = {
     description?: string;
     data: HistoryPoint[];
 };
-
-function formatShortDate(iso: string, loc: string): string {
-    const d = new Date(iso);
-
-    if (Number.isNaN(d.getTime())) {
-        return iso;
-    }
-
-    return new Intl.DateTimeFormat(loc, { day: '2-digit', month: '2-digit' }).format(d);
-}
-
-function formatTooltipDate(iso: string, loc: string): string {
-    const d = new Date(iso);
-
-    if (Number.isNaN(d.getTime())) {
-        return iso;
-    }
-
-    return new Intl.DateTimeFormat(loc, {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-    }).format(d);
-}
 
 export function HistoryLineChart({
     title,
@@ -98,7 +75,7 @@ export function HistoryLineChart({
             </CardHeader>
             <CardContent className="pb-2">
                 <ChartContainer config={config} className="aspect-auto h-70 w-full">
-                    <LineChart data={data} margin={{ left: 12, right: 12, top: 8, bottom: 0 }}>
+                    <LineChart data={data} margin={CHART_MARGINS.DEFAULT}>
                         <CartesianGrid vertical={false} strokeDasharray="3 3" />
                         <XAxis
                             dataKey="date"
@@ -106,7 +83,7 @@ export function HistoryLineChart({
                             axisLine={false}
                             tickMargin={8}
                             minTickGap={32}
-                            tickFormatter={(v) => formatShortDate(String(v), loc)}
+                            tickFormatter={(v) => formatHistoryAxisDate(String(v), loc)}
                         />
                         <YAxis
                             domain={[minY, maxY]}
@@ -120,7 +97,7 @@ export function HistoryLineChart({
                             cursor={true}
                             content={
                                 <ChartTooltipContent
-                                    labelFormatter={(label) => formatTooltipDate(String(label), loc)}
+                                    labelFormatter={(label) => formatHistoryTooltipDate(String(label), loc)}
                                     formatter={(value, name) => {
                                         const numeric = Number(value);
                                         const key = String(name);

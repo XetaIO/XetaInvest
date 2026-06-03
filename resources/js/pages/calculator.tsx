@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, setLayoutProps } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CalculatorChart } from '@/components/calculator/calculator-chart';
@@ -25,6 +25,7 @@ function buildInputs(defaults: CalculatorDefaults): CalculatorInputs {
 
 export default function CalculatorPage({ defaults }: CalculatorPageProps) {
     const { t } = useTranslation();
+    setLayoutProps({ breadcrumbs: [{ title: t('calculator.title'), href: '/calculator' }] });
     const [inputs, setInputs] = useState<CalculatorInputs>(() => buildInputs(defaults));
 
     const projection = useMemo(() => computeProjection(inputs), [inputs]);

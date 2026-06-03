@@ -1,18 +1,11 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { Area, AreaChart } from 'recharts';
+import { CHART_COLORS } from '@/lib/constants';
+import { formatSignedNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { show as symbolShow } from '@/routes/symbol';
 import type { PortfolioTickerEntry } from '@/types/ticker';
-
-const POSITIVE_COLOR = '#10b981';
-const NEGATIVE_COLOR = '#ef4444';
-
-function formatSignedNumber(value: number, fractionDigits = 2): string {
-    const sign = value > 0 ? '+' : '';
-
-    return `${sign}${value.toFixed(fractionDigits)}`;
-}
 
 function TickerItem({ entry }: { entry: PortfolioTickerEntry }) {
     const { i18n } = useTranslation();
@@ -62,16 +55,16 @@ function TickerItem({ entry }: { entry: PortfolioTickerEntry }) {
                 <AreaChart width={64} height={24} data={data}>
                     <defs>
                         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0" stopColor={POSITIVE_COLOR} stopOpacity={0.6} />
-                            <stop offset={gradientOffset} stopColor={POSITIVE_COLOR} stopOpacity={0.1} />
-                            <stop offset={gradientOffset} stopColor={NEGATIVE_COLOR} stopOpacity={0.1} />
-                            <stop offset="1" stopColor={NEGATIVE_COLOR} stopOpacity={0.6} />
+                            <stop offset="0" stopColor={CHART_COLORS.POSITIVE} stopOpacity={0.6} />
+                            <stop offset={gradientOffset} stopColor={CHART_COLORS.POSITIVE} stopOpacity={0.1} />
+                            <stop offset={gradientOffset} stopColor={CHART_COLORS.NEGATIVE} stopOpacity={0.1} />
+                            <stop offset="1" stopColor={CHART_COLORS.NEGATIVE} stopOpacity={0.6} />
                         </linearGradient>
                         <linearGradient id={`${gradientId}-stroke`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0" stopColor={POSITIVE_COLOR} />
-                            <stop offset={gradientOffset} stopColor={POSITIVE_COLOR} />
-                            <stop offset={gradientOffset} stopColor={NEGATIVE_COLOR} />
-                            <stop offset="1" stopColor={NEGATIVE_COLOR} />
+                            <stop offset="0" stopColor={CHART_COLORS.POSITIVE} />
+                            <stop offset={gradientOffset} stopColor={CHART_COLORS.POSITIVE} />
+                            <stop offset={gradientOffset} stopColor={CHART_COLORS.NEGATIVE} />
+                            <stop offset="1" stopColor={CHART_COLORS.NEGATIVE} />
                         </linearGradient>
                     </defs>
                     <Area

@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, setLayoutProps } from '@inertiajs/react';
 import { AlertTriangle, Plus, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,12 +10,14 @@ import { PositionRow } from '@/components/portfolio/position-row';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { AUTO_REFRESH_INTERVAL_MS } from '@/lib/constants';
 import { formatEur, formatPercent, formatTime } from '@/lib/format';
 import { dashboard } from '@/routes';
 import type { DashboardProps } from '@/types';
 
 export default function Dashboard({ portfolios, active, transactionTypes, aiReport = null, aiGlobalReport = null }: DashboardProps) {
     const { t } = useTranslation();
+    setLayoutProps({ breadcrumbs: [{ title: t('dashboard.title'), href: dashboard() }] });
     const [addOpen, setAddOpen] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -32,7 +34,7 @@ export default function Dashboard({ portfolios, active, transactionTypes, aiRepo
             }
 
             router.reload({ only: ['active'] });
-        }, 60_000);
+        }, AUTO_REFRESH_INTERVAL_MS);
 
         return () => window.clearInterval(id);
     }, [portfolioId]);
@@ -150,12 +152,3 @@ export default function Dashboard({ portfolios, active, transactionTypes, aiRepo
         </>
     );
 }
-
-Dashboard.layout = {
-    breadcrumbs: [
-        {
-            title: 'Dashboard',
-            href: dashboard(),
-        },
-    ],
-};

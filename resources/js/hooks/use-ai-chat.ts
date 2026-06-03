@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { apiFetch } from '@/lib/api';
 import type { AiChatMessage, AiChatSession } from '@/types';
 
 interface UseAiChatResult {
@@ -13,63 +14,6 @@ interface UseAiChatResult {
     selectSession: (id: number) => Promise<void>;
     sendMessage: (content: string) => Promise<void>;
     deleteSession: (id: number) => Promise<void>;
-}
-
-function getXsrfToken(): string {
-    const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
-
-    return match ? decodeURIComponent(match[1]) : '';
-}
-
-async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
-    const method = (init?.method ?? 'GET').toUpperCase();
-    const headers: Record<string, string> = {
-        Accept: 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        ...(init?.headers as Record<string, string> | undefined),
-    };
-
-    if (method !== 'GET' && method !== 'HEAD') {
-        headers['Content-Type'] = headers['Content-Type'] ?? 'application/json';
-        const token = getXsrfToken();
-
-        if (token) {
-            headers['X-XSRF-TOKEN'] = token;
-        }
-    }
-
-    const response = await fetch(url, {
-        credentials: 'same-origin',
-        ...init,
-        headers,
-    });
-
-    if (!response.ok) {
-        let message = `HTTP ${response.status}`;
-
-        if (response.status === 422 || response.status === 429) {
-            try {
-                const body = (await response.json()) as { message?: string };
-
-                if (body.message) {
-                    message = body.message;
-                }
-            } catch {
-                // ignore json parse errors
-            }
-        }
-
-        const err = new Error(message) as Error & { status?: number };
-        err.status = response.status;
-
-        throw err;
-    }
-
-    if (response.status === 204) {
-        return undefined as T;
-    }
-
-    return (await response.json()) as T;
 }
 
 export function useAiChat(): UseAiChatResult {

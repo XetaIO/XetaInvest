@@ -7,6 +7,7 @@ import {
     ChartTooltipContent,
 } from '@/components/ui/chart';
 import type { ChartConfig } from '@/components/ui/chart';
+import { formatSignedPercent } from '@/lib/format';
 
 export type ChartSeries = {
     symbol: string;
@@ -17,8 +18,6 @@ export type ChartSeries = {
 type Props = {
     series: ChartSeries[];
 };
-
-const formatPct = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`;
 
 export function WatchlistChart({ series }: Props) {
     const { i18n } = useTranslation();
@@ -143,7 +142,7 @@ export function WatchlistChart({ series }: Props) {
                                 <div className="flex w-full items-center gap-2">
                                     <span className="text-muted-foreground">{String(name)}</span>
                                     <span className="ml-auto font-mono font-medium tabular-nums text-foreground">
-                                        {formatPct(Number(value))}
+                                        {formatSignedPercent(Number(value))}
                                     </span>
                                 </div>
                             )}

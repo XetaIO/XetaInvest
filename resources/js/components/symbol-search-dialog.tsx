@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { AddToWatchlistButton } from '@/components/watchlist/add-to-watchlist-button';
+import { apiFetch } from '@/lib/api';
 import { search as symbolSearch, show as symbolShow } from '@/routes/symbol';
 import type { SymbolSearchResult } from '@/types';
 
@@ -42,16 +43,9 @@ export function SymbolSearchDialog({ open, onOpenChange }: Props) {
             setLoading(true);
 
             try {
-                const response = await fetch(`${symbolSearch().url}?q=${encodeURIComponent(q)}`, {
-                    headers: { Accept: 'application/json' },
-                    credentials: 'same-origin',
-                });
-
-                if (!response.ok) {
-                    throw new Error('Search request failed');
-                }
-
-                const payload = (await response.json()) as { data?: SymbolSearchResult[] };
+                const payload = await apiFetch<{ data?: SymbolSearchResult[] }>(
+                    `${symbolSearch().url}?q=${encodeURIComponent(q)}`,
+                );
                 setResults(payload.data ?? []);
             } catch {
                 setResults([]);

@@ -25,6 +25,7 @@ class WatchlistItemController extends Controller
             'symbol_not_found' => Inertia::flash('toast', ['type' => 'error', 'message' => __('messages.watchlist_item.symbol_not_found')]),
             'already_present' => Inertia::flash('toast', ['type' => 'info', 'message' => __('messages.watchlist_item.already_present')]),
             'added' => Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.watchlist_item.added')]),
+            'limit_reached' => Inertia::flash('toast', ['type' => 'error', 'message' => __('messages.watchlist_item.limit_reached', ['max' => Watchlist::MAX_ITEMS])]),
         };
 
         return back();

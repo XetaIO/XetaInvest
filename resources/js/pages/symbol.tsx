@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, setLayoutProps } from '@inertiajs/react';
 import { ArrowDownRight, ArrowUpRight, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SymbolChart } from '@/components/symbol-chart';
@@ -214,6 +214,7 @@ export default function SymbolPage({
     available_ranges,
 }: SymbolProps) {
     const { t } = useTranslation();
+    setLayoutProps({ breadcrumbs: [{ title: quote?.name ?? symbol, href: `/symbol/${symbol}` }] });
     const change = quote?.change ?? null;
     const changePercent = quote?.change_percent ?? null;
     const isPositive = (change ?? 0) >= 0;

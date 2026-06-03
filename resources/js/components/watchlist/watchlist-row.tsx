@@ -2,6 +2,7 @@ import { Link, router } from '@inertiajs/react';
 import { Eye, EyeOff, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import { formatSignedPercent } from '@/lib/format';
 import type { PriceUpdate, WatchlistItem } from '@/types';
 
 type Props = {
@@ -11,8 +12,6 @@ type Props = {
     color: string;
     onToggleVisible: () => void;
 };
-
-const formatPct = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`;
 
 export function WatchlistRow({ item, price, visible, color, onToggleVisible }: Props) {
     const { i18n } = useTranslation();
@@ -66,7 +65,7 @@ export function WatchlistRow({ item, price, visible, color, onToggleVisible }: P
                                 }`}
                         >
                             {isUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                            {formatPct(changePct)}
+                            {formatSignedPercent(changePct)}
                         </div>
                     </>
                 ) : (

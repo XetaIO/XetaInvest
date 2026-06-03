@@ -68,7 +68,9 @@ test('cannot exceed max items per watchlist', function () {
 
     $this->actingAs($this->user)
         ->post(route('watchlists.items.store', $w), ['symbol' => 'NEW'])
-        ->assertForbidden();
+        ->assertRedirect();
+
+    expect($w->items()->count())->toBe(Watchlist::MAX_ITEMS);
 });
 
 test('cannot add item to another user watchlist', function () {

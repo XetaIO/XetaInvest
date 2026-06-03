@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -16,7 +18,10 @@ class HandleAppearance
      */
     public function handle(Request $request, Closure $next): Response
     {
-        View::share('appearance', $request->cookie('appearance') ?? 'system');
+        $raw = $request->cookie('appearance');
+        $appearance = in_array($raw, ['light', 'dark', 'system'], true) ? $raw : 'system';
+
+        View::share('appearance', $appearance);
 
         return $next($request);
     }

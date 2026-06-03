@@ -54,7 +54,9 @@ class HandleInertiaRequests extends Middleware
             'portfolioTicker' => fn () => $request->user()
                 ? $this->ticker->buildFor($request->user())
                 : null,
-            'financeQueryWsUrl' => config('services.finance_query.ws_url'),
+            'financeQueryWsUrl' => $request->user()
+                ? config('services.finance_query.ws_url')
+                : null,
         ];
     }
 }

@@ -39,12 +39,15 @@ class PortfolioController extends Controller
         $this->authorize('delete', $portfolio);
 
         $wasDefault = $portfolio->is_default;
-        $portfolio->delete();
 
-        if ($wasDefault) {
-            $next = $request->user()->portfolios()->orderBy('id')->first();
-            $next?->update(['is_default' => true]);
-        }
+        DB::transaction(function () use ($portfolio, $wasDefault, $request): void {
+            $portfolio->delete();
+
+            if ($wasDefault) {
+                $next = $request->user()->portfolios()->orderBy('id')->first();
+                $next?->update(['is_default' => true]);
+            }
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.portfolio.deleted')]);
 

@@ -17,8 +17,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', [DashboardController::class, 'show'])->name('dashboard');
-    Route::get('statistics', [StatisticsController::class, 'show'])->name('statistics');
-    Route::get('news', [NewsController::class, 'show'])->name('news');
+    Route::get('statistics', [StatisticsController::class, 'show'])->middleware('throttle:30,1')->name('statistics');
+    Route::get('news', [NewsController::class, 'show'])->middleware('throttle:20,1')->name('news');
 
     Route::get('budget', [BudgetController::class, 'show'])->name('budget.show');
     Route::put('budget', [BudgetController::class, 'update'])->name('budget.update');
@@ -51,5 +51,5 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::delete('watchlist-items/{item}', [WatchlistItemController::class, 'destroy'])->name('watchlists.items.destroy');
 
     Route::get('api/watchlists/summary', [WatchlistApiController::class, 'summary'])->name('api.watchlists.summary');
-    Route::get('api/watchlists/history', [WatchlistApiController::class, 'history'])->name('api.watchlists.history');
+    Route::get('api/watchlists/history', [WatchlistApiController::class, 'history'])->middleware('throttle:30,1')->name('api.watchlists.history');
 });

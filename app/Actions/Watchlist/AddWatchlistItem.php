@@ -6,6 +6,7 @@ namespace App\Actions\Watchlist;
 
 use App\Models\Watchlist;
 use App\Services\InstrumentResolver;
+use Illuminate\Support\Facades\DB;
 
 class AddWatchlistItem
 {
@@ -14,27 +15,34 @@ class AddWatchlistItem
     }
 
     /**
-     * @return 'added'|'symbol_not_found'|'already_present'
+     * @return 'added'|'symbol_not_found'|'already_present'|'limit_reached'
      */
     public function handle(Watchlist $watchlist, string $symbol): string
     {
-        $instrument = $this->resolver->resolve($symbol);
+        return DB::transaction(function () use ($watchlist, $symbol): string {
+            $count = $watchlist->items()->lockForUpdate()->count();
+            if ($count >= Watchlist::MAX_ITEMS) {
+                return 'limit_reached';
+            }
 
-        if ($instrument === null) {
-            return 'symbol_not_found';
-        }
+            $instrument = $this->resolver->resolve($symbol);
 
-        if ($watchlist->items()->where('instrument_id', $instrument->id)->exists()) {
-            return 'already_present';
-        }
+            if ($instrument === null) {
+                return 'symbol_not_found';
+            }
 
-        $position = (int) $watchlist->items()->max('position') + 1;
+            if ($watchlist->items()->where('instrument_id', $instrument->id)->exists()) {
+                return 'already_present';
+            }
 
-        $watchlist->items()->create([
-            'instrument_id' => $instrument->id,
-            'position' => $position,
-        ]);
+            $position = (int) $watchlist->items()->max('position') + 1;
 
-        return 'added';
+            $watchlist->items()->create([
+                'instrument_id' => $instrument->id,
+                'position' => $position,
+            ]);
+
+            return 'added';
+        });
     }
 }

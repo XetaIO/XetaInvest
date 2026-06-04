@@ -14,9 +14,9 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AddToWatchlistButton } from '@/components/watchlist/add-to-watchlist-button';
 import { apiFetch } from '@/lib/api';
+import { TAB_ORDER } from '@/lib/constants';
 import { search as symbolSearch, show as symbolShow } from '@/routes/symbol';
 import type { SymbolSearchResult } from '@/types';
-import { TAB_ORDER } from '@/lib/constants';
 
 type QuoteType = (typeof TAB_ORDER)[number];
 
@@ -92,22 +92,12 @@ export function SymbolSearchDialog({ open, onOpenChange }: Props) {
     const [activeTab, setActiveTab] = useState('all');
     const debounceRef = useRef<number | null>(null);
 
-    // Reset tab on new query
-    useEffect(() => {
-        setActiveTab('all');
-    }, [query]);
-
     useEffect(() => {
         if (debounceRef.current) {
             window.clearTimeout(debounceRef.current);
         }
 
         const q = query.trim();
-
-        if (q.length < 2) {
-            setResults([]);
-            return;
-        }
 
         const timeout = window.setTimeout(async () => {
             setLoading(true);
@@ -176,8 +166,12 @@ export function SymbolSearchDialog({ open, onOpenChange }: Props) {
     };
 
     const tabLabel = (tab: string) => {
-        if (tab === 'all') return t('symbol.search_tab_all');
+        if (tab === 'all') {
+            return t('symbol.search_tab_all');
+        }
+
         const key = `symbol.search_tab_${tab}` as const;
+
         return t(key);
     };
 
@@ -199,7 +193,10 @@ export function SymbolSearchDialog({ open, onOpenChange }: Props) {
                         autoFocus
                         placeholder="AAPL, Apple, Tesla..."
                         value={query}
-                        onChange={(e) => setQuery(e.target.value)}
+                        onChange={(e) => {
+                            setQuery(e.target.value);
+                            setActiveTab('all');
+                        }}
                         onKeyDown={handleKeyDown}
                     />
                 </div>

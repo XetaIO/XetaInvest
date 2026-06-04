@@ -6,8 +6,8 @@ import {
     ChartTooltipContent
 } from '@/components/ui/chart';
 import type { ChartConfig } from '@/components/ui/chart';
-import { formatEur, formatPercent } from '@/lib/format';
 import { CHART_COLORS } from '@/lib/constants';
+import { formatEur, formatPercent } from '@/lib/format';
 
 export type MoverItem = {
     symbol: string;

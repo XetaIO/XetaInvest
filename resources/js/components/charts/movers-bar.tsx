@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/chart';
 import type { ChartConfig } from '@/components/ui/chart';
 import { formatEur, formatPercent } from '@/lib/format';
+import { CHART_COLORS } from '@/lib/constants';
 
 export type MoverItem = {
     symbol: string;
@@ -23,11 +24,8 @@ type Props = {
     emptyLabel?: string;
 };
 
-const UP_COLOR = 'var(--chart-2)';
-const DOWN_COLOR = 'var(--destructive)';
-
 export function MoversBar({ title, description, items, tone, emptyLabel = 'Aucune donnée.' }: Props) {
-    const color = tone === 'up' ? UP_COLOR : DOWN_COLOR;
+    const color = tone === 'up' ? CHART_COLORS.POSITIVE : CHART_COLORS.NEGATIVE;
 
     const config: ChartConfig = {
         pnl_pct: {

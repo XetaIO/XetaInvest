@@ -144,7 +144,9 @@
         "col_value": "Valeur",
         "col_allocation": "Allocation",
         "col_pnl": "P&L",
-        "col_pnl_pct": "P&L %"
+        "col_pnl_pct": "P&L %",
+        "treemap_title": "Carte des positions",
+        "treemap_desc": "Taille proportionnelle à la valeur"
     },
     "budget": {
         "title": "Calculateur de budget",

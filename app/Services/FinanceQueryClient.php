@@ -38,11 +38,11 @@ class FinanceQueryClient
     }
 
     /**
-     * Search symbols by name or ticker.
+     * Search symbols by name or ticker via /v2/lookup.
      *
      * @return array<int, array<string, mixed>>
      */
-    public function search(string $query, int $limit = 10): array
+    public function search(string $query, int $limit = 25, string $region = 'FR'): array
     {
         $query = trim($query);
 
@@ -50,21 +50,28 @@ class FinanceQueryClient
             return [];
         }
 
-        $key = sprintf('fq:search:%s:%d', strtolower($query), $limit);
+        $key = sprintf('fq:search:%s:%d:%s', strtolower($query), $limit, strtolower($region));
 
-        return Cache::remember($key, $this->searchTtl, function () use ($query, $limit): array {
-            $payload = $this->get('/v1/search', ['query' => $query, 'hits' => $limit]);
+        return Cache::remember($key, $this->searchTtl, function () use ($query, $limit, $region): array {
+            $payload = $this->get('/v2/lookup', [
+                'q' => $query,
+                'type' => 'all',
+                'count' => $limit,
+                'logo' => 'true',
+                'region' => $region,
+            ]);
 
-            $items = is_array($payload) && array_is_list($payload) ? $payload : ($payload['quotes'] ?? []);
+            $items = $payload['quotes'] ?? [];
 
             return array_map(static function (array $item): array {
                 return [
                     'symbol' => $item['symbol'] ?? '',
-                    'name' => $item['name'] ?? $item['longname'] ?? $item['shortname'] ?? null,
-                    'exchange' => $item['exchange'] ?? $item['exchDisp'] ?? null,
-                    'type' => $item['type'] ?? $item['typeDisp'] ?? $item['quoteType'] ?? null,
+                    'name' => $item['shortName'] ?? $item['longName'] ?? $item['name'] ?? null,
+                    'exchange' => $item['exchange'] ?? null,
+                    'type' => $item['quoteType'] ?? $item['type'] ?? null,
+                    'logo_url' => $item['logoUrl'] ?? $item['companyLogoUrl'] ?? null,
                 ];
-            }, $items);
+            }, is_array($items) ? $items : []);
         });
     }
 

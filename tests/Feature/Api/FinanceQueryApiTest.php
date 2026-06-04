@@ -11,8 +11,16 @@ beforeEach(function (): void {
 
 test('search proxies to finance-query with query param', function () {
     Http::fake([
-        '*finance-query.com/v1/search*' => Http::response([
-            ['symbol' => 'AAPL', 'name' => 'Apple Inc.', 'exchange' => 'NASDAQ', 'type' => 'equity'],
+        '*finance-query.com/v2/lookup*' => Http::response([
+            'quotes' => [
+                [
+                    'symbol' => 'AAPL',
+                    'shortName' => 'Apple Inc.',
+                    'exchange' => 'NASDAQ',
+                    'quoteType' => 'equity',
+                    'logoUrl' => null,
+                ],
+            ],
         ]),
     ]);
 
@@ -22,7 +30,7 @@ test('search proxies to finance-query with query param', function () {
         ->assertJsonPath('results.0.symbol', 'AAPL')
         ->assertJsonPath('results.0.name', 'Apple Inc.');
 
-    Http::assertSent(fn ($request) => str_contains($request->url(), 'query=apple'));
+    Http::assertSent(fn ($request) => str_contains($request->url(), 'q=apple'));
 });
 
 test('search requires q parameter', function () {

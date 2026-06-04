@@ -133,6 +133,7 @@ export type SymbolSearchResult = {
     name: string | null;
     exchange: string | null;
     type: string | null;
+    logo_url: string | null;
 };
 
 export type SymbolProps = {

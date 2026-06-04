@@ -54,3 +54,16 @@ export const WATCHLIST_MAX_POINTS = 600;
 
 /** Maximum age for a price update before it is discarded (ms) */
 export const WATCHLIST_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+// ─── Misc ─────────────────────────────────────────────────────────────
+
+/** Supported symbol types for search and display */
+export const TAB_ORDER = [
+    'equity',
+    'etf',
+    'mutualfund',
+    'cryptocurrency',
+    'index',
+    'future',
+    'currency',
+] as const;

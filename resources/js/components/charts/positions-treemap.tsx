@@ -1,9 +1,9 @@
-import { Tooltip, Treemap, ResponsiveContainer } from 'recharts';
 import { useTranslation } from 'react-i18next';
+import { Tooltip, Treemap, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CHART_COLORS } from '@/lib/constants';
 import { formatEur, formatPercent } from '@/lib/format';
 import type { InstrumentAllocation } from '@/types';
-import { CHART_COLORS } from '@/lib/constants';
 
 interface TreemapEntry {
     name: string;
@@ -31,8 +31,15 @@ interface CellProps {
 function truncate(text: string, availableWidth: number, fontSize: number): string {
     const avgCharWidth = fontSize * 0.55;
     const maxChars = Math.floor(availableWidth / avgCharWidth);
-    if (maxChars < 2) return '';
-    if (text.length <= maxChars) return text;
+
+    if (maxChars < 2) {
+return '';
+}
+
+    if (text.length <= maxChars) {
+return text;
+}
+
     return text.slice(0, maxChars - 1) + '…';
 }
 
@@ -123,6 +130,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
     }
 
     const data = payload[0]?.payload;
+
     if (!data) {
         return null;
     }

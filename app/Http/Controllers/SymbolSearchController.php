@@ -20,8 +20,15 @@ class SymbolSearchController extends Controller
             return response()->json(['data' => []]);
         }
 
+        $locale = app()->getLocale();
+        $region = match ($locale) {
+            'fr' => 'FR',
+            'en' => 'US',
+            default => strtoupper($locale),
+        };
+
         try {
-            $results = $client->search($query, 10);
+            $results = $client->search($query, 25, $region);
         } catch (FinanceQueryException $e) {
             Log::warning('Symbol search failed', ['query' => $query, 'error' => $e->getMessage()]);
 

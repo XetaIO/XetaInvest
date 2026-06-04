@@ -5,6 +5,7 @@ import type { SymbolRange } from '@/types';
 export const CHART_COLORS = {
     POSITIVE: '#10b981',
     NEGATIVE: '#ef4444',
+    NEUTRAL: '#6b7280',
     /** 10-item categorical palette shared by watchlist, sankey, allocation charts */
     PALETTE: [
         '#0ea5e9',

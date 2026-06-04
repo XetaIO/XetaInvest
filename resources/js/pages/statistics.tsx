@@ -5,6 +5,7 @@ import { AllocationPie } from '@/components/charts/allocation-pie';
 import type { AllocationItem } from '@/components/charts/allocation-pie';
 import { HistoryLineChart } from '@/components/charts/history-line-chart';
 import { MoversBar } from '@/components/charts/movers-bar';
+import { PositionsTreemap } from '@/components/charts/positions-treemap';
 import { KpiCard } from '@/components/portfolio/kpi-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -84,7 +85,7 @@ export default function Statistics({ portfolios, scope, stats }: StatisticsProps
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <Select value={scope} onValueChange={handleScopeChange}>
-                            <SelectTrigger className="min-w-[240px]">
+                            <SelectTrigger className="min-w-60">
                                 <SelectValue placeholder={t('statistics.select_portfolio')} />
                             </SelectTrigger>
                             <SelectContent>
@@ -152,6 +153,12 @@ export default function Statistics({ portfolios, scope, stats }: StatisticsProps
                                     : t('statistics.history_all')
                             }
                             data={stats.history}
+                        />
+
+                        <PositionsTreemap
+                            title={t('statistics.treemap_title')}
+                            description={t('statistics.treemap_desc')}
+                            data={allocations.by_instrument}
                         />
 
                         <div className="grid gap-3 lg:grid-cols-2">

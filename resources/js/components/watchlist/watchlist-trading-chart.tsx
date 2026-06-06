@@ -1,28 +1,30 @@
-import {
+import type {
     BusinessDay,
     CandlestickData,
-    CandlestickSeries,
     ChartOptions,
-    ColorType,
-    createChart,
-    createSeriesMarkers,
     DeepPartial,
     IChartApi,
     IPriceLine,
     ISeriesApi,
     LineData,
+    SeriesMarker,
+    Time,
+    UTCTimestamp} from 'lightweight-charts';
+import {
+    CandlestickSeries,
+    ColorType,
+    createChart,
+    createSeriesMarkers,
     LineSeries,
     LineStyle,
-    SeriesMarker,
-    TickMarkType,
-    Time,
-    UTCTimestamp,
+    TickMarkType
 } from 'lightweight-charts';
 import { BarChart2, Loader2, TrendingUp, Wallet } from 'lucide-react';
 import {
     useCallback,
     useEffect,
     useLayoutEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -143,20 +145,25 @@ function buildChartOptions(): DeepPartial<ChartOptions> {
                     const d = new Date(time * 1000);
                     const fmt = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' });
                     const fmtDate = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', day: '2-digit', month: '2-digit' });
+
                     if (tickMarkType === TickMarkType.DayOfMonth || tickMarkType === TickMarkType.Month) {
                         return fmtDate.format(d);
                     }
+
                     return fmt.format(d);
                 }
+
                 // BusinessDay
                 if (tickMarkType === TickMarkType.Year) {
                     return String(time.year);
                 }
+
                 if (tickMarkType === TickMarkType.Month) {
                     return new Intl.DateTimeFormat('fr-FR', { month: 'short' }).format(
                         new Date(Date.UTC(time.year, time.month - 1, 1)),
                     );
                 }
+
                 return `${String(time.day).padStart(2, '0')}/${String(time.month).padStart(2, '0')}`;
             },
         },
@@ -185,8 +192,10 @@ function buildChartOptions(): DeepPartial<ChartOptions> {
                         minute: '2-digit',
                     }).format(new Date(time * 1000));
                 }
+
                 // Daily — BusinessDay {year, month, day}
                 const d = new Date(Date.UTC(time.year, time.month - 1, time.day));
+
                 return new Intl.DateTimeFormat('fr-FR', {
                     timeZone: 'Europe/Paris',
                     day: '2-digit',
@@ -198,20 +207,46 @@ function buildChartOptions(): DeepPartial<ChartOptions> {
     };
 }
 
+// Stable empty array so derived `points` keeps a constant identity while loading
+const EMPTY_POINTS: ChartPoint[] = [];
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSymbol }: Props) {
     const { t, i18n } = useTranslation();
 
-    // The symbol currently displayed
-    const firstSymbol = defaultSymbol ?? items[0]?.instrument.symbol ?? '';
-    const [selectedSymbol, setSelectedSymbol] = useState<string>(firstSymbol);
+    // Symbols available in the active watchlist (uppercase)
+    const symbols = useMemo(
+        () => items.map((i) => i.instrument.symbol.toUpperCase()),
+        [items],
+    );
+
+    const initialSymbol = (
+        defaultSymbol ?? items[0]?.instrument.symbol ?? ''
+    ).toUpperCase();
+    const [selectedSymbol, setSelectedSymbol] = useState<string>(initialSymbol);
+    // Fall back to the first symbol when the selected one leaves the watchlist —
+    // derived instead of being synced through an effect.
+    const activeSymbol = symbols.includes(selectedSymbol)
+        ? selectedSymbol
+        : (symbols[0] ?? '');
+
     const [chartType, setChartType] = useState<ChartType>('candlestick');
     const [range, setRange] = useState<SymbolRange>('3mo');
-    const [points, setPoints] = useState<ChartPoint[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    // Last resolved chart payload. loading/error/points are derived from it so
+    // the data-fetching effect never calls setState synchronously.
+    const [result, setResult] = useState<{
+        symbol: string;
+        range: SymbolRange;
+        points: ChartPoint[];
+        error: string | null;
+    }>({ symbol: '', range: '3mo', points: EMPTY_POINTS, error: null });
     const [showPositionLine, setShowPositionLine] = useState(true);
+
+    const isFresh = result.symbol === activeSymbol && result.range === range;
+    const loading = activeSymbol !== '' && !isFresh;
+    const points = isFresh ? result.points : EMPTY_POINTS;
+    const error = isFresh ? result.error : null;
 
     // Lightweight chart refs
     const containerRef = useRef<HTMLDivElement>(null);
@@ -225,42 +260,71 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
     const rangeRef = useRef<SymbolRange>(range);
     const priceLineRef = useRef<IPriceLine | null>(null);
 
-    useEffect(() => { pointsRef.current = points; }, [points]);
-    useEffect(() => { chartTypeRef.current = chartType; }, [chartType]);
-    useEffect(() => { rangeRef.current = range; }, [range]);
+    useEffect(() => {
+ pointsRef.current = points; 
+}, [points]);
+    useEffect(() => {
+ chartTypeRef.current = chartType; 
+}, [chartType]);
+    useEffect(() => {
+ rangeRef.current = range; 
+}, [range]);
 
     // ── Data fetching ──────────────────────────────────────────────────────────
-    const fetchData = useCallback(
-        async (symbol: string, r: SymbolRange) => {
-            if (!symbol) return;
-
-            setLoading(true);
-            setError(null);
-
+    const fetchChart = useCallback(
+        async (
+            symbol: string,
+            r: SymbolRange,
+        ): Promise<{ points: ChartPoint[]; error: string | null }> => {
             try {
                 const res = await fetch(
                     `/symbol/${encodeURIComponent(symbol)}/chart?range=${encodeURIComponent(r)}`,
                     { headers: { Accept: 'application/json' } },
                 );
 
-                if (!res.ok) throw new Error('fetch error');
+                if (!res.ok) {
+                    throw new Error('fetch error');
+                }
 
                 const json: { points?: ChartPoint[] } = await res.json();
-                setPoints(json.points ?? []);
+
+                return { points: json.points ?? [], error: null };
             } catch {
-                setError(t('watchlist.trading_chart_error'));
-                setPoints([]);
-            } finally {
-                setLoading(false);
+                return {
+                    points: [],
+                    error: t('watchlist.trading_chart_error'),
+                };
             }
         },
         [t],
     );
 
-    // Fetch when symbol or range changes
+    // Fetch when symbol or range changes; setState only runs once the request
+    // resolves (asynchronously), never synchronously in the effect body.
     useEffect(() => {
-        void fetchData(selectedSymbol, range);
-    }, [selectedSymbol, range, fetchData]);
+        if (!activeSymbol) {
+            return;
+        }
+
+        let cancelled = false;
+
+        void fetchChart(activeSymbol, range).then((res) => {
+            if (cancelled) {
+                return;
+            }
+
+            setResult({
+                symbol: activeSymbol,
+                range,
+                points: res.points,
+                error: res.error,
+            });
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [activeSymbol, range, fetchChart]);
 
     // ── Live WebSocket update ──────────────────────────────────────────────────
     // Live ticks are bucketed on the range's candle interval: a new candle is
@@ -268,12 +332,21 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
     // candle is updated in place (avoids the "one candle per second" artefact).
     const handleLiveUpdate = useCallback((update: PriceUpdate) => {
         const series = seriesRef.current;
-        if (!series) return;
-        if (update.id.toUpperCase() !== selectedSymbol.toUpperCase()) return;
+
+        if (!series) {
+return;
+}
+
+        if (update.id.toUpperCase() !== activeSymbol.toUpperCase()) {
+return;
+}
 
         const price = update.price;
         const last = pointsRef.current[pointsRef.current.length - 1];
-        if (!last) return;
+
+        if (!last) {
+return;
+}
 
         const isIntraday = /^\d+$/.test(last.date);
 
@@ -307,6 +380,7 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
                     close: price,
                 };
             }
+
             return;
         }
 
@@ -357,6 +431,7 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
             }
         } else {
             (series as ISeriesApi<'Line'>).update({ time: isNewBucket ? time : (lastTime as UTCTimestamp), value: price });
+
             if (isNewBucket) {
                 pointsRef.current = [
                     ...pointsRef.current,
@@ -369,29 +444,20 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
                 };
             }
         }
-    }, [selectedSymbol]);
+    }, [activeSymbol]);
 
     useFinanceQueryStream({
-        symbols: selectedSymbol ? [selectedSymbol] : [],
+        symbols: activeSymbol ? [activeSymbol] : [],
         wsUrl,
         onUpdate: handleLiveUpdate,
-        enabled: !!selectedSymbol && !!wsUrl,
+        enabled: !!activeSymbol && !!wsUrl,
     });
-
-    // When active watchlist changes and the selected symbol is gone, pick first
-    useEffect(() => {
-        const symbols = items.map((i) => i.instrument.symbol.toUpperCase());
-        if (
-            symbols.length > 0 &&
-            !symbols.includes(selectedSymbol.toUpperCase())
-        ) {
-            setSelectedSymbol(symbols[0]);
-        }
-    }, [items, selectedSymbol]);
 
     // ── Chart initialization & theme watch ─────────────────────────────────────
     useLayoutEffect(() => {
-        if (!containerRef.current) return;
+        if (!containerRef.current) {
+return;
+}
 
         const chart = createChart(containerRef.current, buildChartOptions());
 
@@ -412,13 +478,16 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
             chartRef.current = null;
             seriesRef.current = null;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
     }, []); // run once — re-creating chart is expensive
 
     // ── Series rendering ───────────────────────────────────────────────────────
     useEffect(() => {
         const chart = chartRef.current;
-        if (!chart || loading || points.length === 0) return;
+
+        if (!chart || loading || points.length === 0) {
+return;
+}
 
         // Remove existing series
         if (seriesRef.current) {
@@ -427,6 +496,7 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
             } catch {
                 /* already removed */
             }
+
             seriesRef.current = null;
         }
 
@@ -529,11 +599,14 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
     }, [points, chartType, loading, i18n.resolvedLanguage]);
 
     // ── Position cost-basis (PRU) price line ───────────────────────────────────
-    const position = positions[selectedSymbol.toUpperCase()];
+    const position = positions[activeSymbol];
 
     useEffect(() => {
         const series = seriesRef.current;
-        if (!series) return;
+
+        if (!series) {
+return;
+}
 
         // Clear any previous line first
         if (priceLineRef.current) {
@@ -542,10 +615,13 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
             } catch {
                 /* series already removed */
             }
+
             priceLineRef.current = null;
         }
 
-        if (!showPositionLine || !position || position.avg_price <= 0) return;
+        if (!showPositionLine || !position || position.avg_price <= 0) {
+return;
+}
 
         priceLineRef.current = series.createPriceLine({
             price: position.avg_price,
@@ -560,11 +636,8 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
     // ── Helpers ────────────────────────────────────────────────────────────────
 
     const currency =
-        items.find(
-            (i) =>
-                i.instrument.symbol.toUpperCase() ===
-                selectedSymbol.toUpperCase(),
-        )?.instrument.currency ?? '';
+        items.find((i) => i.instrument.symbol.toUpperCase() === activeSymbol)
+            ?.instrument.currency ?? '';
 
     const symbolOptions = items.map((i) => ({
         value: i.instrument.symbol.toUpperCase(),
@@ -589,7 +662,7 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
                     <div className="flex flex-wrap items-center gap-2">
                         {/* Symbol selector */}
                         <Select
-                            value={selectedSymbol}
+                            value={activeSymbol}
                             onValueChange={setSelectedSymbol}
                         >
                             <SelectTrigger className="h-7 w-32 text-xs">
@@ -713,7 +786,7 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
                 <div
                     ref={containerRef}
                     className={cn(
-                        'h-[400px] w-full overflow-hidden rounded-b-xl',
+                        'h-100 w-full overflow-hidden rounded-b-xl',
                         (loading || error || points.length === 0) && 'hidden',
                     )}
                 />
@@ -735,17 +808,23 @@ function cssColor(varName: string): string {
         .getPropertyValue(varName)
         .trim();
 
-    if (!raw) return '#888888';
+    if (!raw) {
+return '#888888';
+}
 
     // Paint the color onto a 1×1 canvas; getImageData always returns sRGB bytes
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = 1;
     const ctx = canvas.getContext('2d');
-    if (!ctx) return '#888888';
+
+    if (!ctx) {
+return '#888888';
+}
 
     ctx.fillStyle = raw;
     ctx.fillRect(0, 0, 1, 1);
     const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+
     return `rgb(${r}, ${g}, ${b})`;
 }
 
@@ -758,6 +837,7 @@ function toChartTime(date: string): Time {
     if (/^\d+$/.test(date)) {
         return Number(date) as UTCTimestamp;
     }
+
     return date as Time;
 }
 

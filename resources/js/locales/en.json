@@ -250,8 +250,17 @@
         "item_limit": "Limit of {{max}} symbols reached.",
         "no_symbol_add": "No symbols. Add them from the field above or the search.",
         "evolution_title": "Evolution (% since session open)",
-        "realtime": "Real-time · WebSocket",
-        "remove_symbol": "Remove {{symbol}}"
+        "realtime": "Real-time",
+        "remove_symbol": "Remove {{symbol}}",
+        "trading_chart_title": "Advanced Chart",
+        "trading_chart_type_candle": "Candlesticks",
+        "trading_chart_type_line": "Line",
+        "trading_chart_type_line_markers": "Line + markers",
+        "trading_chart_loading": "Loading chart…",
+        "trading_chart_error": "Unable to load chart.",
+        "trading_chart_no_data": "No data available.",
+        "trading_chart_position_line": "Avg cost",
+        "trading_chart_position_toggle": "Show/hide your average cost"
     },
     "news": {
         "title": "News",

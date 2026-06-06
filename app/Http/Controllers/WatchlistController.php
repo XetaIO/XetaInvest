@@ -8,7 +8,9 @@ use App\Http\Requests\Watchlist\ReorderWatchlistRequest;
 use App\Http\Requests\Watchlist\StoreWatchlistRequest;
 use App\Http\Requests\Watchlist\UpdateWatchlistRequest;
 use App\Models\AiReport;
+use App\Models\Position;
 use App\Models\Watchlist;
+use App\Services\PortfolioCalculator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -45,9 +47,19 @@ class WatchlistController extends Controller
         $activeId = (string) $request->query('watchlist', '');
         $active = $watchlists->firstWhere('id', $activeId) ?? $watchlists->first();
 
+        $symbols = $watchlists
+            ->pluck('items')
+            ->flatten(1)
+            ->pluck('instrument.symbol')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
         return Inertia::render('watchlist', [
             'watchlists' => $watchlists,
             'activeWatchlistId' => $active['id'] ?? null,
+            'positions' => $this->positionsBySymbol($user->id, $symbols),
             'aiWatchlistReport' => AiReport::query()
                 ->where('user_id', $user->id)
                 ->where('type', 'watchlist')
@@ -59,6 +71,60 @@ class WatchlistController extends Controller
                 'maxItems' => Watchlist::MAX_ITEMS,
             ],
         ]);
+    }
+
+    /**
+     * Aggregate the user's open positions by instrument symbol, returning the
+     * weighted average cost (PRU) per symbol across all of their portfolios.
+     *
+     * @param  array<int, string>  $symbols
+     * @return array<string, array{avg_price: float, quantity: float, currency: string|null}>
+     */
+    private function positionsBySymbol(int $userId, array $symbols): array
+    {
+        if ($symbols === []) {
+            return [];
+        }
+
+        $positions = Position::query()
+            ->whereHas('portfolio', fn ($q) => $q->where('user_id', $userId))
+            ->whereHas('instrument', fn ($q) => $q->whereIn('symbol', $symbols))
+            ->with(['instrument', 'transactions'])
+            ->get();
+
+        $calculator = new PortfolioCalculator();
+
+        /** @var array<string, array{invested: float, quantity: float, currency: string|null}> $aggregate */
+        $aggregate = [];
+
+        foreach ($positions as $position) {
+            $kpis = $calculator->computePosition($position, [], 1.0);
+
+            if ($kpis['quantity'] <= 0.0) {
+                continue;
+            }
+
+            $symbol = strtoupper($position->instrument->symbol);
+
+            if (! isset($aggregate[$symbol])) {
+                $aggregate[$symbol] = [
+                    'invested' => 0.0,
+                    'quantity' => 0.0,
+                    'currency' => $position->instrument->currency,
+                ];
+            }
+
+            $aggregate[$symbol]['invested'] += $kpis['invested_native'];
+            $aggregate[$symbol]['quantity'] += $kpis['quantity'];
+        }
+
+        return collect($aggregate)
+            ->map(fn (array $row) => [
+                'avg_price' => $row['quantity'] > 0.0 ? $row['invested'] / $row['quantity'] : 0.0,
+                'quantity' => $row['quantity'],
+                'currency' => $row['currency'],
+            ])
+            ->all();
     }
 
     public function store(StoreWatchlistRequest $request): RedirectResponse

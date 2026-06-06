@@ -11,8 +11,10 @@ import { WatchlistChart } from '@/components/watchlist/watchlist-chart';
 import type { ChartSeries } from '@/components/watchlist/watchlist-chart';
 import { WatchlistFormDialog } from '@/components/watchlist/watchlist-form-dialog';
 import { WatchlistRow } from '@/components/watchlist/watchlist-row';
+import { WatchlistTradingChart } from '@/components/watchlist/watchlist-trading-chart';
 import { useFinanceQueryStream } from '@/hooks/use-finance-query-stream';
 import type { AiReport, PriceUpdate, Watchlist, WatchlistLimits } from '@/types';
+import type { WatchlistPosition } from '@/types/watchlist';
 
 type SharedExtra = { financeQueryWsUrl?: string };
 
@@ -21,6 +23,7 @@ type PageProps = {
     activeWatchlistId: string | null;
     limits: WatchlistLimits;
     aiWatchlistReport?: AiReport | null;
+    positions: Record<string, WatchlistPosition>;
 };
 
 const PALETTE = [
@@ -41,7 +44,7 @@ const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 type LivePoint = { t: number; v: number };
 
-export default function WatchlistPage({ watchlists, activeWatchlistId, limits, aiWatchlistReport = null }: PageProps) {
+export default function WatchlistPage({ watchlists, activeWatchlistId, limits, aiWatchlistReport = null, positions }: PageProps) {
     const { t } = useTranslation();
     setLayoutProps({ breadcrumbs: [{ title: t('watchlist.title'), href: '/watchlists' }] });
     const page = usePage<{ financeQueryWsUrl?: string } & SharedExtra>();
@@ -405,6 +408,10 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                             </CardContent>
                         </Card>
                     </div>
+                )}
+
+                {active && active.items.length > 0 && (
+                    <WatchlistTradingChart items={active.items} wsUrl={wsUrl} positions={positions} />
                 )}
 
                 <AiReportCard report={aiWatchlistReport} title="Analyse IA — watchlists" />

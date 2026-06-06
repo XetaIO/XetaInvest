@@ -30,6 +30,12 @@ export type WatchlistLimits = {
     maxItems: number;
 };
 
+export type WatchlistPosition = {
+    avg_price: number;
+    quantity: number;
+    currency: string | null;
+};
+
 export type PriceUpdate = {
     id: string;
     price: number;

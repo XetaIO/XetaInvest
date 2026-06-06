@@ -250,8 +250,17 @@
         "item_limit": "Limite de {{max}} symboles atteinte.",
         "no_symbol_add": "Aucun symbol. Ajoutez-en depuis le champ ci-dessus ou la recherche.",
         "evolution_title": "Évolution (% depuis ouverture session)",
-        "realtime": "Temps réel · WebSocket",
-        "remove_symbol": "Retirer {{symbol}}"
+        "realtime": "Temps réel",
+        "remove_symbol": "Retirer {{symbol}}",
+        "trading_chart_title": "Graphique avancé",
+        "trading_chart_type_candle": "Bougies",
+        "trading_chart_type_line": "Ligne",
+        "trading_chart_type_line_markers": "Ligne + marqueurs",
+        "trading_chart_loading": "Chargement du graphique…",
+        "trading_chart_error": "Impossible de charger le graphique.",
+        "trading_chart_no_data": "Aucune donnée disponible.",
+        "trading_chart_position_line": "PRU",
+        "trading_chart_position_toggle": "Afficher/masquer votre prix de revient"
     },
     "news": {
         "title": "Actualités",

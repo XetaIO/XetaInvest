@@ -9,7 +9,8 @@ import type {
     LineData,
     SeriesMarker,
     Time,
-    UTCTimestamp} from 'lightweight-charts';
+    UTCTimestamp
+} from 'lightweight-charts';
 import {
     CandlestickSeries,
     ColorType,
@@ -261,14 +262,14 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
     const priceLineRef = useRef<IPriceLine | null>(null);
 
     useEffect(() => {
- pointsRef.current = points; 
-}, [points]);
+        pointsRef.current = points;
+    }, [points]);
     useEffect(() => {
- chartTypeRef.current = chartType; 
-}, [chartType]);
+        chartTypeRef.current = chartType;
+    }, [chartType]);
     useEffect(() => {
- rangeRef.current = range; 
-}, [range]);
+        rangeRef.current = range;
+    }, [range]);
 
     // ── Data fetching ──────────────────────────────────────────────────────────
     const fetchChart = useCallback(
@@ -334,19 +335,19 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
         const series = seriesRef.current;
 
         if (!series) {
-return;
-}
+            return;
+        }
 
         if (update.id.toUpperCase() !== activeSymbol.toUpperCase()) {
-return;
-}
+            return;
+        }
 
         const price = update.price;
         const last = pointsRef.current[pointsRef.current.length - 1];
 
         if (!last) {
-return;
-}
+            return;
+        }
 
         const isIntraday = /^\d+$/.test(last.date);
 
@@ -456,8 +457,8 @@ return;
     // ── Chart initialization & theme watch ─────────────────────────────────────
     useLayoutEffect(() => {
         if (!containerRef.current) {
-return;
-}
+            return;
+        }
 
         const chart = createChart(containerRef.current, buildChartOptions());
 
@@ -478,7 +479,7 @@ return;
             chartRef.current = null;
             seriesRef.current = null;
         };
-         
+
     }, []); // run once — re-creating chart is expensive
 
     // ── Series rendering ───────────────────────────────────────────────────────
@@ -486,8 +487,8 @@ return;
         const chart = chartRef.current;
 
         if (!chart || loading || points.length === 0) {
-return;
-}
+            return;
+        }
 
         // Remove existing series
         if (seriesRef.current) {
@@ -605,8 +606,8 @@ return;
         const series = seriesRef.current;
 
         if (!series) {
-return;
-}
+            return;
+        }
 
         // Clear any previous line first
         if (priceLineRef.current) {
@@ -620,8 +621,8 @@ return;
         }
 
         if (!showPositionLine || !position || position.avg_price <= 0) {
-return;
-}
+            return;
+        }
 
         priceLineRef.current = series.createPriceLine({
             price: position.avg_price,
@@ -809,8 +810,8 @@ function cssColor(varName: string): string {
         .trim();
 
     if (!raw) {
-return '#888888';
-}
+        return '#888888';
+    }
 
     // Paint the color onto a 1×1 canvas; getImageData always returns sRGB bytes
     const canvas = document.createElement('canvas');
@@ -818,8 +819,8 @@ return '#888888';
     const ctx = canvas.getContext('2d');
 
     if (!ctx) {
-return '#888888';
-}
+        return '#888888';
+    }
 
     ctx.fillStyle = raw;
     ctx.fillRect(0, 0, 1, 1);

@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class AddWatchlistItem
 {
-    public function __construct(private readonly InstrumentResolver $resolver)
-    {
-    }
+    public function __construct(private readonly InstrumentResolver $resolver) {}
 
     /**
      * @return 'added'|'symbol_not_found'|'already_present'|'limit_reached'
@@ -20,7 +18,12 @@ class AddWatchlistItem
     public function handle(Watchlist $watchlist, string $symbol): string
     {
         return DB::transaction(function () use ($watchlist, $symbol): string {
-            $count = $watchlist->items()->lockForUpdate()->count();
+            // Lock the parent watchlist row to serialize concurrent inserts.
+            // PostgreSQL forbids FOR UPDATE alongside aggregate functions, so we
+            // cannot lock with count() directly.
+            Watchlist::query()->whereKey($watchlist->getKey())->lockForUpdate()->first();
+
+            $count = $watchlist->items()->count();
             if ($count >= Watchlist::MAX_ITEMS) {
                 return 'limit_reached';
             }

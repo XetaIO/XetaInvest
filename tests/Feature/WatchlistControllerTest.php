@@ -97,3 +97,15 @@ test('user can reorder items in a watchlist', function () {
     expect($i1->fresh()->position)->toBe(1)
         ->and($i2->fresh()->position)->toBe(0);
 });
+
+test('reorder requires every watchlist item exactly once', function () {
+    $watchlist = Watchlist::factory()->forUser($this->user)->create();
+    $item = WatchlistItem::factory()->forWatchlist($watchlist)->create(['position' => 0]);
+    WatchlistItem::factory()->forWatchlist($watchlist)->create(['position' => 1]);
+
+    $this->actingAs($this->user)
+        ->patch(route('watchlists.reorder', $watchlist), [
+            'item_ids' => [$item->id],
+        ])
+        ->assertSessionHasErrors('item_ids');
+});

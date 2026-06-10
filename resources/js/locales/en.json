@@ -57,25 +57,33 @@
     },
     "portfolio": {
         "new": "New portfolio",
+        "edit_title": "Edit portfolio",
         "edit": "Edit",
         "delete": "Delete",
         "set_default": "Set as default",
         "name": "Portfolio name",
-        "is_default": "Default portfolio",
+        "is_default": "Set as default portfolio",
         "create": "Create",
         "update": "Update",
         "cancel": "Cancel",
+        "portfolios": "Portfolios",
         "positions": "Positions",
         "transactions": "Transactions",
-        "no_portfolio": "No portfolio."
+        "no_portfolio": "No portfolio",
+        "delete_confirm": "Delete portfolio “{{name}}”? This action cannot be undone.",
+        "delete_error": "Unable to delete this portfolio."
     },
     "position": {
         "symbol": "Symbol",
+        "type": "Type",
         "quantity": "Quantity",
         "unit_price": "Unit price",
         "date": "Date",
         "notes": "Notes",
         "note": "Note",
+        "note_optional": "Note (optional)",
+        "transaction_new": "New transaction",
+        "transaction_edit": "Edit transaction",
         "add_line": "Add line",
         "add": "Add",
         "delete": "Delete position",
@@ -186,7 +194,10 @@
         "income_section_title": "Income",
         "income_empty": "No income sources yet.",
         "income_placeholder": "e.g. Salary",
-        "income_add": "Add an income source"
+        "income_add": "Add an income source",
+        "line_label": "Label",
+        "remove_group": "Delete category",
+        "remove_line": "Delete line"
     },
     "calculator": {
         "title": "Compound interest calculator",
@@ -229,12 +240,23 @@
         "additional_contributions": "Additional contributions",
         "monthly_savings_cumul": "Cumulative monthly savings",
         "total_contributed": "Total contributed",
-        "capital_plus_savings": "Capital + savings"
+        "capital_plus_savings": "Capital + savings",
+        "eur_per_month": "EUR / MONTH",
+        "years_unit": "YEARS",
+        "months_unit": "MONTHS",
+        "projection_title_one": "Projection over {{count}} year",
+        "projection_title_other": "Projection over {{count}} years",
+        "year_count_one": "{{count}} year",
+        "year_count_other": "{{count}} years",
+        "year_label": "Year {{label}}"
     },
     "watchlist": {
         "title": "My watchlist",
         "new": "New list",
+        "new_title": "New watchlist",
         "rename": "Rename",
+        "rename_title": "Rename watchlist",
+        "name": "Name",
         "delete": "Delete",
         "add_symbol": "Add symbol",
         "no_watchlist": "No watchlist. Create one to get started.",
@@ -260,7 +282,10 @@
         "trading_chart_error": "Unable to load chart.",
         "trading_chart_no_data": "No data available.",
         "trading_chart_position_line": "Avg cost",
-        "trading_chart_position_toggle": "Show/hide your average cost"
+        "trading_chart_position_toggle": "Show/hide your average cost",
+        "add_to_list": "Add to a watchlist",
+        "add_to_empty": "No watchlist. Create one from the Watchlist page.",
+        "no_symbol_chart": "No symbols to display."
     },
     "news": {
         "title": "News",
@@ -435,6 +460,27 @@
         "fr": "Français",
         "en": "English"
     },
+    "ai": {
+        "open": "Open the AI assistant",
+        "title": "AI Assistant",
+        "empty_chat": "Ask a question about your portfolios and watchlists, or start an analysis.",
+        "thinking": "The assistant is thinking...",
+        "message_placeholder": "Your message...",
+        "new_conversation": "New conversation",
+        "no_conversation": "No conversations.",
+        "untitled": "Untitled",
+        "daily_analysis": "Today's AI analysis",
+        "no_report": "No report is available for today. The next report will be generated automatically.",
+        "report_failed": "Report generation failed.",
+        "highlights": "Highlights",
+        "risks": "Risks",
+        "recommendations": "Recommendations",
+        "detailed_analysis": "Detailed analysis",
+        "disclaimer": "AI-generated information for guidance only, not investment advice.",
+        "portfolio_analysis": "AI analysis — portfolio",
+        "global_analysis": "AI analysis — global",
+        "news_analysis": "AI selection — news & screener"
+    },
     "common": {
         "save": "Save",
         "cancel": "Cancel",
@@ -454,6 +500,8 @@
         "reset": "Reset",
         "export": "Export",
         "import": "Import",
-        "refresh": "Refresh"
+        "refresh": "Refresh",
+        "no_data": "No data.",
+        "other": "Other"
     }
 }

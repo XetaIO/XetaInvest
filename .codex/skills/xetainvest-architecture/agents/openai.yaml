@@ -1,0 +1,4 @@
+interface:
+  display_name: "XetaInvest Architecture"
+  short_description: "Apply XetaInvest backend and frontend architecture rules"
+  default_prompt: "Use the XetaInvest architecture conventions while implementing and reviewing changes."

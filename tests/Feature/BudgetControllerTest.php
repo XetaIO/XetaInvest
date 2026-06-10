@@ -29,10 +29,10 @@ test('show returns the budget structure with three sections', function () {
         ->get(route('budget.show'))
         ->assertInertia(
             fn ($page) => $page
-            ->component('budget')
-            ->has('budget.income.lines')
-            ->has('budget.investments.groups')
-            ->has('budget.expenses.groups')
+                ->component('budget')
+                ->has('budget.income.lines')
+                ->has('budget.investments.groups')
+                ->has('budget.expenses.groups')
         );
 });
 

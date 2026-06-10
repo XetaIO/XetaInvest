@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\Watchlist\AddWatchlistItem;
+use App\Actions\Watchlist\RemoveWatchlistItem;
 use App\Http\Requests\Watchlist\StoreWatchlistItemRequest;
 use App\Models\Watchlist;
 use App\Models\WatchlistItem;
@@ -31,11 +32,13 @@ class WatchlistItemController extends Controller
         return back();
     }
 
-    public function destroy(Request $request, WatchlistItem $item): RedirectResponse
-    {
+    public function destroy(
+        Request $request,
+        WatchlistItem $item,
+        RemoveWatchlistItem $action,
+    ): RedirectResponse {
         $this->authorize('delete', $item);
-
-        $item->delete();
+        $action->handle($item);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.watchlist_item.removed')]);
 

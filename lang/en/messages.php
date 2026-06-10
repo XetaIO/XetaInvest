@@ -7,6 +7,7 @@ return [
     'portfolio.created' => 'Portfolio created.',
     'portfolio.updated' => 'Portfolio updated.',
     'portfolio.deleted' => 'Portfolio deleted.',
+    'portfolio.limit_reached' => 'The maximum number of portfolios has been reached.',
 
     // PositionController
     'position.symbol_not_found' => 'Symbol not found.',
@@ -17,11 +18,14 @@ return [
     'watchlist.created' => 'Watchlist created.',
     'watchlist.renamed' => 'Watchlist renamed.',
     'watchlist.deleted' => 'Watchlist deleted.',
+    'watchlist.limit_reached' => 'The maximum number of watchlists has been reached.',
+    'watchlist.invalid_order' => 'The ordered list must contain every tracked item exactly once.',
 
     // TransactionController
     'transaction.added' => 'Transaction added.',
     'transaction.updated' => 'Transaction updated.',
     'transaction.deleted' => 'Transaction deleted.',
+    'transaction.insufficient_quantity' => 'This operation would create a negative holding quantity on the selected date.',
 
     // WatchlistItemController
     'watchlist_item.symbol_not_found' => 'Symbol not found.',
@@ -34,4 +38,9 @@ return [
     'password.updated' => 'Password updated.',
     'locale.updated' => 'Language updated.',
     'locale.invalid' => 'Unsupported language.',
+
+    // AI
+    'ai.unavailable' => 'The AI service is temporarily unavailable. Reference: :reference.',
+    'ai.quota_exceeded' => 'The daily AI quota has been reached. Please try again tomorrow.',
+    'market_data.unavailable' => 'Market data is temporarily unavailable.',
 ];

@@ -48,7 +48,7 @@ class NewsAggregator
         $symbolsToFetch = $symbolFilter !== null ? [$symbolFilter] : $userSymbols;
         $applyPerSymbolLimit = $symbolFilter === null;
 
-        $items = new Collection();
+        $items = new Collection;
 
         foreach ($symbolsToFetch as $symbol) {
             try {

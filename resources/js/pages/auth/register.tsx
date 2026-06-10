@@ -67,7 +67,9 @@ export default function Register({ passwordRules }: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">{t('auth.password')}</Label>
+                                <Label htmlFor="password">
+                                    {t('auth.password')}
+                                </Label>
                                 <PasswordInput
                                     id="password"
                                     required

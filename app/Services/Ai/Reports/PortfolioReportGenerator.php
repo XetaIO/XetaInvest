@@ -52,7 +52,7 @@ class PortfolioReportGenerator extends BaseReportGenerator
         ];
 
         return [
-            ['role' => 'system', 'content' => $this->systemPrompt()],
+            ['role' => 'system', 'content' => $this->systemPrompt($user)],
             ['role' => 'user', 'content' => "Analyse le portefeuille suivant et produis le rapport JSON demandé. Mets en avant la performance, l'allocation, les risques (concentration sectorielle / devise / titre unique) et 1 à 3 recommandations actionnables.\n\nDonnées:\n".json_encode($context, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)],
         ];
     }

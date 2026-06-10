@@ -9,8 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useDebounce } from '@/hooks/use-debounce';
 import { AUTOSAVE_DEBOUNCE_MS } from '@/lib/constants';
+import type {
+    BudgetGroupDraft,
+    BudgetLineDraft,
+    BudgetPageProps,
+    BudgetTab,
+} from '@/types/budget';
 import { update as updateBudget } from '@/routes/budget';
-import type { BudgetGroupDraft, BudgetLineDraft, BudgetPageProps, BudgetTab } from '@/types';
 
 const TABS: BudgetTab[] = ['income', 'investments', 'expenses'];
 
@@ -28,15 +33,26 @@ function buildPayload(
 
 export default function BudgetPage({ budget }: BudgetPageProps) {
     const { t } = useTranslation();
-    setLayoutProps({ breadcrumbs: [{ title: t('budget.title'), href: '/budget' }] });
+    setLayoutProps({
+        breadcrumbs: [{ title: t('budget.title'), href: '/budget' }],
+    });
     const [tab, setTab] = useState<BudgetTab>('income');
-    const [income, setIncome] = useState<BudgetLineDraft[]>(budget.income.lines);
-    const [investments, setInvestments] = useState<BudgetGroupDraft[]>(budget.investments.groups);
-    const [expenses, setExpenses] = useState<BudgetGroupDraft[]>(budget.expenses.groups);
+    const [income, setIncome] = useState<BudgetLineDraft[]>(
+        budget.income.lines,
+    );
+    const [investments, setInvestments] = useState<BudgetGroupDraft[]>(
+        budget.investments.groups,
+    );
+    const [expenses, setExpenses] = useState<BudgetGroupDraft[]>(
+        budget.expenses.groups,
+    );
     const [saving, setSaving] = useState(false);
 
     // Debounce the combined payload to avoid saving on every keystroke
-    const payload = useMemo(() => buildPayload(income, investments, expenses), [income, investments, expenses]);
+    const payload = useMemo(
+        () => buildPayload(income, investments, expenses),
+        [income, investments, expenses],
+    );
     const debouncedPayload = useDebounce(payload, AUTOSAVE_DEBOUNCE_MS);
     const isFirstSave = useRef(true);
 
@@ -72,25 +88,39 @@ export default function BudgetPage({ budget }: BudgetPageProps) {
             <div className="flex flex-col gap-6 p-4 md:p-6">
                 <div className="flex items-center justify-between gap-2">
                     <div>
-                        <h1 className="text-2xl font-semibold">{t('budget.title')}</h1>
+                        <h1 className="text-2xl font-semibold">
+                            {t('budget.title')}
+                        </h1>
                         <p className="text-sm text-muted-foreground">
                             {t('budget.subtitle')}
                         </p>
                     </div>
-                    <span className="text-xs text-muted-foreground" aria-live="polite">
+                    <span
+                        className="text-xs text-muted-foreground"
+                        aria-live="polite"
+                    >
                         {saving ? t('budget.saving') : t('budget.saved')}
                     </span>
                 </div>
 
                 <Tabs value={tab} onValueChange={(v) => setTab(v as BudgetTab)}>
                     <TabsList>
-                        <TabsTrigger value="income">{t('budget.income')}</TabsTrigger>
-                        <TabsTrigger value="investments">{t('budget.investments')}</TabsTrigger>
-                        <TabsTrigger value="expenses">{t('budget.expenses')}</TabsTrigger>
+                        <TabsTrigger value="income">
+                            {t('budget.income')}
+                        </TabsTrigger>
+                        <TabsTrigger value="investments">
+                            {t('budget.investments')}
+                        </TabsTrigger>
+                        <TabsTrigger value="expenses">
+                            {t('budget.expenses')}
+                        </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="income" className="mt-4">
-                        <BudgetTabRevenues lines={income} onChange={setIncome} />
+                        <BudgetTabRevenues
+                            lines={income}
+                            onChange={setIncome}
+                        />
                     </TabsContent>
                     <TabsContent value="investments" className="mt-4">
                         <BudgetTabGroups
@@ -99,8 +129,12 @@ export default function BudgetPage({ budget }: BudgetPageProps) {
                             onChange={setInvestments}
                             addGroupLabel={t('budget.add_investment_group')}
                             addLineLabel={t('budget.add_line_btn')}
-                            groupPlaceholder={t('budget.group_placeholder_investments')}
-                            linePlaceholder={t('budget.line_placeholder_investments')}
+                            groupPlaceholder={t(
+                                'budget.group_placeholder_investments',
+                            )}
+                            linePlaceholder={t(
+                                'budget.line_placeholder_investments',
+                            )}
                             emptyText={t('budget.empty_investments')}
                         />
                     </TabsContent>
@@ -111,8 +145,12 @@ export default function BudgetPage({ budget }: BudgetPageProps) {
                             onChange={setExpenses}
                             addGroupLabel={t('budget.add_expense_group')}
                             addLineLabel={t('budget.add_line_btn')}
-                            groupPlaceholder={t('budget.group_placeholder_expenses')}
-                            linePlaceholder={t('budget.line_placeholder_expenses')}
+                            groupPlaceholder={t(
+                                'budget.group_placeholder_expenses',
+                            )}
+                            linePlaceholder={t(
+                                'budget.line_placeholder_expenses',
+                            )}
                             emptyText={t('budget.empty_expenses')}
                         />
                     </TabsContent>

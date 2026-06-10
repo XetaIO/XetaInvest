@@ -1,10 +1,21 @@
-import { AiChatWidget } from '@/components/ai/ai-chat-widget';
+import { lazy, Suspense } from 'react';
 import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
-import { PortfolioTicker } from '@/components/portfolio-ticker';
-import type { AppLayoutProps } from '@/types';
+import type { AppLayoutProps } from '@/types/ui';
+
+const AiChatWidget = lazy(() =>
+    import('@/components/ai/ai-chat-widget').then((module) => ({
+        default: module.AiChatWidget,
+    })),
+);
+
+const PortfolioTicker = lazy(() =>
+    import('@/components/portfolio-ticker').then((module) => ({
+        default: module.PortfolioTicker,
+    })),
+);
 
 export default function AppSidebarLayout({
     children,
@@ -15,10 +26,14 @@ export default function AppSidebarLayout({
             <AppSidebar />
             <AppContent variant="sidebar" className="overflow-x-hidden">
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
-                <PortfolioTicker />
+                <Suspense fallback={null}>
+                    <PortfolioTicker />
+                </Suspense>
                 {children}
             </AppContent>
-            <AiChatWidget />
+            <Suspense fallback={null}>
+                <AiChatWidget />
+            </Suspense>
         </AppShell>
     );
 }

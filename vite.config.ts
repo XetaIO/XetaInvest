@@ -40,6 +40,46 @@ function esToolkitCompatEsm(): Plugin {
 }
 
 export default defineConfig({
+    build: {
+        rolldownOptions: {
+            output: {
+                codeSplitting: {
+                    groups: [
+                        {
+                            name: 'react',
+                            test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+                            priority: 50,
+                        },
+                        {
+                            name: 'recharts',
+                            test: /node_modules[\\/](?:recharts|victory-vendor|d3-[^\\/]+)[\\/]/,
+                            priority: 40,
+                        },
+                        {
+                            name: 'lightweight-charts',
+                            test: /node_modules[\\/]lightweight-charts[\\/]/,
+                            priority: 40,
+                        },
+                        {
+                            name: 'ui',
+                            test: /node_modules[\\/](@radix-ui|@headlessui|lucide-react)[\\/]/,
+                            priority: 30,
+                        },
+                        {
+                            name: 'markdown',
+                            test: /node_modules[\\/](react-markdown|remark-|rehype-|micromark|mdast-|hast-|unified)[\\/]/,
+                            priority: 30,
+                        },
+                        {
+                            name: 'vendor',
+                            test: /node_modules[\\/]/,
+                            priority: 10,
+                        },
+                    ],
+                },
+            },
+        },
+    },
     plugins: [
         esToolkitCompatEsm(),
         laravel({

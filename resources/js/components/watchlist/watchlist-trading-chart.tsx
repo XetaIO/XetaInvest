@@ -9,7 +9,7 @@ import type {
     LineData,
     SeriesMarker,
     Time,
-    UTCTimestamp
+    UTCTimestamp,
 } from 'lightweight-charts';
 import {
     CandlestickSeries,
@@ -18,7 +18,7 @@ import {
     createSeriesMarkers,
     LineSeries,
     LineStyle,
-    TickMarkType
+    TickMarkType,
 } from 'lightweight-charts';
 import { BarChart2, Loader2, TrendingUp, Wallet } from 'lucide-react';
 import {
@@ -42,7 +42,8 @@ import {
 import { useFinanceQueryStream } from '@/hooks/use-finance-query-stream';
 import { CHART_RANGE_LABELS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
-import type { ChartPoint, PriceUpdate, SymbolRange, WatchlistItem } from '@/types';
+import type { ChartPoint, SymbolRange } from '@/types/symbol';
+import type { PriceUpdate, WatchlistItem } from '@/types/watchlist';
 import type { WatchlistPosition } from '@/types/watchlist';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -93,22 +94,22 @@ const CHART_TYPES: {
     labelKey: string;
     icon: React.ReactNode;
 }[] = [
-        {
-            value: 'candlestick',
-            labelKey: 'watchlist.trading_chart_type_candle',
-            icon: <BarChart2 className="h-3.5 w-3.5" />,
-        },
-        {
-            value: 'line',
-            labelKey: 'watchlist.trading_chart_type_line',
-            icon: <TrendingUp className="h-3.5 w-3.5" />,
-        },
-        {
-            value: 'line-markers',
-            labelKey: 'watchlist.trading_chart_type_line_markers',
-            icon: <TrendingUp className="h-3.5 w-3.5" />,
-        },
-    ];
+    {
+        value: 'candlestick',
+        labelKey: 'watchlist.trading_chart_type_candle',
+        icon: <BarChart2 className="h-3.5 w-3.5" />,
+    },
+    {
+        value: 'line',
+        labelKey: 'watchlist.trading_chart_type_line',
+        icon: <TrendingUp className="h-3.5 w-3.5" />,
+    },
+    {
+        value: 'line-markers',
+        labelKey: 'watchlist.trading_chart_type_line_markers',
+        icon: <TrendingUp className="h-3.5 w-3.5" />,
+    },
+];
 
 // Builds Lightweight Charts options matching the current CSS theme
 function buildChartOptions(): DeepPartial<ChartOptions> {
@@ -141,13 +142,27 @@ function buildChartOptions(): DeepPartial<ChartOptions> {
             timeVisible: true,
             secondsVisible: false,
             rightOffset: 4,
-            tickMarkFormatter: (time: UTCTimestamp | BusinessDay, tickMarkType: TickMarkType) => {
+            tickMarkFormatter: (
+                time: UTCTimestamp | BusinessDay,
+                tickMarkType: TickMarkType,
+            ) => {
                 if (typeof time === 'number') {
                     const d = new Date(time * 1000);
-                    const fmt = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' });
-                    const fmtDate = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', day: '2-digit', month: '2-digit' });
+                    const fmt = new Intl.DateTimeFormat('fr-FR', {
+                        timeZone: 'Europe/Paris',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                    });
+                    const fmtDate = new Intl.DateTimeFormat('fr-FR', {
+                        timeZone: 'Europe/Paris',
+                        day: '2-digit',
+                        month: '2-digit',
+                    });
 
-                    if (tickMarkType === TickMarkType.DayOfMonth || tickMarkType === TickMarkType.Month) {
+                    if (
+                        tickMarkType === TickMarkType.DayOfMonth ||
+                        tickMarkType === TickMarkType.Month
+                    ) {
                         return fmtDate.format(d);
                     }
 
@@ -160,9 +175,9 @@ function buildChartOptions(): DeepPartial<ChartOptions> {
                 }
 
                 if (tickMarkType === TickMarkType.Month) {
-                    return new Intl.DateTimeFormat('fr-FR', { month: 'short' }).format(
-                        new Date(Date.UTC(time.year, time.month - 1, 1)),
-                    );
+                    return new Intl.DateTimeFormat('fr-FR', {
+                        month: 'short',
+                    }).format(new Date(Date.UTC(time.year, time.month - 1, 1)));
                 }
 
                 return `${String(time.day).padStart(2, '0')}/${String(time.month).padStart(2, '0')}`;
@@ -195,7 +210,9 @@ function buildChartOptions(): DeepPartial<ChartOptions> {
                 }
 
                 // Daily — BusinessDay {year, month, day}
-                const d = new Date(Date.UTC(time.year, time.month - 1, time.day));
+                const d = new Date(
+                    Date.UTC(time.year, time.month - 1, time.day),
+                );
 
                 return new Intl.DateTimeFormat('fr-FR', {
                     timeZone: 'Europe/Paris',
@@ -213,7 +230,12 @@ const EMPTY_POINTS: ChartPoint[] = [];
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSymbol }: Props) {
+export function WatchlistTradingChart({
+    items,
+    wsUrl,
+    positions = {},
+    defaultSymbol,
+}: Props) {
     const { t, i18n } = useTranslation();
 
     // Symbols available in the active watchlist (uppercase)
@@ -223,7 +245,9 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
     );
 
     const initialSymbol = (
-        defaultSymbol ?? items[0]?.instrument.symbol ?? ''
+        defaultSymbol ??
+        items[0]?.instrument.symbol ??
+        ''
     ).toUpperCase();
     const [selectedSymbol, setSelectedSymbol] = useState<string>(initialSymbol);
     // Fall back to the first symbol when the selected one leaves the watchlist —
@@ -331,121 +355,127 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
     // Live ticks are bucketed on the range's candle interval: a new candle is
     // only appended when the bucket boundary is crossed, otherwise the current
     // candle is updated in place (avoids the "one candle per second" artefact).
-    const handleLiveUpdate = useCallback((update: PriceUpdate) => {
-        const series = seriesRef.current;
+    const handleLiveUpdate = useCallback(
+        (update: PriceUpdate) => {
+            const series = seriesRef.current;
 
-        if (!series) {
-            return;
-        }
-
-        if (update.id.toUpperCase() !== activeSymbol.toUpperCase()) {
-            return;
-        }
-
-        const price = update.price;
-        const last = pointsRef.current[pointsRef.current.length - 1];
-
-        if (!last) {
-            return;
-        }
-
-        const isIntraday = /^\d+$/.test(last.date);
-
-        // Daily / weekly ranges use BusinessDay times — we can't append a
-        // UTCTimestamp candle without mixing time formats, so we only refresh
-        // the last candle in place.
-        if (!isIntraday) {
-            if (chartTypeRef.current === 'candlestick') {
-                const high = Math.max(last.high ?? price, price);
-                const low = Math.min(last.low ?? price, price);
-                (series as ISeriesApi<'Candlestick'>).update({
-                    time: last.date as Time,
-                    open: last.open ?? price,
-                    high,
-                    low,
-                    close: price,
-                });
-                pointsRef.current[pointsRef.current.length - 1] = {
-                    ...last,
-                    high,
-                    low,
-                    close: price,
-                };
-            } else {
-                (series as ISeriesApi<'Line'>).update({
-                    time: last.date as Time,
-                    value: price,
-                });
-                pointsRef.current[pointsRef.current.length - 1] = {
-                    ...last,
-                    close: price,
-                };
+            if (!series) {
+                return;
             }
 
-            return;
-        }
+            if (update.id.toUpperCase() !== activeSymbol.toUpperCase()) {
+                return;
+            }
 
-        // Intraday — bucket the current time on the range interval.
-        const interval = INTERVAL_SECONDS[rangeRef.current];
-        const nowSec = Math.floor(Date.now() / 1000);
-        const bucket = Math.floor(nowSec / interval) * interval;
-        const lastTime = Number(last.date);
-        const isNewBucket = bucket > lastTime;
-        const time = bucket as UTCTimestamp;
+            const price = update.price;
+            const last = pointsRef.current[pointsRef.current.length - 1];
 
-        if (chartTypeRef.current === 'candlestick') {
-            if (isNewBucket) {
-                (series as ISeriesApi<'Candlestick'>).update({
-                    time,
-                    open: price,
-                    high: price,
-                    low: price,
-                    close: price,
-                });
-                pointsRef.current = [
-                    ...pointsRef.current,
-                    {
+            if (!last) {
+                return;
+            }
+
+            const isIntraday = /^\d+$/.test(last.date);
+
+            // Daily / weekly ranges use BusinessDay times — we can't append a
+            // UTCTimestamp candle without mixing time formats, so we only refresh
+            // the last candle in place.
+            if (!isIntraday) {
+                if (chartTypeRef.current === 'candlestick') {
+                    const high = Math.max(last.high ?? price, price);
+                    const low = Math.min(last.low ?? price, price);
+                    (series as ISeriesApi<'Candlestick'>).update({
+                        time: last.date as Time,
+                        open: last.open ?? price,
+                        high,
+                        low,
+                        close: price,
+                    });
+                    pointsRef.current[pointsRef.current.length - 1] = {
                         ...last,
-                        date: String(bucket),
+                        high,
+                        low,
+                        close: price,
+                    };
+                } else {
+                    (series as ISeriesApi<'Line'>).update({
+                        time: last.date as Time,
+                        value: price,
+                    });
+                    pointsRef.current[pointsRef.current.length - 1] = {
+                        ...last,
+                        close: price,
+                    };
+                }
+
+                return;
+            }
+
+            // Intraday — bucket the current time on the range interval.
+            const interval = INTERVAL_SECONDS[rangeRef.current];
+            const nowSec = Math.floor(Date.now() / 1000);
+            const bucket = Math.floor(nowSec / interval) * interval;
+            const lastTime = Number(last.date);
+            const isNewBucket = bucket > lastTime;
+            const time = bucket as UTCTimestamp;
+
+            if (chartTypeRef.current === 'candlestick') {
+                if (isNewBucket) {
+                    (series as ISeriesApi<'Candlestick'>).update({
+                        time,
                         open: price,
                         high: price,
                         low: price,
                         close: price,
-                    },
-                ];
+                    });
+                    pointsRef.current = [
+                        ...pointsRef.current,
+                        {
+                            ...last,
+                            date: String(bucket),
+                            open: price,
+                            high: price,
+                            low: price,
+                            close: price,
+                        },
+                    ];
+                } else {
+                    const high = Math.max(last.high ?? price, price);
+                    const low = Math.min(last.low ?? price, price);
+                    (series as ISeriesApi<'Candlestick'>).update({
+                        time: lastTime as UTCTimestamp,
+                        open: last.open ?? price,
+                        high,
+                        low,
+                        close: price,
+                    });
+                    pointsRef.current[pointsRef.current.length - 1] = {
+                        ...last,
+                        high,
+                        low,
+                        close: price,
+                    };
+                }
             } else {
-                const high = Math.max(last.high ?? price, price);
-                const low = Math.min(last.low ?? price, price);
-                (series as ISeriesApi<'Candlestick'>).update({
-                    time: lastTime as UTCTimestamp,
-                    open: last.open ?? price,
-                    high,
-                    low,
-                    close: price,
+                (series as ISeriesApi<'Line'>).update({
+                    time: isNewBucket ? time : (lastTime as UTCTimestamp),
+                    value: price,
                 });
-                pointsRef.current[pointsRef.current.length - 1] = {
-                    ...last,
-                    high,
-                    low,
-                    close: price,
-                };
-            }
-        } else {
-            (series as ISeriesApi<'Line'>).update({ time: isNewBucket ? time : (lastTime as UTCTimestamp), value: price });
 
-            if (isNewBucket) {
-                pointsRef.current = [
-                    ...pointsRef.current,
-                    { ...last, date: String(bucket), close: price },
-                ];
-            } else {
-                pointsRef.current[pointsRef.current.length - 1] = {
-                    ...last,
-                    close: price,
-                };
+                if (isNewBucket) {
+                    pointsRef.current = [
+                        ...pointsRef.current,
+                        { ...last, date: String(bucket), close: price },
+                    ];
+                } else {
+                    pointsRef.current[pointsRef.current.length - 1] = {
+                        ...last,
+                        close: price,
+                    };
+                }
             }
-        }
-    }, [activeSymbol]);
+        },
+        [activeSymbol],
+    );
 
     useFinanceQueryStream({
         symbols: activeSymbol ? [activeSymbol] : [],
@@ -479,7 +509,6 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
             chartRef.current = null;
             seriesRef.current = null;
         };
-
     }, []); // run once — re-creating chart is expensive
 
     // ── Series rendering ───────────────────────────────────────────────────────
@@ -727,7 +756,9 @@ export function WatchlistTradingChart({ items, wsUrl, positions = {}, defaultSym
                                 variant={showPositionLine ? 'default' : 'ghost'}
                                 size="sm"
                                 className="h-7 gap-1 px-2 text-xs"
-                                title={t('watchlist.trading_chart_position_toggle')}
+                                title={t(
+                                    'watchlist.trading_chart_position_toggle',
+                                )}
                                 onClick={() => setShowPositionLine((v) => !v)}
                             >
                                 <Wallet className="h-3.5 w-3.5" />

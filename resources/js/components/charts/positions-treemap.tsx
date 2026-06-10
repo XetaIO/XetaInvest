@@ -1,9 +1,15 @@
 import { useTranslation } from 'react-i18next';
 import { Tooltip, Treemap, ResponsiveContainer } from 'recharts';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { CHART_COLORS } from '@/lib/constants';
 import { formatEur, formatPercent } from '@/lib/format';
-import type { InstrumentAllocation } from '@/types';
+import type { InstrumentAllocation } from '@/types/portfolio';
 
 interface TreemapEntry {
     name: string;
@@ -28,28 +34,46 @@ interface CellProps {
 }
 
 // Approximate chars that fit in a given pixel width at a given font size (avg char ~0.55× font-size)
-function truncate(text: string, availableWidth: number, fontSize: number): string {
+function truncate(
+    text: string,
+    availableWidth: number,
+    fontSize: number,
+): string {
     const avgCharWidth = fontSize * 0.55;
     const maxChars = Math.floor(availableWidth / avgCharWidth);
 
     if (maxChars < 2) {
-return '';
-}
+        return '';
+    }
 
     if (text.length <= maxChars) {
-return text;
-}
+        return text;
+    }
 
     return text.slice(0, maxChars - 1) + '…';
 }
 
-function TreemapCell({ x = 0, y = 0, width = 0, height = 0, name, pnl_eur = 0, percent = 0, depth = 1 }: CellProps) {
+function TreemapCell({
+    x = 0,
+    y = 0,
+    width = 0,
+    height = 0,
+    name,
+    pnl_eur = 0,
+    percent = 0,
+    depth = 1,
+}: CellProps) {
     // Skip the root node (depth 0) and tiny cells
     if (depth === 0 || width < 10 || height < 10) {
         return null;
     }
 
-    const bgColor = pnl_eur > 0 ? CHART_COLORS.POSITIVE : pnl_eur < 0 ? CHART_COLORS.NEGATIVE : CHART_COLORS.NEUTRAL;
+    const bgColor =
+        pnl_eur > 0
+            ? CHART_COLORS.POSITIVE
+            : pnl_eur < 0
+              ? CHART_COLORS.NEGATIVE
+              : CHART_COLORS.NEUTRAL;
     const cx = x + width / 2;
     const cy = y + height / 2;
 
@@ -69,7 +93,12 @@ function TreemapCell({ x = 0, y = 0, width = 0, height = 0, name, pnl_eur = 0, p
         <g>
             <defs>
                 <clipPath id={clipId}>
-                    <rect x={x + 1} y={y + 1} width={width - 2} height={height - 2} />
+                    <rect
+                        x={x + 1}
+                        y={y + 1}
+                        width={width - 2}
+                        height={height - 2}
+                    />
                 </clipPath>
             </defs>
             <rect
@@ -141,14 +170,26 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
         <div className="rounded-lg border bg-popover px-3 py-2 text-sm shadow-md">
             <p className="mb-1 font-semibold">{data.name}</p>
             <p className="text-muted-foreground">
-                {t('statistics.col_value')} : <span className="font-medium text-foreground">{formatEur(data.value)}</span>
+                {t('statistics.col_value')} :{' '}
+                <span className="font-medium text-foreground">
+                    {formatEur(data.value)}
+                </span>
             </p>
             <p className="text-muted-foreground">
-                {t('statistics.col_allocation')} : <span className="font-medium text-foreground">{data.percent.toFixed(1)} %</span>
+                {t('statistics.col_allocation')} :{' '}
+                <span className="font-medium text-foreground">
+                    {data.percent.toFixed(1)} %
+                </span>
             </p>
             <p className="text-muted-foreground">
                 {t('statistics.col_pnl')} :{' '}
-                <span className={isPositive ? 'font-medium text-emerald-600 dark:text-emerald-400' : 'font-medium text-rose-600 dark:text-rose-400'}>
+                <span
+                    className={
+                        isPositive
+                            ? 'font-medium text-emerald-600 dark:text-emerald-400'
+                            : 'font-medium text-rose-600 dark:text-rose-400'
+                    }
+                >
                     {formatEur(data.pnl_eur)} ({formatPercent(data.pnl_pct)})
                 </span>
             </p>
@@ -163,7 +204,12 @@ type Props = {
     emptyLabel?: string;
 };
 
-export function PositionsTreemap({ title, description, data, emptyLabel }: Props) {
+export function PositionsTreemap({
+    title,
+    description,
+    data,
+    emptyLabel,
+}: Props) {
     const { t } = useTranslation();
 
     if (data.length === 0) {
@@ -171,7 +217,9 @@ export function PositionsTreemap({ title, description, data, emptyLabel }: Props
             <Card className="py-6">
                 <CardHeader className="pb-0">
                     <CardTitle className="text-base">{title}</CardTitle>
-                    {description && <CardDescription>{description}</CardDescription>}
+                    {description && (
+                        <CardDescription>{description}</CardDescription>
+                    )}
                 </CardHeader>
                 <CardContent className="pb-2">
                     <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
@@ -194,7 +242,9 @@ export function PositionsTreemap({ title, description, data, emptyLabel }: Props
         <Card className="py-6">
             <CardHeader className="pb-0">
                 <CardTitle className="text-base">{title}</CardTitle>
-                {description && <CardDescription>{description}</CardDescription>}
+                {description && (
+                    <CardDescription>{description}</CardDescription>
+                )}
             </CardHeader>
             <CardContent className="pb-4">
                 <ResponsiveContainer width="100%" height={300}>

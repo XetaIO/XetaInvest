@@ -89,16 +89,14 @@ test('it is idempotent when run twice on the same date', function () {
     expect(PortfolioSnapshot::count())->toBe(1);
 });
 
-test('it marks the snapshot with quote_error when finance-query fails', function () {
+test('it does not persist a snapshot when finance-query fails', function () {
     Http::fake([
         '*finance-query.com/*' => Http::response('boom', 500),
     ]);
 
-    $this->artisan('portfolio:snapshot', ['--date' => '2026-05-22'])->assertSuccessful();
+    $this->artisan('portfolio:snapshot', ['--date' => '2026-05-22'])->assertFailed();
 
-    $snap = PortfolioSnapshot::first();
-    expect($snap)->not->toBeNull()
-        ->and($snap->quote_error)->toBeTrue();
+    expect(PortfolioSnapshot::count())->toBe(0);
 });
 
 test('it can target a single portfolio with --portfolio option', function () {

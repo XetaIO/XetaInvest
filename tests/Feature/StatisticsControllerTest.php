@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Models\Instrument;
 use App\Models\Portfolio;
-use App\Models\Position;
 use App\Models\PortfolioSnapshot;
+use App\Models\Position;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Api\WatchlistApiController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CalculatorController;

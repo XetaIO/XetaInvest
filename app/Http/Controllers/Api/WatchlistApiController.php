@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Exceptions\FinanceQueryException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\WatchlistHistoryRequest;
 use App\Services\FinanceQueryClient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,9 +23,9 @@ class WatchlistApiController extends Controller
         return response()->json(['data' => $watchlists]);
     }
 
-    public function history(Request $request, FinanceQueryClient $client): JsonResponse
+    public function history(WatchlistHistoryRequest $request, FinanceQueryClient $client): JsonResponse
     {
-        $raw = (string) $request->query('symbols', '');
+        $raw = (string) $request->validated('symbols');
 
         $symbols = collect(explode(',', $raw))
             ->map(fn (string $s): string => strtoupper(trim($s)))
@@ -33,6 +34,18 @@ class WatchlistApiController extends Controller
             ->take(25)
             ->values()
             ->all();
+
+        $allowedSymbols = $request->user()->watchlists()
+            ->reorder()
+            ->join('watchlist_items', 'watchlists.id', '=', 'watchlist_items.watchlist_id')
+            ->join('instruments', 'watchlist_items.instrument_id', '=', 'instruments.id')
+            ->whereIn('instruments.symbol', $symbols)
+            ->pluck('instruments.symbol')
+            ->map(static fn (string $symbol): string => strtoupper($symbol))
+            ->unique()
+            ->all();
+
+        $symbols = array_values(array_intersect($symbols, $allowedSymbols));
 
         if ($symbols === []) {
             return response()->json(['data' => []]);

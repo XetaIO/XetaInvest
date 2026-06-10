@@ -70,19 +70,19 @@ test('authenticated user can view symbol page', function () {
         ->assertOk()
         ->assertInertia(
             fn ($page) => $page
-            ->component('symbol')
-            ->where('symbol', 'AAPL')
-            ->where('quote.symbol', 'AAPL')
-            ->where('quote.name', 'Apple Inc.')
-            ->where('quote.price', 189.84)
-            ->where('chart.range', '1mo')
-            ->has('chart.points', 3)
-            ->has('news', 3)
-            ->where('news.1.link', 'https://stockanalysis.com/relative/path')
-            ->has('recommendations', 2)
-            ->where('recommendations.0.symbol', 'MSFT')
-            ->where('recommendations.0.name', 'Microsoft Corp.')
-            ->where('recommendations.1.name', 'Alphabet')
+                ->component('symbol')
+                ->where('symbol', 'AAPL')
+                ->where('quote.symbol', 'AAPL')
+                ->where('quote.name', 'Apple Inc.')
+                ->where('quote.price', 189.84)
+                ->where('chart.range', '1mo')
+                ->has('chart.points', 3)
+                ->has('news', 3)
+                ->where('news.1.link', 'https://stockanalysis.com/relative/path')
+                ->has('recommendations', 2)
+                ->where('recommendations.0.symbol', 'MSFT')
+                ->where('recommendations.0.name', 'Microsoft Corp.')
+                ->where('recommendations.1.name', 'Alphabet')
         );
 });
 
@@ -99,8 +99,8 @@ test('symbol page renders when quote API fails', function () {
         ->assertOk()
         ->assertInertia(
             fn ($page) => $page
-            ->component('symbol')
-            ->where('quote', null)
+                ->component('symbol')
+                ->where('quote', null)
         );
 });
 

@@ -20,7 +20,8 @@ class PortfolioStatistics
     public function __construct(
         protected FinanceQueryClient $client,
         protected PortfolioCalculator $calculator,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<string, mixed>

@@ -1,7 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { SharedData } from '@/types';
+import type { SharedData } from '@/types/shared';
 
 /**
  * Synchronise i18next avec la locale partagée par Inertia (backend).

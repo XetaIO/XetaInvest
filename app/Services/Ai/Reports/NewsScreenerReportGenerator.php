@@ -78,7 +78,7 @@ class NewsScreenerReportGenerator extends BaseReportGenerator
         ];
 
         return [
-            ['role' => 'system', 'content' => $this->systemPrompt()],
+            ['role' => 'system', 'content' => $this->systemPrompt($user)],
             ['role' => 'user', 'content' => "Voici les résultats d'un screener FR et US filtrant les sociétés à forte croissance. Produis le rapport JSON: synthèse des opportunités, secteurs porteurs, top 5 titres FR et top 5 titres US avec rationale, alertes (valorisations excessives, signaux de prudence).\n\nDonnées:\n".json_encode($context, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)],
         ];
     }

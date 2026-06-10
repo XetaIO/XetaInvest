@@ -50,7 +50,7 @@ class GetQuoteTool implements AiTool
         try {
             $quote = $this->finance->quoteDetail($symbol);
         } catch (Throwable $e) {
-            return ['error' => 'finance_query_failed', 'message' => $e->getMessage()];
+            return ['error' => 'finance_query_failed'];
         }
 
         if ($quote === null) {

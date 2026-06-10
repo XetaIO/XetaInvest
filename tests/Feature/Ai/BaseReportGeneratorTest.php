@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\Ai\AiManager;
 use App\Services\Ai\AiUsageLogger;
 use App\Services\Ai\Contracts\AiProvider;
+use App\Services\Ai\DataTransferObjects\AiQuotaReservation;
 use App\Services\Ai\DataTransferObjects\AiResponse;
 use App\Services\Ai\Reports\GlobalPortfolioReportGenerator;
 use App\Services\Ai\Tools\Concrete\GetPortfoliosTool;
@@ -34,7 +35,12 @@ function makeGenerator(): GlobalPortfolioReportGenerator
     $manager->allows('driver')->andReturn($provider);
 
     $usage = Mockery::mock(AiUsageLogger::class);
-    $usage->allows('ensureWithinQuota');
+    $usage->allows('reserve')->andReturn(new AiQuotaReservation(
+        date: now()->toDateString(),
+        scopeKeys: [],
+        tokens: 4000,
+    ));
+    $usage->allows('release');
     $usage->allows('record')->andReturn(0.0);
 
     $portfoliosTool = Mockery::mock(GetPortfoliosTool::class);

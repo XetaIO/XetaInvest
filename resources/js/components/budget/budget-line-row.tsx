@@ -1,4 +1,5 @@
 import { GripVertical, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -10,13 +11,24 @@ type Props = {
     onRemove: () => void;
 };
 
-export function BudgetLineRow({ name, amount, namePlaceholder, onChange, onRemove }: Props) {
+export function BudgetLineRow({
+    name,
+    amount,
+    namePlaceholder,
+    onChange,
+    onRemove,
+}: Props) {
+    const { t } = useTranslation();
+
     return (
         <div className="flex items-center gap-2">
-            <GripVertical className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+            <GripVertical
+                className="size-4 shrink-0 text-muted-foreground"
+                aria-hidden
+            />
             <Input
                 value={name}
-                placeholder={namePlaceholder ?? 'Libellé'}
+                placeholder={namePlaceholder ?? t('budget.line_label')}
                 onChange={(e) => onChange({ name: e.target.value, amount })}
                 className="flex-1"
             />
@@ -29,11 +41,14 @@ export function BudgetLineRow({ name, amount, namePlaceholder, onChange, onRemov
                     value={Number.isFinite(amount) ? amount : 0}
                     onChange={(e) => {
                         const v = parseInt(e.target.value, 10);
-                        onChange({ name, amount: Number.isFinite(v) && v >= 0 ? v : 0 });
+                        onChange({
+                            name,
+                            amount: Number.isFinite(v) && v >= 0 ? v : 0,
+                        });
                     }}
                     className="pr-8 text-right"
                 />
-                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-muted-foreground">
                     €
                 </span>
             </div>
@@ -42,7 +57,7 @@ export function BudgetLineRow({ name, amount, namePlaceholder, onChange, onRemov
                 variant="destructive"
                 size="icon"
                 onClick={onRemove}
-                aria-label="Supprimer la ligne"
+                aria-label={t('budget.remove_line')}
                 className="hover:cursor-pointer"
             >
                 <Trash2 className="size-4" />

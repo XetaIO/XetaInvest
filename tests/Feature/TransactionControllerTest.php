@@ -18,12 +18,30 @@ beforeEach(function (): void {
 test('user can add a transaction to their position', function () {
     $this->actingAs($this->user)
         ->post(route('transactions.store', $this->position), [
-            'type' => 'sell',
+            'type' => 'buy',
             'quantity' => 5,
             'unit_price' => 200,
             'executed_at' => '2026-03-15',
         ])
         ->assertRedirect();
+
+    expect($this->position->transactions()->count())->toBe(1);
+});
+
+test('user cannot sell more units than are held at the transaction date', function () {
+    Transaction::factory()->forPosition($this->position)->buy()->create([
+        'quantity' => 4,
+        'executed_at' => '2026-03-14',
+    ]);
+
+    $this->actingAs($this->user)
+        ->post(route('transactions.store', $this->position), [
+            'type' => 'sell',
+            'quantity' => 5,
+            'unit_price' => 200,
+            'executed_at' => '2026-03-15',
+        ])
+        ->assertSessionHasErrors('quantity');
 
     expect($this->position->transactions()->count())->toBe(1);
 });
@@ -53,6 +71,23 @@ test('user can delete their transaction', function () {
         ->assertRedirect();
 
     expect(Transaction::find($tx->id))->toBeNull();
+});
+
+test('user cannot delete a buy required by a later sell', function () {
+    $buy = Transaction::factory()->forPosition($this->position)->buy()->create([
+        'quantity' => 5,
+        'executed_at' => '2026-01-01',
+    ]);
+    Transaction::factory()->forPosition($this->position)->sell()->create([
+        'quantity' => 5,
+        'executed_at' => '2026-01-02',
+    ]);
+
+    $this->actingAs($this->user)
+        ->delete(route('transactions.destroy', $buy))
+        ->assertSessionHasErrors('quantity');
+
+    expect(Transaction::find($buy->id))->not->toBeNull();
 });
 
 test('user cannot touch another user transaction', function () {

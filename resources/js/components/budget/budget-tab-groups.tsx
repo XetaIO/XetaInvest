@@ -1,8 +1,9 @@
 import { Plus, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import type { BudgetGroupDraft, BudgetLineDraft } from '@/types';
+import type { BudgetGroupDraft, BudgetLineDraft } from '@/types/budget';
 import { BudgetLineRow } from './budget-line-row';
 
 type Props = {
@@ -26,6 +27,7 @@ export function BudgetTabGroups({
     linePlaceholder,
     emptyText,
 }: Props) {
+    const { t } = useTranslation();
     const updateGroup = (index: number, next: BudgetGroupDraft) => {
         const copy = [...groups];
         copy[index] = next;
@@ -33,7 +35,9 @@ export function BudgetTabGroups({
     };
 
     const removeGroup = (index: number) => {
-        onChange(groups.filter((_g: BudgetGroupDraft, i: number) => i !== index));
+        onChange(
+            groups.filter((_g: BudgetGroupDraft, i: number) => i !== index),
+        );
     };
 
     const addGroup = () => {
@@ -49,12 +53,20 @@ export function BudgetTabGroups({
 
     const removeLine = (gIdx: number, lIdx: number) => {
         const group = groups[gIdx];
-        updateGroup(gIdx, { ...group, lines: group.lines.filter((_l: BudgetLineDraft, i: number) => i !== lIdx) });
+        updateGroup(gIdx, {
+            ...group,
+            lines: group.lines.filter(
+                (_l: BudgetLineDraft, i: number) => i !== lIdx,
+            ),
+        });
     };
 
     const addLine = (gIdx: number) => {
         const group = groups[gIdx];
-        updateGroup(gIdx, { ...group, lines: [...group.lines, { name: '', amount: 0 }] });
+        updateGroup(gIdx, {
+            ...group,
+            lines: [...group.lines, { name: '', amount: 0 }],
+        });
     };
 
     return (
@@ -69,7 +81,12 @@ export function BudgetTabGroups({
                         <Input
                             value={group.name}
                             placeholder={groupPlaceholder}
-                            onChange={(e) => updateGroup(gIdx, { ...group, name: e.target.value })}
+                            onChange={(e) =>
+                                updateGroup(gIdx, {
+                                    ...group,
+                                    name: e.target.value,
+                                })
+                            }
                             className="max-w-md font-medium"
                         />
                         <Button
@@ -77,7 +94,7 @@ export function BudgetTabGroups({
                             variant="destructive"
                             size="icon"
                             onClick={() => removeGroup(gIdx)}
-                            aria-label="Supprimer la catégorie"
+                            aria-label={t('budget.remove_group')}
                             className="ml-auto hover:cursor-pointer"
                         >
                             <Trash2 className="size-4" />
@@ -90,7 +107,9 @@ export function BudgetTabGroups({
                                 name={line.name}
                                 amount={line.amount}
                                 namePlaceholder={linePlaceholder}
-                                onChange={(next) => updateLine(gIdx, lIdx, next)}
+                                onChange={(next) =>
+                                    updateLine(gIdx, lIdx, next)
+                                }
                                 onRemove={() => removeLine(gIdx, lIdx)}
                             />
                         ))}

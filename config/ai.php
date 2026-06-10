@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /*
@@ -49,6 +51,7 @@ return [
     'defaults' => [
         'temperature' => (float) env('AI_TEMPERATURE', 0.3),
         'max_tokens' => (int) env('AI_MAX_TOKENS', 2000),
+        'quota_reservation_tokens' => (int) env('AI_QUOTA_RESERVATION_TOKENS', 4000),
         'max_tool_iterations' => (int) env('AI_MAX_TOOL_ITERATIONS', 5),
         'chat_history_limit' => (int) env('AI_CHAT_HISTORY_LIMIT', 20),
     ],

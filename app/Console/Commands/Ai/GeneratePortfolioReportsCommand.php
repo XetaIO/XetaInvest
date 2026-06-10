@@ -28,27 +28,31 @@ class GeneratePortfolioReportsCommand extends Command
             $query->whereKey((int) $userId);
         }
 
-        $users = $query->get();
-
         $total = 0;
         $failed = 0;
 
         /** @var User $user */
-        foreach ($users as $user) {
+        foreach ($query->lazyById() as $user) {
             $portfolios = Portfolio::query()->where('user_id', $user->id);
 
             if ($portfolioId) {
                 $portfolios->whereKey((int) $portfolioId);
             }
 
-            foreach ($portfolios->get() as $portfolio) {
+            foreach ($portfolios->lazyById() as $portfolio) {
                 $this->components->task(
                     sprintf('Portfolio #%d (%s) for user #%d', $portfolio->id, $portfolio->name, $user->id),
                     function () use ($generator, $user, $portfolio, &$failed): bool {
                         try {
                             $report = $generator->generate($user, $portfolio);
 
-                            return $report->status->value === 'success';
+                            $successful = $report->status->value === 'success';
+
+                            if (! $successful) {
+                                $failed++;
+                            }
+
+                            return $successful;
                         } catch (AiQuotaExceededException $e) {
                             $this->components->warn($e->getMessage());
                             $failed++;
@@ -69,6 +73,6 @@ class GeneratePortfolioReportsCommand extends Command
 
         $this->components->info(sprintf('Done. %d processed, %d failed.', $total, $failed));
 
-        return self::SUCCESS;
+        return $failed > 0 ? self::FAILURE : self::SUCCESS;
     }
 }

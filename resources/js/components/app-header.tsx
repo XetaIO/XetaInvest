@@ -34,8 +34,8 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
 import { cn, toUrl } from '@/lib/utils';
+import type { BreadcrumbItem, NavItem } from '@/types/navigation';
 import { dashboard } from '@/routes';
-import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
     breadcrumbs?: BreadcrumbItem[];
@@ -74,7 +74,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
     useEffect(() => {
         const handler = (event: KeyboardEvent) => {
-            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+            if (
+                (event.ctrlKey || event.metaKey) &&
+                event.key.toLowerCase() === 'k'
+            ) {
                 event.preventDefault();
                 setSearchOpen((prev) => !prev);
             }
@@ -202,7 +205,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                             >
                                 <Search className="!size-5 opacity-80 group-hover:opacity-100" />
                             </Button>
-                            <kbd className="pointer-events-none hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground md:inline-flex">
+                            <kbd className="pointer-events-none hidden h-6 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground select-none md:inline-flex">
                                 <span className="text-xs">⌘</span>K
                             </kbd>
                             <div className="ml-1 hidden gap-1 lg:flex">
@@ -263,7 +266,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     </div>
                 </div>
             )}
-            <SymbolSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+            <SymbolSearchDialog
+                open={searchOpen}
+                onOpenChange={setSearchOpen}
+            />
         </>
     );
 }

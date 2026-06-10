@@ -12,6 +12,7 @@ use App\Services\Ai\DataTransferObjects\AiResponse;
 use App\Services\Ai\Exceptions\AiException;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Throwable;
 
 abstract class BaseReportGenerator
@@ -56,10 +57,14 @@ abstract class BaseReportGenerator
             ],
         );
 
-        try {
-            $this->usage->ensureWithinQuota($user);
+        $reservation = null;
 
+        try {
             $messages = $this->buildMessages($user, $scope);
+            $reservation = $this->usage->reserve(
+                $user,
+                (int) config('ai.defaults.quota_reservation_tokens'),
+            );
 
             $response = $this->manager->driver()->chat($messages, [], [
                 'model' => config('ai.models.report'),
@@ -68,7 +73,8 @@ abstract class BaseReportGenerator
                 'response_format' => ['type' => 'json_object'],
             ]);
 
-            $cost = $this->usage->record($user, $this->purpose(), $response);
+            $cost = $this->usage->record($user, $this->purpose(), $response, $reservation);
+            $reservation = null;
 
             $report->update([
                 'status' => 'success',
@@ -81,7 +87,14 @@ abstract class BaseReportGenerator
                 'error_message' => null,
             ]);
         } catch (Throwable $e) {
+            if ($reservation !== null) {
+                $this->usage->release($reservation);
+            }
+
+            $errorId = (string) Str::uuid();
+
             Log::warning('AI report generation failed', [
+                'error_id' => $errorId,
                 'type' => $this->type(),
                 'user_id' => $user->id,
                 'scope_id' => $scopeId,
@@ -90,7 +103,7 @@ abstract class BaseReportGenerator
 
             $report->update([
                 'status' => 'failed',
-                'error_message' => mb_substr($e->getMessage(), 0, 500),
+                'error_message' => __('messages.ai.unavailable', ['reference' => $errorId]),
             ]);
         }
 
@@ -145,18 +158,21 @@ abstract class BaseReportGenerator
         return ['narrative_md' => $raw];
     }
 
-    protected function systemPrompt(): string
+    protected function systemPrompt(User $user): string
     {
-        return <<<'PROMPT'
-        Tu es un assistant financier français pour l'application XetaInvest.
-        Tu produis des analyses claires, neutres, factuelles et prudentes.
-        Tu ne donnes JAMAIS de garantie de performance.
-        Tu réponds STRICTEMENT en JSON valide, sans texte autour, avec les clés:
-          - summary (string, 1-2 phrases)
-          - highlights (array de string courts)
-          - risks (array de string courts)
-          - recommendations (array d'objets {action: "buy"|"hold"|"sell"|"watch", symbol?: string, rationale: string})
-          - narrative_md (string, analyse détaillée en markdown FR)
+        $language = $user->locale === 'en' ? 'English' : 'French';
+
+        return <<<PROMPT
+        You are a financial assistant for the XetaInvest application.
+        Write every user-facing value in {$language}.
+        Produce clear, neutral, factual and cautious analysis.
+        Never guarantee future performance.
+        Reply strictly as valid JSON with no surrounding text, using these keys:
+          - summary (string, 1-2 sentences)
+          - highlights (array of short strings)
+          - risks (array of short strings)
+          - recommendations (array of objects {action: "buy"|"hold"|"sell"|"watch", symbol?: string, rationale: string})
+          - narrative_md (string, detailed markdown analysis)
         PROMPT;
     }
 

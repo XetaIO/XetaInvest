@@ -7,6 +7,7 @@ return [
     'portfolio.created' => 'Portefeuille créé.',
     'portfolio.updated' => 'Portefeuille mis à jour.',
     'portfolio.deleted' => 'Portefeuille supprimé.',
+    'portfolio.limit_reached' => 'Le nombre maximal de portefeuilles est atteint.',
 
     // PositionController
     'position.symbol_not_found' => 'Symbole introuvable.',
@@ -17,11 +18,14 @@ return [
     'watchlist.created' => 'Liste de suivi créée.',
     'watchlist.renamed' => 'Liste renommée.',
     'watchlist.deleted' => 'Liste supprimée.',
+    'watchlist.limit_reached' => 'Le nombre maximal de listes de suivi est atteint.',
+    'watchlist.invalid_order' => 'La liste ordonnée doit contenir exactement tous les éléments suivis.',
 
     // TransactionController
     'transaction.added' => 'Transaction ajoutée.',
     'transaction.updated' => 'Transaction mise à jour.',
     'transaction.deleted' => 'Transaction supprimée.',
+    'transaction.insufficient_quantity' => 'Cette opération créerait une quantité détenue négative à la date indiquée.',
 
     // WatchlistItemController
     'watchlist_item.symbol_not_found' => 'Symbole introuvable.',
@@ -34,4 +38,9 @@ return [
     'password.updated' => 'Mot de passe mis à jour.',
     'locale.updated' => 'Langue mise à jour.',
     'locale.invalid' => 'Langue non supportée.',
+
+    // AI
+    'ai.unavailable' => 'Le service IA est temporairement indisponible. Référence : :reference.',
+    'ai.quota_exceeded' => 'Le quota IA quotidien est atteint. Réessayez demain.',
+    'market_data.unavailable' => 'Les données de marché sont temporairement indisponibles.',
 ];

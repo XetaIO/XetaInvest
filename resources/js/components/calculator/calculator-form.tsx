@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { CalculatorDefaults, CalculatorInputs } from '@/types';
+import type { CalculatorDefaults, CalculatorInputs } from '@/types/calculator';
 
 type Props = {
     inputs: CalculatorInputs;
@@ -15,7 +15,10 @@ type Props = {
 
 export function CalculatorForm({ inputs, onChange, onReset, defaults }: Props) {
     const { t } = useTranslation();
-    const set = <K extends keyof CalculatorInputs>(key: K, value: CalculatorInputs[K]) => {
+    const set = <K extends keyof CalculatorInputs>(
+        key: K,
+        value: CalculatorInputs[K],
+    ) => {
         onChange({ ...inputs, [key]: value });
     };
 
@@ -33,8 +36,15 @@ export function CalculatorForm({ inputs, onChange, onReset, defaults }: Props) {
         <Card className="py-6">
             <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-base">{t('calculator.settings_title')}</CardTitle>
-                    <Button variant="outline" size="sm" onClick={onReset} className="h-8">
+                    <CardTitle className="text-base">
+                        {t('calculator.settings_title')}
+                    </CardTitle>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={onReset}
+                        className="h-8"
+                    >
                         <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
                         {t('common.reset')}
                     </Button>
@@ -57,7 +67,7 @@ export function CalculatorForm({ inputs, onChange, onReset, defaults }: Props) {
                 <Field
                     id="monthlyContribution"
                     label={t('calculator.field_monthly_savings')}
-                    suffix="EUR / MOIS"
+                    suffix={t('calculator.eur_per_month')}
                     value={inputs.monthlyContribution}
                     onChange={(v) => numericChange('monthlyContribution', v)}
                     helper={
@@ -70,7 +80,7 @@ export function CalculatorForm({ inputs, onChange, onReset, defaults }: Props) {
                 <Field
                     id="years"
                     label={t('calculator.field_horizon')}
-                    suffix="ANNÉES"
+                    suffix={t('calculator.years_unit')}
                     value={inputs.years}
                     onChange={(v) => numericChange('years', v)}
                     step="1"
@@ -90,7 +100,7 @@ export function CalculatorForm({ inputs, onChange, onReset, defaults }: Props) {
                 <Field
                     id="compoundIntervalMonths"
                     label={t('calculator.field_compound_interval')}
-                    suffix="MOIS"
+                    suffix={t('calculator.months_unit')}
                     value={inputs.compoundIntervalMonths}
                     onChange={(v) => numericChange('compoundIntervalMonths', v)}
                     step="1"
@@ -125,7 +135,17 @@ type FieldProps = {
     max?: number;
 };
 
-function Field({ id, label, suffix, value, onChange, helper, step = '1', min = 0, max }: FieldProps) {
+function Field({
+    id,
+    label,
+    suffix,
+    value,
+    onChange,
+    helper,
+    step = '1',
+    min = 0,
+    max,
+}: FieldProps) {
     return (
         <div className="flex flex-col gap-1.5">
             <Label htmlFor={id} className="text-sm font-medium">
@@ -143,11 +163,13 @@ function Field({ id, label, suffix, value, onChange, helper, step = '1', min = 0
                     onChange={(e) => onChange(e.target.value)}
                     className="pr-20 font-mono tabular-nums"
                 />
-                <span className="absolute inset-y-0 right-3 flex items-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <span className="absolute inset-y-0 right-3 flex items-center text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                     {suffix}
                 </span>
             </div>
-            {helper && <p className="text-xs text-muted-foreground">{helper}</p>}
+            {helper && (
+                <p className="text-xs text-muted-foreground">{helper}</p>
+            )}
         </div>
     );
 }

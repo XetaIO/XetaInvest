@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
+import type { AuthLayoutProps } from '@/types/ui';
 import { home } from '@/routes';
-import type { AuthLayoutProps } from '@/types';
 
 export default function AuthSimpleLayout({
     children,
@@ -17,8 +17,16 @@ export default function AuthSimpleLayout({
                             className="flex flex-col items-center gap-2 font-medium"
                         >
                             <div className="mb-1 flex items-center justify-center rounded-md">
-                                <img src="/images/logo-brand-light-mode.png" alt="Logo" className="h-13 block dark:hidden" />
-                                <img src="/images/logo-brand-dark-mode.png" alt="Logo" className="h-13 hidden dark:block" />
+                                <img
+                                    src="/images/logo-brand-light-mode.png"
+                                    alt="Logo"
+                                    className="block h-13 dark:hidden"
+                                />
+                                <img
+                                    src="/images/logo-brand-dark-mode.png"
+                                    alt="Logo"
+                                    className="hidden h-13 dark:block"
+                                />
                             </div>
                             <span className="sr-only">{title}</span>
                         </Link>

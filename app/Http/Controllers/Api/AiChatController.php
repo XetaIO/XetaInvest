@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Ai\CreateChatSession;
+use App\Actions\Ai\DeleteChatSession;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ai\CreateChatSessionRequest;
 use App\Http\Requests\Ai\SendChatMessageRequest;
@@ -28,13 +30,11 @@ class AiChatController extends Controller
         return response()->json(['data' => $sessions]);
     }
 
-    public function storeSession(CreateChatSessionRequest $request): JsonResponse
-    {
-        $session = AiChatSession::create([
-            'user_id' => $request->user()->id,
-            'title' => $request->input('title'),
-            'last_message_at' => now(),
-        ]);
+    public function storeSession(
+        CreateChatSessionRequest $request,
+        CreateChatSession $action,
+    ): JsonResponse {
+        $session = $action->handle($request->user(), $request->validated('title'));
 
         return response()->json(['data' => $session], 201);
     }
@@ -65,8 +65,8 @@ class AiChatController extends Controller
                 $session,
                 $request->string('content')->toString(),
             );
-        } catch (AiQuotaExceededException $e) {
-            return response()->json(['message' => $e->getMessage()], 429);
+        } catch (AiQuotaExceededException) {
+            return response()->json(['message' => __('messages.ai.quota_exceeded')], 429);
         }
 
         return response()->json([
@@ -77,11 +77,13 @@ class AiChatController extends Controller
         ]);
     }
 
-    public function destroySession(Request $request, AiChatSession $session): JsonResponse
-    {
+    public function destroySession(
+        Request $request,
+        AiChatSession $session,
+        DeleteChatSession $action,
+    ): JsonResponse {
         $this->authorize('delete', $session);
-
-        $session->delete();
+        $action->handle($session);
 
         return response()->json(['data' => true]);
     }

@@ -1,4 +1,4 @@
-import type { CalculatorInputs, CalculatorPoint } from '@/types';
+import type { CalculatorInputs, CalculatorPoint } from '@/types/calculator';
 
 /**
  * Monthly compounding compound interest projection.

@@ -1,4 +1,4 @@
-import type { SymbolRange } from '@/types';
+import type { SymbolRange } from '@/types/symbol';
 
 // ─── Chart  ────────────────────────────────────────────────────────────
 

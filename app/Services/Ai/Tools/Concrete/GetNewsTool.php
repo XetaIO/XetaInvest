@@ -55,7 +55,7 @@ class GetNewsTool implements AiTool
         try {
             $items = $this->finance->news($symbol);
         } catch (Throwable $e) {
-            return ['error' => 'finance_query_failed', 'message' => $e->getMessage()];
+            return ['error' => 'finance_query_failed'];
         }
 
         $items = array_slice($items, 0, $limit);

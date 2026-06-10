@@ -117,7 +117,7 @@ class ScreenStocksTool implements AiTool
         try {
             $result = $this->finance->screener($payload);
         } catch (Throwable $e) {
-            return ['error' => 'screener_failed', 'message' => $e->getMessage()];
+            return ['error' => 'screener_failed'];
         }
 
         return $result;

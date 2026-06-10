@@ -33,7 +33,7 @@ class GetPortfoliosTool implements AiTool
     {
         return [
             'type' => 'object',
-            'properties' => new \stdClass(),
+            'properties' => new \stdClass,
             'required' => [],
         ];
     }

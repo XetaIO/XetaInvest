@@ -1,6 +1,14 @@
 import { router } from '@inertiajs/react';
-import { Check, ChevronsUpDown, Pencil, Plus, Star, Trash2 } from 'lucide-react';
+import {
+    Check,
+    ChevronsUpDown,
+    Pencil,
+    Plus,
+    Star,
+    Trash2,
+} from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,10 +20,13 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { dashboard } from '@/routes';
-import { destroy as destroyPortfolio, defaultMethod as setDefaultPortfolio } from '@/routes/portfolios';
-import type { PortfolioSummary } from '@/types';
+import type { PortfolioSummary } from '@/types/portfolio';
 import { PortfolioFormDialog } from './portfolio-form-dialog';
+import { dashboard } from '@/routes';
+import {
+    destroy as destroyPortfolio,
+    defaultMethod as setDefaultPortfolio,
+} from '@/routes/portfolios';
 
 type Props = {
     portfolios: PortfolioSummary[];
@@ -23,6 +34,7 @@ type Props = {
 };
 
 export function PortfolioSwitcher({ portfolios, active }: Props) {
+    const { t } = useTranslation();
     const [createOpen, setCreateOpen] = useState(false);
     const [editTarget, setEditTarget] = useState<PortfolioSummary | null>(null);
     const [open, setOpen] = useState(false);
@@ -45,14 +57,20 @@ export function PortfolioSwitcher({ portfolios, active }: Props) {
     };
 
     const handleDelete = (p: PortfolioSummary) => {
-        if (!confirm(`Supprimer le portefeuille « ${p.name} » ? Cette action est irréversible.`)) {
+        if (
+            !confirm(
+                t('portfolio.delete_confirm', {
+                    name: p.name,
+                }),
+            )
+        ) {
             return;
         }
 
         const r = destroyPortfolio(p.id);
         router.delete(r.url, {
             preserveScroll: true,
-            onError: () => toast.error('Impossible de supprimer ce portefeuille.'),
+            onError: () => toast.error(t('portfolio.delete_error')),
         });
     };
 
@@ -60,18 +78,29 @@ export function PortfolioSwitcher({ portfolios, active }: Props) {
         <>
             <DropdownMenu open={open} onOpenChange={setOpen}>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="min-w-[220px] justify-between">
+                    <Button
+                        variant="outline"
+                        className="min-w-[220px] justify-between"
+                    >
                         <span className="flex items-center gap-2 truncate">
-                            {active?.is_default && <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />}
-                            <span className="truncate">{active?.name ?? 'Aucun portefeuille'}</span>
+                            {active?.is_default && (
+                                <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+                            )}
+                            <span className="truncate">
+                                {active?.name ?? t('portfolio.no_portfolio')}
+                            </span>
                         </span>
                         <ChevronsUpDown className="h-4 w-4 opacity-50" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-[260px]">
-                    <DropdownMenuLabel>Portefeuilles</DropdownMenuLabel>
+                    <DropdownMenuLabel>
+                        {t('portfolio.portfolios')}
+                    </DropdownMenuLabel>
                     {portfolios.length === 0 && (
-                        <div className="px-2 py-1.5 text-sm text-muted-foreground">Aucun portefeuille</div>
+                        <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                            {t('portfolio.no_portfolio')}
+                        </div>
                     )}
                     {portfolios.map((p) => (
                         <DropdownMenuItem
@@ -83,16 +112,25 @@ export function PortfolioSwitcher({ portfolios, active }: Props) {
                             }}
                         >
                             <span className="flex items-center gap-2 truncate">
-                                <Check className={cn('h-4 w-4', active?.id === p.id ? 'opacity-100' : 'opacity-0')} />
+                                <Check
+                                    className={cn(
+                                        'h-4 w-4',
+                                        active?.id === p.id
+                                            ? 'opacity-100'
+                                            : 'opacity-0',
+                                    )}
+                                />
                                 <span className="truncate">{p.name}</span>
-                                {p.is_default && <Star className="h-3 w-3 fill-amber-500 text-amber-500" />}
+                                {p.is_default && (
+                                    <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                                )}
                             </span>
                             <span className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                                 {!p.is_default && (
                                     <button
                                         type="button"
                                         className="rounded p-1 hover:bg-accent"
-                                        title="Définir par défaut"
+                                        title={t('portfolio.set_default')}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             handleSetDefault(p);
@@ -104,7 +142,7 @@ export function PortfolioSwitcher({ portfolios, active }: Props) {
                                 <button
                                     type="button"
                                     className="rounded p-1 hover:bg-accent"
-                                    title="Renommer"
+                                    title={t('portfolio.edit')}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setEditTarget(p);
@@ -116,7 +154,7 @@ export function PortfolioSwitcher({ portfolios, active }: Props) {
                                 <button
                                     type="button"
                                     className="rounded p-1 hover:bg-accent"
-                                    title="Supprimer"
+                                    title={t('portfolio.delete')}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         handleDelete(p);
@@ -136,12 +174,15 @@ export function PortfolioSwitcher({ portfolios, active }: Props) {
                         }}
                     >
                         <Plus className="mr-2 h-4 w-4" />
-                        Nouveau portefeuille
+                        {t('portfolio.new')}
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <PortfolioFormDialog open={createOpen} onOpenChange={setCreateOpen} />
+            <PortfolioFormDialog
+                open={createOpen}
+                onOpenChange={setCreateOpen}
+            />
             <PortfolioFormDialog
                 open={editTarget !== null}
                 onOpenChange={(o) => !o && setEditTarget(null)}

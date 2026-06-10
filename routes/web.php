@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Api\AiChatController;
 use App\Http\Controllers\Api\QuotesController;
 use App\Http\Controllers\Api\SearchController;
@@ -16,7 +18,7 @@ Route::middleware(['auth'])->prefix('api')->name('api.')->group(function (): voi
     Route::get('search', SearchController::class)->middleware('throttle:60,1')->name('search');
     Route::get('quotes', QuotesController::class)->middleware('throttle:30,1')->name('quotes');
 
-    Route::prefix('ai/chat')->name('ai.chat.')->middleware('throttle:30,1')->group(function (): void {
+    Route::prefix('ai/chat')->name('ai.chat.')->middleware(['verified', 'throttle:30,1'])->group(function (): void {
         Route::get('sessions', [AiChatController::class, 'sessions'])->name('sessions');
         Route::post('sessions', [AiChatController::class, 'storeSession'])->name('sessions.store');
         Route::get('sessions/{session}/messages', [AiChatController::class, 'messages'])->name('messages');

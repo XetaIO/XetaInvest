@@ -29,9 +29,9 @@ test('it atomically reserves and records daily quota consumption', function (): 
         provider: 'openai',
     ), $reservation);
 
-    expect(AiDailyQuota::query()->sum('reserved_tokens'))->toBe(0)
-        ->and(AiDailyQuota::query()->sum('consumed_tokens'))->toBe(60)
-        ->and(AiUsage::query()->count())->toBe(1);
+    expect((int) AiDailyQuota::query()->sum('reserved_tokens'))->toBe(0)
+        ->and((int) AiDailyQuota::query()->sum('consumed_tokens'))->toBe(60)
+        ->and((int) AiUsage::query()->count())->toBe(1);
 });
 
 test('it rejects a reservation that would exceed a user quota', function (): void {

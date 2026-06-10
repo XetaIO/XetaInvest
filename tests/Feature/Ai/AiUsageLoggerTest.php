@@ -17,7 +17,7 @@ test('it atomically reserves and records daily quota consumption', function (): 
     $logger = app(AiUsageLogger::class);
     $reservation = $logger->reserve($user, 50);
 
-    expect(AiDailyQuota::query()->sum('reserved_tokens'))->toBe(100);
+    expect((int) AiDailyQuota::query()->sum('reserved_tokens'))->toBe(100);
 
     $logger->record($user, 'test', new AiResponse(
         content: 'ok',

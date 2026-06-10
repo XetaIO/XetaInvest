@@ -27,7 +27,7 @@ jobs:
       - name: Install Dependencies
         run: |
           composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-          npm ci
+          npm install
 
       - name: Check Pint
         run: composer lint:check

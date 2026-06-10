@@ -175,8 +175,8 @@ export function AddInvestmentDialog({
                         {step === 'search'
                             ? t('position.add_dialog_title')
                             : t('position.add_dialog_lines', {
-                                symbol: selected?.symbol,
-                            })}
+                                  symbol: selected?.symbol,
+                              })}
                     </DialogTitle>
                 </DialogHeader>
 

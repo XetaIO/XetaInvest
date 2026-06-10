@@ -277,10 +277,10 @@ export function SymbolSearchDialog({ open, onOpenChange }: Props) {
                                         {(tab === 'all'
                                             ? displayResults
                                             : displayResults.filter(
-                                                (r) =>
-                                                    r.type?.toLowerCase() ===
-                                                    tab,
-                                            )
+                                                  (r) =>
+                                                      r.type?.toLowerCase() ===
+                                                      tab,
+                                              )
                                         ).map((r) => (
                                             <ResultItem
                                                 key={`${r.symbol}-${r.exchange ?? ''}`}

@@ -15,8 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AddToWatchlistButton } from '@/components/watchlist/add-to-watchlist-button';
 import { apiFetch } from '@/lib/api';
 import { TAB_ORDER } from '@/lib/constants';
-import { search as symbolSearch, show as symbolShow } from '@/routes/symbol';
 import type { SymbolSearchResult } from '@/types/symbol';
+import { search as symbolSearch, show as symbolShow } from '@/routes/symbol';
 
 type QuoteType = (typeof TAB_ORDER)[number];
 
@@ -277,10 +277,10 @@ export function SymbolSearchDialog({ open, onOpenChange }: Props) {
                                         {(tab === 'all'
                                             ? displayResults
                                             : displayResults.filter(
-                                                  (r) =>
-                                                      r.type?.toLowerCase() ===
-                                                      tab,
-                                              )
+                                                (r) =>
+                                                    r.type?.toLowerCase() ===
+                                                    tab,
+                                            )
                                         ).map((r) => (
                                             <ResultItem
                                                 key={`${r.symbol}-${r.exchange ?? ''}`}

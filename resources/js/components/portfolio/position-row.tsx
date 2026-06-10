@@ -20,11 +20,11 @@ import {
     formatPercent,
 } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import { destroy as destroyPosition } from '@/routes/positions';
-import { destroy as destroyTransaction } from '@/routes/transactions';
 import type { PositionKpis, TransactionTypeOption } from '@/types/portfolio';
 import { TransactionFormDialog } from './transaction-form-dialog';
 import type { TransactionFormValues } from './transaction-form-dialog';
+import { destroy as destroyPosition } from '@/routes/positions';
+import { destroy as destroyTransaction } from '@/routes/transactions';
 
 type Props = {
     position: PositionKpis;

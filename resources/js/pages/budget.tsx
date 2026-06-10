@@ -9,13 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useDebounce } from '@/hooks/use-debounce';
 import { AUTOSAVE_DEBOUNCE_MS } from '@/lib/constants';
-import { update as updateBudget } from '@/routes/budget';
 import type {
     BudgetGroupDraft,
     BudgetLineDraft,
     BudgetPageProps,
     BudgetTab,
 } from '@/types/budget';
+import { update as updateBudget } from '@/routes/budget';
 
 const TABS: BudgetTab[] = ['income', 'investments', 'expenses'];
 

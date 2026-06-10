@@ -20,13 +20,13 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import type { PortfolioSummary } from '@/types/portfolio';
+import { PortfolioFormDialog } from './portfolio-form-dialog';
 import { dashboard } from '@/routes';
 import {
     destroy as destroyPortfolio,
     defaultMethod as setDefaultPortfolio,
 } from '@/routes/portfolios';
-import type { PortfolioSummary } from '@/types/portfolio';
-import { PortfolioFormDialog } from './portfolio-form-dialog';
 
 type Props = {
     portfolios: PortfolioSummary[];

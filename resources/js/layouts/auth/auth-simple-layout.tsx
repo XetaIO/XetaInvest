@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types/ui';
+import { home } from '@/routes';
 
 export default function AuthSimpleLayout({
     children,

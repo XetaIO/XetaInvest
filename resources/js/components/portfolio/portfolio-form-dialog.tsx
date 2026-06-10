@@ -12,11 +12,11 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import type { PortfolioSummary } from '@/types/portfolio';
 import {
     store as storePortfolio,
     update as updatePortfolio,
 } from '@/routes/portfolios';
-import type { PortfolioSummary } from '@/types/portfolio';
 
 type Props = {
     open: boolean;

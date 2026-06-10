@@ -7,16 +7,25 @@ namespace App\Actions\Portfolio;
 use App\Models\Portfolio;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class CreatePortfolio
 {
     /** @param array<string, mixed> $data */
     public function handle(User $user, array $data): Portfolio
     {
-        $isDefault = (bool) ($data['is_default'] ?? false);
-        $count = $user->portfolios()->count();
+        return DB::transaction(function () use ($user, $data): Portfolio {
+            User::query()->whereKey($user->getKey())->lockForUpdate()->firstOrFail();
+            $count = $user->portfolios()->count();
 
-        return DB::transaction(function () use ($user, $data, $isDefault, $count): Portfolio {
+            if ($count >= Portfolio::MAX_PER_USER) {
+                throw ValidationException::withMessages([
+                    'name' => __('messages.portfolio.limit_reached'),
+                ]);
+            }
+
+            $isDefault = (bool) ($data['is_default'] ?? false);
+
             if ($isDefault || $count === 0) {
                 $user->portfolios()->update(['is_default' => false]);
             }

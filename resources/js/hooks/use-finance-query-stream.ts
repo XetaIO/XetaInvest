@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import type { PriceUpdate } from '@/types';
+import type { PriceUpdate } from '@/types/watchlist';
 
 type Options = {
     symbols: string[];
@@ -35,8 +35,10 @@ type RawPriceUpdate = {
     time?: unknown;
 };
 
-const num = (v: unknown): number | undefined => (typeof v === 'number' && Number.isFinite(v) ? v : undefined);
-const str = (v: unknown): string | undefined => (typeof v === 'string' ? v : undefined);
+const num = (v: unknown): number | undefined =>
+    typeof v === 'number' && Number.isFinite(v) ? v : undefined;
+const str = (v: unknown): string | undefined =>
+    typeof v === 'string' ? v : undefined;
 
 function normalizePriceUpdate(raw: unknown): PriceUpdate | null {
     if (!raw || typeof raw !== 'object') {
@@ -83,17 +85,26 @@ function normalizePriceUpdate(raw: unknown): PriceUpdate | null {
     };
 }
 
-export function useFinanceQueryStream({ symbols, wsUrl, onUpdate, enabled = true }: Options) {
+export function useFinanceQueryStream({
+    symbols,
+    wsUrl,
+    onUpdate,
+    enabled = true,
+}: Options) {
     const wsRef = useRef<WebSocket | null>(null);
     const subscribedRef = useRef<Set<string>>(new Set());
     const reconnectDelayRef = useRef<number>(3000);
     const reconnectTimerRef = useRef<number | null>(null);
     const closedByUsRef = useRef<boolean>(false);
     const onUpdateRef = useRef(onUpdate);
-    const syncSubscriptionsRef = useRef<() => void>(() => { });
+    const syncSubscriptionsRef = useRef<() => void>(() => {});
 
     const symbolsKey = useMemo(
-        () => symbols.map((s) => s.toUpperCase()).sort().join('|'),
+        () =>
+            symbols
+                .map((s) => s.toUpperCase())
+                .sort()
+                .join('|'),
         [symbols],
     );
 
@@ -185,8 +196,14 @@ export function useFinanceQueryStream({ symbols, wsUrl, onUpdate, enabled = true
                     return;
                 }
 
-                reconnectTimerRef.current = window.setTimeout(connect, reconnectDelayRef.current);
-                reconnectDelayRef.current = Math.min(reconnectDelayRef.current * 2, 30000);
+                reconnectTimerRef.current = window.setTimeout(
+                    connect,
+                    reconnectDelayRef.current,
+                );
+                reconnectDelayRef.current = Math.min(
+                    reconnectDelayRef.current * 2,
+                    30000,
+                );
             };
 
             ws.onerror = () => {
@@ -212,11 +229,9 @@ export function useFinanceQueryStream({ symbols, wsUrl, onUpdate, enabled = true
             wsRef.current = null;
             subscribedRef.current = new Set();
         };
-
     }, [enabled, wsUrl]);
 
     useEffect(() => {
         syncSubscriptionsRef.current();
-
     }, [symbolsKey]);
 }

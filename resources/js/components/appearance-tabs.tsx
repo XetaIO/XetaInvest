@@ -16,7 +16,11 @@ export function AppearanceTabs({
     const tabs: { value: Appearance; icon: LucideIcon; label: string }[] = [
         { value: 'light', icon: Sun, label: t('settings.appearance_light') },
         { value: 'dark', icon: Moon, label: t('settings.appearance_dark') },
-        { value: 'system', icon: Monitor, label: t('settings.appearance_system') },
+        {
+            value: 'system',
+            icon: Monitor,
+            label: t('settings.appearance_system'),
+        },
     ];
 
     return (

@@ -40,7 +40,7 @@ class WatchlistReportGenerator extends BaseReportGenerator
         $context = $this->watchlistsTool->execute($user, ['with_quotes' => true]);
 
         return [
-            ['role' => 'system', 'content' => $this->systemPrompt()],
+            ['role' => 'system', 'content' => $this->systemPrompt($user)],
             ['role' => 'user', 'content' => "Analyse les watchlists de l'utilisateur et propose un classement des titres les plus intéressants à investir maintenant. Pour chaque recommandation, justifie brièvement (momentum, valorisation, secteur). Limite-toi aux titres présents.\n\nDonnées:\n".json_encode($context, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)],
         ];
     }

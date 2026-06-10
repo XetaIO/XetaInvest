@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { apiFetch } from '@/lib/api';
-import type { AiChatMessage, AiChatSession } from '@/types';
+import type { AiChatMessage, AiChatSession } from '@/types/ai';
 
 interface UseAiChatResult {
     sessions: AiChatSession[];
@@ -18,7 +18,9 @@ interface UseAiChatResult {
 
 export function useAiChat(): UseAiChatResult {
     const [sessions, setSessions] = useState<AiChatSession[]>([]);
-    const [activeSession, setActiveSession] = useState<AiChatSession | null>(null);
+    const [activeSession, setActiveSession] = useState<AiChatSession | null>(
+        null,
+    );
     const [messages, setMessages] = useState<AiChatMessage[]>([]);
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false);
@@ -27,30 +29,36 @@ export function useAiChat(): UseAiChatResult {
 
     const loadSessions = useCallback(async () => {
         try {
-            const data = await apiFetch<{ data: AiChatSession[] }>('/api/ai/chat/sessions');
+            const data = await apiFetch<{ data: AiChatSession[] }>(
+                '/api/ai/chat/sessions',
+            );
             setSessions(data.data);
         } catch (e) {
             setError(e instanceof Error ? e.message : 'load_failed');
         }
     }, []);
 
-    const createSession = useCallback(async (): Promise<AiChatSession | null> => {
-        try {
-            const data = await apiFetch<{ data: AiChatSession }>('/api/ai/chat/sessions', {
-                method: 'POST',
-                body: JSON.stringify({}),
-            });
-            setSessions((prev) => [data.data, ...prev]);
-            setActiveSession(data.data);
-            setMessages([]);
+    const createSession =
+        useCallback(async (): Promise<AiChatSession | null> => {
+            try {
+                const data = await apiFetch<{ data: AiChatSession }>(
+                    '/api/ai/chat/sessions',
+                    {
+                        method: 'POST',
+                        body: JSON.stringify({}),
+                    },
+                );
+                setSessions((prev) => [data.data, ...prev]);
+                setActiveSession(data.data);
+                setMessages([]);
 
-            return data.data;
-        } catch (e) {
-            setError(e instanceof Error ? e.message : 'create_failed');
+                return data.data;
+            } catch (e) {
+                setError(e instanceof Error ? e.message : 'create_failed');
 
-            return null;
-        }
-    }, []);
+                return null;
+            }
+        }, []);
 
     const selectSession = useCallback(
         async (id: number) => {
@@ -100,7 +108,10 @@ export function useAiChat(): UseAiChatResult {
 
             try {
                 const data = await apiFetch<{
-                    data: { assistant_message: AiChatMessage; session: AiChatSession };
+                    data: {
+                        assistant_message: AiChatMessage;
+                        session: AiChatSession;
+                    };
                 }>(`/api/ai/chat/sessions/${session.id}/messages`, {
                     method: 'POST',
                     body: JSON.stringify({ content }),
@@ -112,13 +123,17 @@ export function useAiChat(): UseAiChatResult {
                 setMessages(refreshed.data);
 
                 setSessions((prev) => {
-                    const others = prev.filter((s) => s.id !== data.data.session.id);
+                    const others = prev.filter(
+                        (s) => s.id !== data.data.session.id,
+                    );
 
                     return [data.data.session, ...others];
                 });
             } catch (e) {
                 setError(e instanceof Error ? e.message : 'send_failed');
-                setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
+                setMessages((prev) =>
+                    prev.filter((m) => m.id !== optimistic.id),
+                );
             } finally {
                 setSending(false);
             }
@@ -129,7 +144,9 @@ export function useAiChat(): UseAiChatResult {
     const deleteSession = useCallback(
         async (id: number) => {
             try {
-                await apiFetch(`/api/ai/chat/sessions/${id}`, { method: 'DELETE' });
+                await apiFetch(`/api/ai/chat/sessions/${id}`, {
+                    method: 'DELETE',
+                });
                 setSessions((prev) => prev.filter((s) => s.id !== id));
 
                 if (activeSession?.id === id) {

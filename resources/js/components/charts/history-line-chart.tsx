@@ -1,6 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import {
     ChartContainer,
     ChartLegend,
@@ -10,8 +16,12 @@ import {
 } from '@/components/ui/chart';
 import type { ChartConfig } from '@/components/ui/chart';
 import { CHART_MARGINS } from '@/lib/constants';
-import { formatEur, formatHistoryAxisDate, formatHistoryTooltipDate } from '@/lib/format';
-import type { HistoryPoint } from '@/types';
+import {
+    formatEur,
+    formatHistoryAxisDate,
+    formatHistoryTooltipDate,
+} from '@/lib/format';
+import type { HistoryPoint } from '@/types/portfolio';
 
 type Props = {
     title?: string;
@@ -19,11 +29,7 @@ type Props = {
     data: HistoryPoint[];
 };
 
-export function HistoryLineChart({
-    title,
-    description,
-    data = [],
-}: Props) {
+export function HistoryLineChart({ title, description, data = [] }: Props) {
     const { t, i18n } = useTranslation();
     const loc = i18n.resolvedLanguage ?? 'fr';
 
@@ -56,7 +62,9 @@ export function HistoryLineChart({
             <Card className="py-6">
                 <CardHeader className="pb-0">
                     <CardTitle className="text-base">{chartTitle}</CardTitle>
-                    {description && <CardDescription>{description}</CardDescription>}
+                    {description && (
+                        <CardDescription>{description}</CardDescription>
+                    )}
                 </CardHeader>
                 <CardContent className="pb-2">
                     <div className="flex h-65 items-center justify-center text-sm text-muted-foreground">
@@ -71,10 +79,15 @@ export function HistoryLineChart({
         <Card className="py-6">
             <CardHeader className="pb-0">
                 <CardTitle className="text-base">{chartTitle}</CardTitle>
-                {description && <CardDescription>{description}</CardDescription>}
+                {description && (
+                    <CardDescription>{description}</CardDescription>
+                )}
             </CardHeader>
             <CardContent className="pb-2">
-                <ChartContainer config={config} className="aspect-auto h-70 w-full">
+                <ChartContainer
+                    config={config}
+                    className="aspect-auto h-70 w-full"
+                >
                     <LineChart data={data} margin={CHART_MARGINS.DEFAULT}>
                         <CartesianGrid vertical={false} strokeDasharray="3 3" />
                         <XAxis
@@ -83,7 +96,9 @@ export function HistoryLineChart({
                             axisLine={false}
                             tickMargin={8}
                             minTickGap={32}
-                            tickFormatter={(v) => formatHistoryAxisDate(String(v), loc)}
+                            tickFormatter={(v) =>
+                                formatHistoryAxisDate(String(v), loc)
+                            }
                         />
                         <YAxis
                             domain={[minY, maxY]}
@@ -97,11 +112,17 @@ export function HistoryLineChart({
                             cursor={true}
                             content={
                                 <ChartTooltipContent
-                                    labelFormatter={(label) => formatHistoryTooltipDate(String(label), loc)}
+                                    labelFormatter={(label) =>
+                                        formatHistoryTooltipDate(
+                                            String(label),
+                                            loc,
+                                        )
+                                    }
                                     formatter={(value, name) => {
                                         const numeric = Number(value);
                                         const key = String(name);
-                                        const meta = config[key as keyof typeof config];
+                                        const meta =
+                                            config[key as keyof typeof config];
                                         const color = meta?.color;
 
                                         return (
@@ -109,13 +130,16 @@ export function HistoryLineChart({
                                                 {color && (
                                                     <span
                                                         className="inline-block h-2.5 w-2.5 shrink-0 rounded-[2px]"
-                                                        style={{ backgroundColor: color }}
+                                                        style={{
+                                                            backgroundColor:
+                                                                color,
+                                                        }}
                                                     />
                                                 )}
                                                 <span className="text-muted-foreground">
                                                     {meta?.label ?? key}
                                                 </span>
-                                                <span className="ml-auto font-mono font-medium tabular-nums text-foreground">
+                                                <span className="ml-auto font-mono font-medium text-foreground tabular-nums">
                                                     {formatEur(numeric)}
                                                 </span>
                                             </div>

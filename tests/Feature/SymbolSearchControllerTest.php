@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
@@ -143,7 +144,7 @@ test('region is derived from app locale', function () {
     $this->actingAs($this->user)->getJson('/symbol-search?q=AAPL')
         ->assertOk();
 
-    Http::assertSent(function (\Illuminate\Http\Client\Request $request): bool {
+    Http::assertSent(function (Request $request): bool {
         return str_contains($request->url(), 'region=FR');
     });
 });

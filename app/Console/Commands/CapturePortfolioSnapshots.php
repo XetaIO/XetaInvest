@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
+use App\Exceptions\FinanceQueryException;
 use App\Models\Portfolio;
 use App\Services\PortfolioSnapshotRecorder;
 use Carbon\CarbonImmutable;
@@ -36,7 +39,18 @@ class CapturePortfolioSnapshots extends Command
                 return self::FAILURE;
             }
 
-            $snapshot = $recorder->recordPortfolio($portfolio, $date, $force);
+            try {
+                $snapshot = $recorder->recordPortfolio($portfolio, $date, $force);
+            } catch (FinanceQueryException $exception) {
+                $this->error(sprintf(
+                    'Snapshot not saved for portfolio #%d: market data is unavailable.',
+                    $portfolio->id,
+                ));
+
+                report($exception);
+
+                return self::FAILURE;
+            }
 
             if ($snapshot === null) {
                 $this->warn("Portfolio #{$portfolio->id} has no positions, skipped.");
@@ -45,11 +59,10 @@ class CapturePortfolioSnapshots extends Command
             }
 
             $this->info(sprintf(
-                'Snapshot saved for portfolio #%d on %s (value: %.2f EUR, quote_error: %s).',
+                'Snapshot saved for portfolio #%d on %s (value: %.2f EUR).',
                 $portfolio->id,
                 $date->toDateString(),
                 (float) $snapshot->current_value_eur,
-                $snapshot->quote_error ? 'yes' : 'no',
             ));
 
             return self::SUCCESS;

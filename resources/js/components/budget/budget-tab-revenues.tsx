@@ -2,7 +2,7 @@ import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { BudgetLineDraft } from '@/types';
+import type { BudgetLineDraft } from '@/types/budget';
 import { BudgetLineRow } from './budget-line-row';
 
 type Props = {
@@ -49,7 +49,12 @@ export function BudgetTabRevenues({ lines, onChange }: Props) {
                     />
                 ))}
                 <div>
-                    <Button type="button" variant="outline" size="sm" onClick={addLine}>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addLine}
+                    >
                         <Plus className="mr-1 size-4" />
                         {t('budget.income_add')}
                     </Button>

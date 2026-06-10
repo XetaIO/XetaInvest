@@ -1,5 +1,5 @@
 import i18n from '@/lib/i18n';
-import type { SymbolRange } from '@/types';
+import type { SymbolRange } from '@/types/symbol';
 
 const PARIS_TZ = 'Europe/Paris';
 
@@ -157,7 +157,11 @@ function parseChartDate(value: string | number): Date {
  * Formats a chart x-axis tick label according to the selected time range.
  * Used in SymbolChart.
  */
-export function formatChartAxisTick(value: string | number, range: SymbolRange, loc: string): string {
+export function formatChartAxisTick(
+    value: string | number,
+    range: SymbolRange,
+    loc: string,
+): string {
     const d = parseChartDate(value);
 
     if (Number.isNaN(d.getTime())) {
@@ -180,18 +184,33 @@ export function formatChartAxisTick(value: string | number, range: SymbolRange, 
         }).format(d);
     }
 
-    if (range === '1mo' || range === '3mo' || range === '6mo' || range === 'ytd') {
-        return new Intl.DateTimeFormat(loc, { day: '2-digit', month: '2-digit' }).format(d);
+    if (
+        range === '1mo' ||
+        range === '3mo' ||
+        range === '6mo' ||
+        range === 'ytd'
+    ) {
+        return new Intl.DateTimeFormat(loc, {
+            day: '2-digit',
+            month: '2-digit',
+        }).format(d);
     }
 
-    return new Intl.DateTimeFormat(loc, { month: 'short', year: '2-digit' }).format(d);
+    return new Intl.DateTimeFormat(loc, {
+        month: 'short',
+        year: '2-digit',
+    }).format(d);
 }
 
 /**
  * Formats a chart tooltip date label according to the selected time range.
  * Used in SymbolChart.
  */
-export function formatChartTooltipDate(value: string | number, range: SymbolRange, loc: string): string {
+export function formatChartTooltipDate(
+    value: string | number,
+    range: SymbolRange,
+    loc: string,
+): string {
     const d = parseChartDate(value);
 
     if (Number.isNaN(d.getTime())) {
@@ -225,7 +244,10 @@ export function formatHistoryAxisDate(iso: string, loc: string): string {
         return iso;
     }
 
-    return new Intl.DateTimeFormat(loc, { day: '2-digit', month: '2-digit' }).format(d);
+    return new Intl.DateTimeFormat(loc, {
+        day: '2-digit',
+        month: '2-digit',
+    }).format(d);
 }
 
 /**

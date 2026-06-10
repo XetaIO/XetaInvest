@@ -62,7 +62,8 @@ class DashboardController extends Controller
                         }
                     }
                 } catch (FinanceQueryException $e) {
-                    $error = $e->getMessage();
+                    report($e);
+                    $error = __('messages.market_data.unavailable');
                 }
             }
 

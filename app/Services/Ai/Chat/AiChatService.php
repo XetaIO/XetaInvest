@@ -28,8 +28,6 @@ class AiChatService
      */
     public function sendMessage(User $user, AiChatSession $session, string $content): AiChatMessage
     {
-        $this->usage->ensureWithinQuota($user);
-
         $session->messages()->create([
             'role' => AiChatRole::User->value,
             'content' => $content,
@@ -41,20 +39,31 @@ class AiChatService
             $session->update(['title' => mb_substr($content, 0, 80)]);
         }
 
-        $history = $this->buildMessageHistory($session);
+        $history = $this->buildMessageHistory($user, $session);
         $toolSchemas = $this->tools->schemas();
         $maxIterations = (int) config('ai.defaults.max_tool_iterations', 5);
 
         $assistantMessage = null;
 
         for ($i = 0; $i < $maxIterations; $i++) {
-            $response = $this->manager->driver()->chat($history, $toolSchemas, [
-                'model' => config('ai.models.chat'),
-                'temperature' => config('ai.defaults.temperature'),
-                'max_tokens' => config('ai.defaults.max_tokens'),
-            ]);
+            $reservation = $this->usage->reserve(
+                $user,
+                (int) config('ai.defaults.quota_reservation_tokens'),
+            );
 
-            $this->usage->record($user, 'chat', $response);
+            try {
+                $response = $this->manager->driver()->chat($history, $toolSchemas, [
+                    'model' => config('ai.models.chat'),
+                    'temperature' => config('ai.defaults.temperature'),
+                    'max_tokens' => config('ai.defaults.max_tokens'),
+                ]);
+
+                $this->usage->record($user, 'chat', $response, $reservation);
+            } catch (Throwable $exception) {
+                $this->usage->release($reservation);
+
+                throw $exception;
+            }
 
             if ($response->hasToolCalls()) {
                 $history[] = [
@@ -126,7 +135,7 @@ class AiChatService
     /**
      * @return array<int, array<string, mixed>>
      */
-    protected function buildMessageHistory(AiChatSession $session): array
+    protected function buildMessageHistory(User $user, AiChatSession $session): array
     {
         $limit = (int) config('ai.defaults.chat_history_limit', 20);
 
@@ -136,7 +145,7 @@ class AiChatService
             ->take(-$limit);
 
         $out = [
-            ['role' => 'system', 'content' => $this->systemPrompt()],
+            ['role' => 'system', 'content' => $this->systemPrompt($user)],
         ];
 
         foreach ($messages as $msg) {
@@ -187,22 +196,24 @@ class AiChatService
         } catch (Throwable $e) {
             Log::warning('AI tool failed', ['tool' => $name, 'error' => $e->getMessage()]);
 
-            return ['error' => 'tool_execution_failed', 'message' => $e->getMessage()];
+            return ['error' => 'tool_execution_failed'];
         }
     }
 
-    protected function systemPrompt(): string
+    protected function systemPrompt(User $user): string
     {
-        return <<<'PROMPT'
-        Tu es l'assistant IA de l'application XetaInvest (investissement boursier personnel).
-        Tu réponds toujours en français, de manière concise, prudente et factuelle.
-        Tu peux appeler des outils en lecture seule pour récupérer les portfolios, watchlists, cotations, news et lancer des screeners.
-        Règles strictes:
-          - Ne JAMAIS promettre de performance future.
-          - Pas de conseil fiscal ou juridique.
-          - Mentionner les limites (données API tierces, retards de cotation).
-          - Sois bref par défaut, développe à la demande.
-          - Utilise les outils dès que la réponse exige des données utilisateur ou marché récentes.
+        $language = $user->locale === 'en' ? 'English' : 'French';
+
+        return <<<PROMPT
+        You are the AI assistant for XetaInvest, a personal investing application.
+        Always answer in {$language}, concisely, cautiously and factually.
+        You may call read-only tools for portfolios, watchlists, quotes, news and screeners.
+        Strict rules:
+          - Never promise future performance.
+          - Do not provide tax or legal advice.
+          - Mention third-party data and delayed quote limitations.
+          - Be brief by default and expand only when asked.
+          - Use tools whenever current user or market data is required.
         PROMPT;
     }
 }

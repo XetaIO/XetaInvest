@@ -7,7 +7,7 @@ import { SymbolSearchDialog } from '@/components/symbol-search-dialog';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useLocale } from '@/hooks/use-locale';
-import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
+import type { BreadcrumbItem as BreadcrumbItemType } from '@/types/navigation';
 
 export function AppSidebarHeader({
     breadcrumbs = [],
@@ -20,7 +20,10 @@ export function AppSidebarHeader({
 
     useEffect(() => {
         const handler = (event: KeyboardEvent) => {
-            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+            if (
+                (event.ctrlKey || event.metaKey) &&
+                event.key.toLowerCase() === 'k'
+            ) {
                 event.preventDefault();
                 setSearchOpen((prev) => !prev);
             }
@@ -46,12 +49,17 @@ export function AppSidebarHeader({
                 aria-label={t('search.aria_label')}
             >
                 <Search className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('search.placeholder')}</span>
-                <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground md:inline-flex">
+                <span className="hidden sm:inline">
+                    {t('search.placeholder')}
+                </span>
+                <kbd className="pointer-events-none hidden h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground select-none md:inline-flex">
                     <span className="text-xs">⌘</span>K
                 </kbd>
             </Button>
-            <SymbolSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+            <SymbolSearchDialog
+                open={searchOpen}
+                onOpenChange={setSearchOpen}
+            />
         </header>
     );
 }

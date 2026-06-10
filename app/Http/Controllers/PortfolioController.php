@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\Portfolio\CreatePortfolio;
+use App\Actions\Portfolio\DeletePortfolio;
+use App\Actions\Portfolio\SetDefaultPortfolio;
 use App\Actions\Portfolio\UpdatePortfolio;
 use App\Http\Requests\Portfolio\StorePortfolioRequest;
 use App\Http\Requests\Portfolio\UpdatePortfolioRequest;
 use App\Models\Portfolio;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class PortfolioController extends Controller
@@ -34,34 +35,26 @@ class PortfolioController extends Controller
         return back();
     }
 
-    public function destroy(Request $request, Portfolio $portfolio): RedirectResponse
-    {
+    public function destroy(
+        Request $request,
+        Portfolio $portfolio,
+        DeletePortfolio $action,
+    ): RedirectResponse {
         $this->authorize('delete', $portfolio);
-
-        $wasDefault = $portfolio->is_default;
-
-        DB::transaction(function () use ($portfolio, $wasDefault, $request): void {
-            $portfolio->delete();
-
-            if ($wasDefault) {
-                $next = $request->user()->portfolios()->orderBy('id')->first();
-                $next?->update(['is_default' => true]);
-            }
-        });
+        $action->handle($request->user(), $portfolio);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.portfolio.deleted')]);
 
         return back();
     }
 
-    public function setDefault(Request $request, Portfolio $portfolio): RedirectResponse
-    {
+    public function setDefault(
+        Request $request,
+        Portfolio $portfolio,
+        SetDefaultPortfolio $action,
+    ): RedirectResponse {
         $this->authorize('update', $portfolio);
-
-        DB::transaction(function () use ($request, $portfolio): void {
-            $request->user()->portfolios()->update(['is_default' => false]);
-            $portfolio->update(['is_default' => true]);
-        });
+        $action->handle($request->user(), $portfolio);
 
         return back();
     }

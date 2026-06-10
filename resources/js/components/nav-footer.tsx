@@ -7,7 +7,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { toUrl } from '@/lib/utils';
-import type { NavItem } from '@/types';
+import type { NavItem } from '@/types/navigation';
 
 export function NavFooter({
     items,

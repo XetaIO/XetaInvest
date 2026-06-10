@@ -16,7 +16,7 @@ import { AddToWatchlistButton } from '@/components/watchlist/add-to-watchlist-bu
 import { apiFetch } from '@/lib/api';
 import { TAB_ORDER } from '@/lib/constants';
 import { search as symbolSearch, show as symbolShow } from '@/routes/symbol';
-import type { SymbolSearchResult } from '@/types';
+import type { SymbolSearchResult } from '@/types/symbol';
 
 type QuoteType = (typeof TAB_ORDER)[number];
 
@@ -25,7 +25,13 @@ type Props = {
     onOpenChange: (open: boolean) => void;
 };
 
-function SymbolLogo({ logoUrl, symbol }: { logoUrl: string | null; symbol: string }) {
+function SymbolLogo({
+    logoUrl,
+    symbol,
+}: {
+    logoUrl: string | null;
+    symbol: string;
+}) {
     if (logoUrl) {
         return (
             <img
@@ -60,7 +66,10 @@ function ResultItem({
                     onClick={() => onNavigate(result.symbol)}
                     className="flex flex-1 items-center gap-3 text-left focus:outline-none"
                 >
-                    <SymbolLogo logoUrl={result.logo_url} symbol={result.symbol} />
+                    <SymbolLogo
+                        logoUrl={result.logo_url}
+                        symbol={result.symbol}
+                    />
                     <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                             <span className="font-medium">{result.symbol}</span>
@@ -71,14 +80,22 @@ function ResultItem({
                             )}
                         </div>
                         {result.name && (
-                            <p className="truncate text-xs text-muted-foreground">{result.name}</p>
+                            <p className="truncate text-xs text-muted-foreground">
+                                {result.name}
+                            </p>
                         )}
                     </div>
                     {result.exchange && (
-                        <span className="shrink-0 text-xs text-muted-foreground">{result.exchange}</span>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                            {result.exchange}
+                        </span>
                     )}
                 </button>
-                <AddToWatchlistButton symbol={result.symbol} variant="ghost" size="sm" />
+                <AddToWatchlistButton
+                    symbol={result.symbol}
+                    variant="ghost"
+                    size="sm"
+                />
             </div>
         </li>
     );
@@ -140,9 +157,7 @@ export function SymbolSearchDialog({ open, onOpenChange }: Props) {
         displayResults.some((r) => r.type?.toLowerCase() === type),
     ) as QuoteType[];
 
-    const tabs = presentTypes.length > 0
-        ? ['all', ...presentTypes]
-        : ['all'];
+    const tabs = presentTypes.length > 0 ? ['all', ...presentTypes] : ['all'];
 
     // Filter results for active tab
     const filteredResults =
@@ -215,11 +230,13 @@ export function SymbolSearchDialog({ open, onOpenChange }: Props) {
                         </p>
                     )}
 
-                    {!loading && trimmed.length >= 2 && displayResults.length === 0 && (
-                        <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-                            {t('symbol.search_no_results')}
-                        </p>
-                    )}
+                    {!loading &&
+                        trimmed.length >= 2 &&
+                        displayResults.length === 0 && (
+                            <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+                                {t('symbol.search_no_results')}
+                            </p>
+                        )}
 
                     {!loading && displayResults.length > 0 && (
                         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -234,7 +251,15 @@ export function SymbolSearchDialog({ open, onOpenChange }: Props) {
                                             {tabLabel(tab)}
                                             {tab !== 'all' && (
                                                 <span className="ml-1 text-[10px] text-muted-foreground">
-                                                    ({displayResults.filter((r) => r.type?.toLowerCase() === tab).length})
+                                                    (
+                                                    {
+                                                        displayResults.filter(
+                                                            (r) =>
+                                                                r.type?.toLowerCase() ===
+                                                                tab,
+                                                        ).length
+                                                    }
+                                                    )
                                                 </span>
                                             )}
                                         </TabsTrigger>
@@ -243,11 +268,19 @@ export function SymbolSearchDialog({ open, onOpenChange }: Props) {
                             )}
 
                             {tabs.map((tab) => (
-                                <TabsContent key={tab} value={tab} className="mt-0">
+                                <TabsContent
+                                    key={tab}
+                                    value={tab}
+                                    className="mt-0"
+                                >
                                     <ul className="py-1">
                                         {(tab === 'all'
                                             ? displayResults
-                                            : displayResults.filter((r) => r.type?.toLowerCase() === tab)
+                                            : displayResults.filter(
+                                                  (r) =>
+                                                      r.type?.toLowerCase() ===
+                                                      tab,
+                                              )
                                         ).map((r) => (
                                             <ResultItem
                                                 key={`${r.symbol}-${r.exchange ?? ''}`}

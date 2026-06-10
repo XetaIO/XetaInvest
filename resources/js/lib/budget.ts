@@ -1,4 +1,4 @@
-import type { BudgetPayload } from '@/types';
+import type { BudgetPayload } from '@/types/budget';
 
 export type BudgetTotals = {
     totalIncome: number;
@@ -12,15 +12,28 @@ export type BudgetTotals = {
  * Shared between BudgetSummary and BudgetSankey to avoid duplication.
  */
 export function calculateBudgetTotals(budget: BudgetPayload): BudgetTotals {
-    const totalIncome = budget.income.lines.reduce((sum, line) => sum + (line.amount || 0), 0);
+    const totalIncome = budget.income.lines.reduce(
+        (sum, line) => sum + (line.amount || 0),
+        0,
+    );
 
     const totalInvestments = budget.investments.groups.reduce(
-        (sum, group) => sum + group.lines.reduce((groupSum, line) => groupSum + (line.amount || 0), 0),
+        (sum, group) =>
+            sum +
+            group.lines.reduce(
+                (groupSum, line) => groupSum + (line.amount || 0),
+                0,
+            ),
         0,
     );
 
     const totalExpenses = budget.expenses.groups.reduce(
-        (sum, group) => sum + group.lines.reduce((groupSum, line) => groupSum + (line.amount || 0), 0),
+        (sum, group) =>
+            sum +
+            group.lines.reduce(
+                (groupSum, line) => groupSum + (line.amount || 0),
+                0,
+            ),
         0,
     );
 

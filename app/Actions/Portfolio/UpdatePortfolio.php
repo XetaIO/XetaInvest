@@ -16,6 +16,8 @@ class UpdatePortfolio
         $isDefault = (bool) ($data['is_default'] ?? $portfolio->is_default);
 
         DB::transaction(function () use ($user, $portfolio, $data, $isDefault): void {
+            User::query()->whereKey($user->getKey())->lockForUpdate()->firstOrFail();
+
             if ($isDefault && ! $portfolio->is_default) {
                 $user->portfolios()->update(['is_default' => false]);
             }

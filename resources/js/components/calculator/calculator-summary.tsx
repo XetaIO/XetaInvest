@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatEur, formatPercent } from '@/lib/format';
-import type { CalculatorPoint } from '@/types';
+import type { CalculatorPoint } from '@/types/calculator';
 
 type Props = {
     data: CalculatorPoint[];
@@ -20,7 +20,8 @@ export function CalculatorSummary({ data }: Props) {
         const totalDeposits = last.deposits_eur;
         const contributions = totalDeposits - initial;
         const medianGain = last.median_eur - totalDeposits;
-        const medianGainPct = totalDeposits > 0 ? medianGain / totalDeposits : 0;
+        const medianGainPct =
+            totalDeposits > 0 ? medianGain / totalDeposits : 0;
 
         return {
             initial,
@@ -44,7 +45,10 @@ export function CalculatorSummary({ data }: Props) {
                 label={t('calculator.scenario_median_full')}
                 value={formatEur(stats.medianFinal)}
                 tone="primary"
-                sub={t('calculator.gains_label', { gain: formatEur(stats.medianGain), pct: formatPercent(stats.medianGainPct) })}
+                sub={t('calculator.gains_label', {
+                    gain: formatEur(stats.medianGain),
+                    pct: formatPercent(stats.medianGainPct),
+                })}
             />
             <Kpi
                 label={t('calculator.scenario_optimistic_full')}
@@ -87,16 +91,20 @@ function Kpi({ label, value, sub, tone }: KpiProps) {
         tone === 'positive'
             ? 'text-emerald-600 dark:text-emerald-400'
             : tone === 'negative'
-                ? 'text-rose-600 dark:text-rose-400'
-                : tone === 'primary'
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-foreground';
+              ? 'text-rose-600 dark:text-rose-400'
+              : tone === 'primary'
+                ? 'text-blue-600 dark:text-blue-400'
+                : 'text-foreground';
 
     return (
         <Card>
             <CardContent className="flex flex-col gap-1 py-4">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-                <p className={`font-mono text-2xl font-semibold tabular-nums ${valueClass}`}>
+                <p className="text-xs tracking-wide text-muted-foreground uppercase">
+                    {label}
+                </p>
+                <p
+                    className={`font-mono text-2xl font-semibold tabular-nums ${valueClass}`}
+                >
                     {value}
                 </p>
                 {sub && <p className="text-xs text-muted-foreground">{sub}</p>}

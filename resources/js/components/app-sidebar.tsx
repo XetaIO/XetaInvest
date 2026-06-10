@@ -1,5 +1,12 @@
 import { Link } from '@inertiajs/react';
-import { Calculator, LayoutGrid, Newspaper, PieChart, Star, Wallet } from 'lucide-react';
+import {
+    Calculator,
+    LayoutGrid,
+    Newspaper,
+    PieChart,
+    Star,
+    Wallet,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { AppLogo } from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
@@ -17,7 +24,7 @@ import { dashboard } from '@/routes';
 import { show as budgetShow } from '@/routes/budget';
 import { show as calculatorShow } from '@/routes/calculator';
 import { index as watchlistsIndex } from '@/routes/watchlists';
-import type { NavItem } from '@/types';
+import type { NavItem } from '@/types/navigation';
 
 export function AppSidebar() {
     const { t } = useTranslation();

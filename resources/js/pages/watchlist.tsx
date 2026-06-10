@@ -13,8 +13,13 @@ import { WatchlistFormDialog } from '@/components/watchlist/watchlist-form-dialo
 import { WatchlistRow } from '@/components/watchlist/watchlist-row';
 import { WatchlistTradingChart } from '@/components/watchlist/watchlist-trading-chart';
 import { useFinanceQueryStream } from '@/hooks/use-finance-query-stream';
-import type { AiReport, PriceUpdate, Watchlist, WatchlistLimits } from '@/types';
-import type { WatchlistPosition } from '@/types/watchlist';
+import type { AiReport } from '@/types/ai';
+import type {
+    PriceUpdate,
+    Watchlist,
+    WatchlistLimits,
+    WatchlistPosition,
+} from '@/types/watchlist';
 
 type SharedExtra = { financeQueryWsUrl?: string };
 
@@ -44,9 +49,17 @@ const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 type LivePoint = { t: number; v: number };
 
-export default function WatchlistPage({ watchlists, activeWatchlistId, limits, aiWatchlistReport = null, positions }: PageProps) {
+export default function WatchlistPage({
+    watchlists,
+    activeWatchlistId,
+    limits,
+    aiWatchlistReport = null,
+    positions,
+}: PageProps) {
     const { t } = useTranslation();
-    setLayoutProps({ breadcrumbs: [{ title: t('watchlist.title'), href: '/watchlists' }] });
+    setLayoutProps({
+        breadcrumbs: [{ title: t('watchlist.title'), href: '/watchlists' }],
+    });
     const page = usePage<{ financeQueryWsUrl?: string } & SharedExtra>();
     const wsUrl = page.props.financeQueryWsUrl ?? '';
 
@@ -67,12 +80,19 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
     );
 
     const itemSymbols = useMemo(
-        () => (active?.items ?? []).map((i) => i.instrument.symbol.toUpperCase()),
+        () =>
+            (active?.items ?? []).map((i) => i.instrument.symbol.toUpperCase()),
         [active],
     );
 
     const allSymbols = useMemo(
-        () => Array.from(new Set([...itemSymbols, ...compareSymbols.map((s) => s.toUpperCase())])),
+        () =>
+            Array.from(
+                new Set([
+                    ...itemSymbols,
+                    ...compareSymbols.map((s) => s.toUpperCase()),
+                ]),
+            ),
         [itemSymbols, compareSymbols],
     );
 
@@ -127,7 +147,10 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
         let cancelled = false;
         const url = `/api/watchlists/history?symbols=${encodeURIComponent(missing.join(','))}`;
 
-        fetch(url, { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
+        fetch(url, {
+            headers: { Accept: 'application/json' },
+            credentials: 'same-origin',
+        })
             .then((r) => (r.ok ? r.json() : null))
             .then((payload: { data?: Record<string, LivePoint[]> } | null) => {
                 if (cancelled || !payload?.data) {
@@ -135,7 +158,11 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                 }
 
                 for (const [sym, points] of Object.entries(payload.data)) {
-                    if (!history.current.has(sym) && Array.isArray(points) && points.length > 0) {
+                    if (
+                        !history.current.has(sym) &&
+                        Array.isArray(points) &&
+                        points.length > 0
+                    ) {
                         history.current.set(sym, points.slice(-MAX_POINTS));
                     }
                 }
@@ -244,7 +271,9 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
             symbol: sym,
             color: colorFor(sym),
             // eslint-disable-next-line react-hooks/refs
-            points: (history.current.get(sym) ?? []).filter((p) => p.t >= cutoff),
+            points: (history.current.get(sym) ?? []).filter(
+                (p) => p.t >= cutoff,
+            ),
         }));
     }, [allSymbols, hidden, colorFor, tick]);
 
@@ -261,7 +290,9 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                         {watchlists.map((w) => (
                             <Button
                                 key={w.id}
-                                variant={w.id === active?.id ? 'default' : 'outline'}
+                                variant={
+                                    w.id === active?.id ? 'default' : 'outline'
+                                }
                                 size="sm"
                                 onClick={() => switchTo(w.id)}
                             >
@@ -277,19 +308,36 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                             size="sm"
                             onClick={() => setCreateOpen(true)}
                             disabled={atListLimit}
-                            title={atListLimit ? t('watchlist.max_lists', { max: limits.maxPerUser }) : t('watchlist.create_hint')}
+                            title={
+                                atListLimit
+                                    ? t('watchlist.max_lists', {
+                                          max: limits.maxPerUser,
+                                      })
+                                    : t('watchlist.create_hint')
+                            }
                         >
-                            <ListPlus className="mr-1 h-4 w-4" /> {t('watchlist.new')}
+                            <ListPlus className="mr-1 h-4 w-4" />{' '}
+                            {t('watchlist.new')}
                         </Button>
                     </div>
 
                     {active && (
                         <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm" onClick={() => setRenameOpen(true)}>
-                                <Pencil className="mr-1 h-4 w-4" /> {t('watchlist.rename')}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setRenameOpen(true)}
+                            >
+                                <Pencil className="mr-1 h-4 w-4" />{' '}
+                                {t('watchlist.rename')}
                             </Button>
-                            <Button variant="outline" size="sm" onClick={deleteActive}>
-                                <Trash2 className="mr-1 h-4 w-4" /> {t('watchlist.delete')}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={deleteActive}
+                            >
+                                <Trash2 className="mr-1 h-4 w-4" />{' '}
+                                {t('watchlist.delete')}
                             </Button>
                         </div>
                     )}
@@ -302,7 +350,8 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                                 {t('watchlist.no_watchlist')}
                             </p>
                             <Button onClick={() => setCreateOpen(true)}>
-                                <Plus className="mr-1 h-4 w-4" /> {t('watchlist.create_first')}
+                                <Plus className="mr-1 h-4 w-4" />{' '}
+                                {t('watchlist.create_first')}
                             </Button>
                         </CardContent>
                     </Card>
@@ -312,21 +361,37 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_400px]">
                         <Card className="py-6">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-base">{t('watchlist.evolution_title')}</CardTitle>
-                                <span className="text-xs text-muted-foreground">{t('watchlist.realtime')}</span>
+                                <CardTitle className="text-base">
+                                    {t('watchlist.evolution_title')}
+                                </CardTitle>
+                                <span className="text-xs text-muted-foreground">
+                                    {t('watchlist.realtime')}
+                                </span>
                             </CardHeader>
                             <CardContent>
                                 <WatchlistChart series={series} />
 
-                                <form onSubmit={addCompare} className="mt-4 flex items-center gap-2">
+                                <form
+                                    onSubmit={addCompare}
+                                    className="mt-4 flex items-center gap-2"
+                                >
                                     <Input
                                         value={compareSymbol}
-                                        onChange={(e) => setCompareSymbol(e.target.value)}
-                                        placeholder={t('watchlist.compare_placeholder')}
+                                        onChange={(e) =>
+                                            setCompareSymbol(e.target.value)
+                                        }
+                                        placeholder={t(
+                                            'watchlist.compare_placeholder',
+                                        )}
                                         className="max-w-xs"
                                     />
-                                    <Button type="submit" variant="outline" size="sm">
-                                        <Plus className="mr-1 h-4 w-4" /> {t('watchlist.compare_btn')}
+                                    <Button
+                                        type="submit"
+                                        variant="outline"
+                                        size="sm"
+                                    >
+                                        <Plus className="mr-1 h-4 w-4" />{' '}
+                                        {t('watchlist.compare_btn')}
                                     </Button>
                                 </form>
 
@@ -337,14 +402,22 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                                                 key={s}
                                                 variant="secondary"
                                                 className="flex items-center gap-1"
-                                                style={{ borderColor: colorFor(s), borderWidth: 1 }}
+                                                style={{
+                                                    borderColor: colorFor(s),
+                                                    borderWidth: 1,
+                                                }}
                                             >
                                                 {s}
                                                 <button
                                                     type="button"
-                                                    onClick={() => removeCompare(s)}
+                                                    onClick={() =>
+                                                        removeCompare(s)
+                                                    }
                                                     className="ml-1 hover:text-rose-500"
-                                                    aria-label={t('watchlist.remove_symbol', { symbol: s })}
+                                                    aria-label={t(
+                                                        'watchlist.remove_symbol',
+                                                        { symbol: s },
+                                                    )}
                                                 >
                                                     <X className="h-3 w-3" />
                                                 </button>
@@ -360,23 +433,39 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                                 <CardTitle className="text-base">
                                     {active.name}
                                     <span className="ml-2 text-xs font-normal text-muted-foreground">
-                                        {active.items.length} / {limits.maxItems}
+                                        {active.items.length} /{' '}
+                                        {limits.maxItems}
                                     </span>
                                 </CardTitle>
-                                <form onSubmit={submitAdd} className="flex items-center gap-2">
+                                <form
+                                    onSubmit={submitAdd}
+                                    className="flex items-center gap-2"
+                                >
                                     <Input
                                         value={addSymbol}
-                                        onChange={(e) => setAddSymbol(e.target.value)}
-                                        placeholder={t('watchlist.add_placeholder')}
+                                        onChange={(e) =>
+                                            setAddSymbol(e.target.value)
+                                        }
+                                        placeholder={t(
+                                            'watchlist.add_placeholder',
+                                        )}
                                         disabled={atItemLimit}
                                     />
-                                    <Button type="submit" size="sm" disabled={atItemLimit || !addSymbol.trim()}>
+                                    <Button
+                                        type="submit"
+                                        size="sm"
+                                        disabled={
+                                            atItemLimit || !addSymbol.trim()
+                                        }
+                                    >
                                         <Plus className="h-4 w-4" />
                                     </Button>
                                 </form>
                                 {atItemLimit && (
                                     <p className="text-xs text-amber-500">
-                                        {t('watchlist.item_limit', { max: limits.maxItems })}
+                                        {t('watchlist.item_limit', {
+                                            max: limits.maxItems,
+                                        })}
                                     </p>
                                 )}
                             </CardHeader>
@@ -389,17 +478,23 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                                     <ul>
                                         {/* eslint-disable-next-line react-hooks/refs */}
                                         {active.items.map((item) => {
-                                            const sym = item.instrument.symbol.toUpperCase();
+                                            const sym =
+                                                item.instrument.symbol.toUpperCase();
 
                                             return (
                                                 <WatchlistRow
                                                     key={item.id}
                                                     item={item}
-
-                                                    price={prices.current.get(sym) ?? null}
+                                                    price={
+                                                        prices.current.get(
+                                                            sym,
+                                                        ) ?? null
+                                                    }
                                                     visible={!hidden.has(sym)}
                                                     color={colorFor(sym)}
-                                                    onToggleVisible={() => toggleHidden(sym)}
+                                                    onToggleVisible={() =>
+                                                        toggleHidden(sym)
+                                                    }
                                                 />
                                             );
                                         })}
@@ -411,15 +506,29 @@ export default function WatchlistPage({ watchlists, activeWatchlistId, limits, a
                 )}
 
                 {active && active.items.length > 0 && (
-                    <WatchlistTradingChart items={active.items} wsUrl={wsUrl} positions={positions} />
+                    <WatchlistTradingChart
+                        items={active.items}
+                        wsUrl={wsUrl}
+                        positions={positions}
+                    />
                 )}
 
-                <AiReportCard report={aiWatchlistReport} title="Analyse IA — watchlists" />
+                <AiReportCard
+                    report={aiWatchlistReport}
+                    title="Analyse IA — watchlists"
+                />
             </div>
 
-            <WatchlistFormDialog open={createOpen} onOpenChange={setCreateOpen} />
+            <WatchlistFormDialog
+                open={createOpen}
+                onOpenChange={setCreateOpen}
+            />
             {active && (
-                <WatchlistFormDialog open={renameOpen} onOpenChange={setRenameOpen} watchlist={active} />
+                <WatchlistFormDialog
+                    open={renameOpen}
+                    onOpenChange={setRenameOpen}
+                    watchlist={active}
+                />
             )}
         </>
     );

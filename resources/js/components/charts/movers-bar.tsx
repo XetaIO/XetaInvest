@@ -1,9 +1,16 @@
+import { useTranslation } from 'react-i18next';
 import { Bar, BarChart, Cell, XAxis, YAxis } from 'recharts';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import {
     ChartContainer,
     ChartTooltip,
-    ChartTooltipContent
+    ChartTooltipContent,
 } from '@/components/ui/chart';
 import type { ChartConfig } from '@/components/ui/chart';
 import { CHART_COLORS } from '@/lib/constants';
@@ -24,7 +31,14 @@ type Props = {
     emptyLabel?: string;
 };
 
-export function MoversBar({ title, description, items, tone, emptyLabel = 'Aucune donnée.' }: Props) {
+export function MoversBar({
+    title,
+    description,
+    items,
+    tone,
+    emptyLabel,
+}: Props) {
+    const { t } = useTranslation();
     const color = tone === 'up' ? CHART_COLORS.POSITIVE : CHART_COLORS.NEGATIVE;
 
     const config: ChartConfig = {
@@ -45,16 +59,25 @@ export function MoversBar({ title, description, items, tone, emptyLabel = 'Aucun
         <Card className="py-6">
             <CardHeader className="pb-2">
                 <CardTitle className="text-base">{title}</CardTitle>
-                {description && <CardDescription>{description}</CardDescription>}
+                {description && (
+                    <CardDescription>{description}</CardDescription>
+                )}
             </CardHeader>
             <CardContent>
                 {data.length === 0 ? (
                     <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
-                        {emptyLabel}
+                        {emptyLabel ?? t('common.no_data')}
                     </div>
                 ) : (
-                    <ChartContainer config={config} className="h-[220px] w-full">
-                        <BarChart data={data} layout="vertical" margin={{ left: 12, right: 24 }}>
+                    <ChartContainer
+                        config={config}
+                        className="h-[220px] w-full"
+                    >
+                        <BarChart
+                            data={data}
+                            layout="vertical"
+                            margin={{ left: 12, right: 24 }}
+                        >
                             <YAxis
                                 dataKey="symbol"
                                 type="category"
@@ -69,7 +92,17 @@ export function MoversBar({ title, description, items, tone, emptyLabel = 'Aucun
                                     <ChartTooltipContent
                                         hideLabel
                                         formatter={(_value, _name, item) => {
-                                            const payload = (item as { payload?: { name?: string; pnl_pct?: number; pnl_eur?: number } } | undefined)?.payload;
+                                            const payload = (
+                                                item as
+                                                    | {
+                                                          payload?: {
+                                                              name?: string;
+                                                              pnl_pct?: number;
+                                                              pnl_eur?: number;
+                                                          };
+                                                      }
+                                                    | undefined
+                                            )?.payload;
 
                                             if (!payload) {
                                                 return null;
@@ -77,14 +110,24 @@ export function MoversBar({ title, description, items, tone, emptyLabel = 'Aucun
 
                                             return (
                                                 <div className="flex w-full flex-col gap-0.5">
-                                                    <span className="text-foreground font-medium">
+                                                    <span className="font-medium text-foreground">
                                                         {payload.name}
                                                     </span>
                                                     <div className="flex items-center justify-between gap-3 text-xs">
-                                                        <span className="text-muted-foreground">P&L</span>
+                                                        <span className="text-muted-foreground">
+                                                            P&L
+                                                        </span>
                                                         <span className="font-mono tabular-nums">
-                                                            {formatEur(payload.pnl_eur ?? 0)} (
-                                                            {formatPercent(payload.pnl_pct ?? 0)})
+                                                            {formatEur(
+                                                                payload.pnl_eur ??
+                                                                    0,
+                                                            )}{' '}
+                                                            (
+                                                            {formatPercent(
+                                                                payload.pnl_pct ??
+                                                                    0,
+                                                            )}
+                                                            )
                                                         </span>
                                                     </div>
                                                 </div>

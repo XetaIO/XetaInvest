@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use App\Services\Ai\AiManager;
@@ -29,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(AiUsageLogger::class);
 
         $this->app->singleton(AiToolRegistry::class, function ($app): AiToolRegistry {
-            $registry = new AiToolRegistry();
+            $registry = new AiToolRegistry;
             $registry->registerMany([
                 $app->make(GetPortfoliosTool::class),
                 $app->make(GetPortfolioDetailTool::class),

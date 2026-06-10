@@ -6,7 +6,6 @@ use App\Models\Instrument;
 use App\Models\Portfolio;
 use App\Models\Position;
 use App\Models\User;
-use App\Services\FinanceQueryClient;
 use Illuminate\Support\Facades\Http;
 
 beforeEach(function (): void {

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Exceptions\FinanceQueryException;
 use App\Models\Portfolio;
 use App\Models\PortfolioSnapshot;
 use Carbon\CarbonImmutable;
@@ -16,7 +15,8 @@ class PortfolioSnapshotRecorder
     public function __construct(
         protected FinanceQueryClient $client,
         protected PortfolioCalculator $calculator,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array{captured: int, skipped: int, failed: int}
@@ -25,32 +25,31 @@ class PortfolioSnapshotRecorder
     {
         $date = $date ? CarbonImmutable::instance($date) : CarbonImmutable::now();
 
-        $portfolios = Portfolio::query()
-            ->with(['positions.instrument', 'positions.transactions'])
-            ->get();
-
         $captured = 0;
         $skipped = 0;
         $failed = 0;
 
-        foreach ($portfolios as $portfolio) {
-            try {
-                $snapshot = $this->recordPortfolio($portfolio, $date, $force);
+        Portfolio::query()
+            ->with(['positions.instrument', 'positions.transactions'])
+            ->lazyById()
+            ->each(function (Portfolio $portfolio) use ($date, $force, &$captured, &$skipped, &$failed): void {
+                try {
+                    $snapshot = $this->recordPortfolio($portfolio, $date, $force);
 
-                if ($snapshot === null) {
-                    $skipped++;
-                } else {
-                    $captured++;
+                    if ($snapshot === null) {
+                        $skipped++;
+                    } else {
+                        $captured++;
+                    }
+                } catch (\Throwable $e) {
+                    $failed++;
+                    Log::error('PortfolioSnapshotRecorder failure', [
+                        'portfolio_id' => $portfolio->id,
+                        'date' => $date->toDateString(),
+                        'error' => $e->getMessage(),
+                    ]);
                 }
-            } catch (\Throwable $e) {
-                $failed++;
-                Log::error('PortfolioSnapshotRecorder failure', [
-                    'portfolio_id' => $portfolio->id,
-                    'date' => $date->toDateString(),
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
+            });
 
         return ['captured' => $captured, 'skipped' => $skipped, 'failed' => $failed];
     }
@@ -77,24 +76,13 @@ class PortfolioSnapshotRecorder
             ->values()
             ->all();
 
-        $quotes = [];
+        $quotes = $this->client->quotes($symbols, $force);
         $fxRates = ['EUR' => 1.0];
-        $quoteError = false;
 
-        try {
-            $quotes = $this->client->quotes($symbols, $force);
-
-            foreach ($currencies as $currency) {
-                if (! isset($fxRates[$currency])) {
-                    $fxRates[$currency] = $this->client->fxRate($currency, 'EUR');
-                }
+        foreach ($currencies as $currency) {
+            if (! isset($fxRates[$currency])) {
+                $fxRates[$currency] = $this->client->fxRate($currency, 'EUR');
             }
-        } catch (FinanceQueryException $e) {
-            $quoteError = true;
-            Log::warning('PortfolioSnapshotRecorder quote error', [
-                'portfolio_id' => $portfolio->id,
-                'error' => $e->getMessage(),
-            ]);
         }
 
         $computed = $this->calculator->computePortfolio($portfolio, $quotes, $fxRates);
@@ -116,7 +104,7 @@ class PortfolioSnapshotRecorder
                 'current_value_eur' => $computed['current_value_eur'],
                 'pnl_eur' => $computed['pnl_eur'],
                 'position_count' => $positionCount,
-                'quote_error' => $quoteError,
+                'quote_error' => false,
             ],
         );
     }

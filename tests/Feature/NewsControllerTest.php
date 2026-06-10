@@ -79,14 +79,14 @@ test('authenticated user sees news for all portfolio symbols', function () {
         ->assertOk()
         ->assertInertia(
             fn ($page) => $page
-            ->component('news')
-            ->where('scope.symbol', null)
-            ->has('available_symbols', 2)
-            ->where('available_symbols.0', 'AAPL')
-            ->where('available_symbols.1', 'MSFT')
-            ->has('news.data', 10) // 5 per symbol * 2 symbols
-            ->where('news.current_page', 1)
-            ->where('news.total', 10)
+                ->component('news')
+                ->where('scope.symbol', null)
+                ->has('available_symbols', 2)
+                ->where('available_symbols.0', 'AAPL')
+                ->where('available_symbols.1', 'MSFT')
+                ->has('news.data', 10) // 5 per symbol * 2 symbols
+                ->where('news.current_page', 1)
+                ->where('news.total', 10)
         );
 });
 
@@ -97,9 +97,9 @@ test('user can filter news by a specific symbol', function () {
         ->assertOk()
         ->assertInertia(
             fn ($page) => $page
-            ->where('scope.symbol', 'AAPL')
-            ->has('news.data', 7) // no per-symbol limit when filtered
-            ->where('news.data.0.symbol', 'AAPL')
+                ->where('scope.symbol', 'AAPL')
+                ->has('news.data', 7) // no per-symbol limit when filtered
+                ->where('news.data.0.symbol', 'AAPL')
         );
 });
 
@@ -143,8 +143,8 @@ test('pagination respects page query parameter', function () {
         ->assertOk()
         ->assertInertia(
             fn ($page) => $page
-            ->where('news.current_page', 2)
-            ->where('news.per_page', 20)
+                ->where('news.current_page', 2)
+                ->where('news.per_page', 20)
         );
 });
 
@@ -174,7 +174,7 @@ test('relative news links are resolved to absolute stockanalysis.com URLs', func
         ->assertOk()
         ->assertInertia(
             fn ($page) => $page
-            ->where('news.data.0.link', 'https://stockanalysis.com/quote/epa/AAPL/filings/123/')
-            ->where('news.data.1.link', 'https://www.reuters.com/article/abc')
+                ->where('news.data.0.link', 'https://stockanalysis.com/quote/epa/AAPL/filings/123/')
+                ->where('news.data.1.link', 'https://www.reuters.com/article/abc')
         );
 });

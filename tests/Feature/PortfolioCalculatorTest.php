@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\TransactionType;
 use App\Models\Instrument;
 use App\Models\Portfolio;
 use App\Models\Position;
@@ -24,7 +23,7 @@ it('computes WAC and current value for a buy-only position', function () {
 
     $quote = ['regularMarketPrice' => 130.0, 'regularMarketPreviousClose' => 125.0, 'currency' => 'USD'];
 
-    $result = (new PortfolioCalculator())->computePosition($position->refresh()->load('transactions', 'instrument'), $quote, 1.0);
+    $result = (new PortfolioCalculator)->computePosition($position->refresh()->load('transactions', 'instrument'), $quote, 1.0);
 
     expect($result['quantity'])->toBe(20.0)
         ->and($result['avg_cost_native'])->toBe(110.0)
@@ -51,7 +50,7 @@ it('applies FIFO when selling part of a position', function () {
 
     $quote = ['regularMarketPrice' => 180.0, 'regularMarketPreviousClose' => 180.0, 'currency' => 'USD'];
 
-    $result = (new PortfolioCalculator())->computePosition($position->refresh()->load('transactions', 'instrument'), $quote, 1.0);
+    $result = (new PortfolioCalculator)->computePosition($position->refresh()->load('transactions', 'instrument'), $quote, 1.0);
 
     // After FIFO: line1 fully consumed (10 @ 100), line2 has 8 left (2 sold @ 150)
     // Realized: (200-100)*10 + (200-150)*2 = 1000 + 100 = 1100
@@ -73,7 +72,7 @@ it('converts native values to EUR via fxRate', function () {
     ]);
 
     $quote = ['regularMarketPrice' => 110.0, 'regularMarketPreviousClose' => 100.0, 'currency' => 'USD'];
-    $result = (new PortfolioCalculator())->computePosition($position->refresh()->load('transactions', 'instrument'), $quote, 0.9);
+    $result = (new PortfolioCalculator)->computePosition($position->refresh()->load('transactions', 'instrument'), $quote, 0.9);
 
     expect($result['invested_eur'])->toBe(90.0)
         ->and($result['current_value_eur'])->toBe(99.0)

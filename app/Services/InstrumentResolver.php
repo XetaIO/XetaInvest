@@ -43,8 +43,9 @@ class InstrumentResolver
             ];
         }
 
-        return Instrument::create([
+        return Instrument::query()->firstOrCreate([
             'symbol' => $symbol,
+        ], [
             'name' => $match['name'] ?? $symbol,
             'exchange' => $match['exchange'] ?? null,
             'type' => $match['type'] ?? null,

@@ -11,7 +11,7 @@ import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
-import type { User } from '@/types';
+import type { User } from '@/types/auth';
 
 type Props = {
     user: User;

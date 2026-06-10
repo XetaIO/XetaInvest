@@ -26,14 +26,20 @@ class GenerateGlobalReportsCommand extends Command
         $failed = 0;
         $total = 0;
 
-        foreach ($query->get() as $user) {
+        foreach ($query->lazyById() as $user) {
             /** @var User $user */
             $this->components->task("Global report user #{$user->id}", function () use ($generator, $user, &$failed): bool {
                 try {
                     /** @var User $user */
                     $report = $generator->generate($user);
 
-                    return $report->status->value === 'success';
+                    $successful = $report->status->value === 'success';
+
+                    if (! $successful) {
+                        $failed++;
+                    }
+
+                    return $successful;
                 } catch (Throwable $e) {
                     $this->components->error($e->getMessage());
                     $failed++;
@@ -46,6 +52,6 @@ class GenerateGlobalReportsCommand extends Command
 
         $this->components->info(sprintf('Done. %d processed, %d failed.', $total, $failed));
 
-        return self::SUCCESS;
+        return $failed > 0 ? self::FAILURE : self::SUCCESS;
     }
 }

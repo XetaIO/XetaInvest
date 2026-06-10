@@ -1,5 +1,10 @@
 import { Head, router, setLayoutProps } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight, ExternalLink, Newspaper } from 'lucide-react';
+import {
+    ChevronLeft,
+    ChevronRight,
+    ExternalLink,
+    Newspaper,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { AiReportCard } from '@/components/ai/ai-report-card';
 import { Badge } from '@/components/ui/badge';
@@ -13,11 +18,18 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { buildNewsUrl } from '@/lib/url-builders';
-import type { NewsProps } from '@/types';
+import type { NewsProps } from '@/types/news';
 
-export default function News({ news, available_symbols, scope, aiNewsReport = null }: NewsProps) {
+export default function News({
+    news,
+    available_symbols,
+    scope,
+    aiNewsReport = null,
+}: NewsProps) {
     const { t } = useTranslation();
-    setLayoutProps({ breadcrumbs: [{ title: t('news.title'), href: '/news' }] });
+    setLayoutProps({
+        breadcrumbs: [{ title: t('news.title'), href: '/news' }],
+    });
     const currentSymbol = scope.symbol ?? 'all';
 
     const handleSymbolChange = (value: string) => {
@@ -29,7 +41,9 @@ export default function News({ news, available_symbols, scope, aiNewsReport = nu
             return;
         }
 
-        router.visit(buildNewsUrl(currentSymbol, page), { preserveScroll: false });
+        router.visit(buildNewsUrl(currentSymbol, page), {
+            preserveScroll: false,
+        });
     };
 
     return (
@@ -39,14 +53,23 @@ export default function News({ news, available_symbols, scope, aiNewsReport = nu
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <Newspaper className="h-5 w-5 text-muted-foreground" />
-                        <h1 className="text-xl font-semibold">{t('news.title')}</h1>
+                        <h1 className="text-xl font-semibold">
+                            {t('news.title')}
+                        </h1>
                     </div>
-                    <Select value={currentSymbol} onValueChange={handleSymbolChange}>
+                    <Select
+                        value={currentSymbol}
+                        onValueChange={handleSymbolChange}
+                    >
                         <SelectTrigger className="min-w-50">
-                            <SelectValue placeholder={t('news.filter_placeholder')} />
+                            <SelectValue
+                                placeholder={t('news.filter_placeholder')}
+                            />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">{t('news.filter_all')}</SelectItem>
+                            <SelectItem value="all">
+                                {t('news.filter_all')}
+                            </SelectItem>
                             {available_symbols.map((s) => (
                                 <SelectItem key={s} value={s}>
                                     {s}
@@ -56,7 +79,10 @@ export default function News({ news, available_symbols, scope, aiNewsReport = nu
                     </Select>
                 </div>
 
-                <AiReportCard report={aiNewsReport} title="Sélection IA — actualités & screener" />
+                <AiReportCard
+                    report={aiNewsReport}
+                    title={t('ai.news_analysis')}
+                />
 
                 {news.data.length === 0 ? (
                     <Card>
@@ -70,7 +96,9 @@ export default function News({ news, available_symbols, scope, aiNewsReport = nu
                     <>
                         <div className="grid gap-3">
                             {news.data.map((item, index) => (
-                                <Card key={`${item.symbol}-${index}-${item.link}`}>
+                                <Card
+                                    key={`${item.symbol}-${index}-${item.link}`}
+                                >
                                     <CardContent className="flex flex-col gap-3 p-4 sm:flex-row">
                                         {item.image && (
                                             <img
@@ -82,11 +110,17 @@ export default function News({ news, available_symbols, scope, aiNewsReport = nu
                                         )}
                                         <div className="flex flex-1 flex-col gap-1.5">
                                             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                                                <Badge variant="secondary">{item.symbol}</Badge>
-                                                {item.source && <span>{item.source}</span>}
+                                                <Badge variant="secondary">
+                                                    {item.symbol}
+                                                </Badge>
+                                                {item.source && (
+                                                    <span>{item.source}</span>
+                                                )}
                                                 {item.time && (
                                                     <>
-                                                        <span aria-hidden>·</span>
+                                                        <span aria-hidden>
+                                                            ·
+                                                        </span>
                                                         <span>{item.time}</span>
                                                     </>
                                                 )}
@@ -109,27 +143,42 @@ export default function News({ news, available_symbols, scope, aiNewsReport = nu
                         <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
                             <p className="text-xs text-muted-foreground">
                                 {news.from && news.to
-                                    ? t('news.count', { from: news.from, to: news.to, total: news.total })
-                                    : t('news.count_simple', { total: news.total })}
+                                    ? t('news.count', {
+                                          from: news.from,
+                                          to: news.to,
+                                          total: news.total,
+                                      })
+                                    : t('news.count_simple', {
+                                          total: news.total,
+                                      })}
                             </p>
                             <div className="flex items-center gap-1">
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => goToPage(news.current_page - 1)}
+                                    onClick={() =>
+                                        goToPage(news.current_page - 1)
+                                    }
                                     disabled={news.current_page <= 1}
                                 >
                                     <ChevronLeft className="h-4 w-4" />
                                     {t('common.previous')}
                                 </Button>
                                 <span className="px-3 text-sm text-muted-foreground">
-                                    {t('news.page_indicator', { current: news.current_page, total: news.last_page })}
+                                    {t('news.page_indicator', {
+                                        current: news.current_page,
+                                        total: news.last_page,
+                                    })}
                                 </span>
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => goToPage(news.current_page + 1)}
-                                    disabled={news.current_page >= news.last_page}
+                                    onClick={() =>
+                                        goToPage(news.current_page + 1)
+                                    }
+                                    disabled={
+                                        news.current_page >= news.last_page
+                                    }
                                 >
                                     {t('common.next')}
                                     <ChevronRight className="h-4 w-4" />

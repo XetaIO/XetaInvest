@@ -40,7 +40,7 @@ class GlobalPortfolioReportGenerator extends BaseReportGenerator
         $context = $this->portfoliosTool->execute($user, []);
 
         return [
-            ['role' => 'system', 'content' => $this->systemPrompt()],
+            ['role' => 'system', 'content' => $this->systemPrompt($user)],
             ['role' => 'user', 'content' => "Analyse l'ensemble des portefeuilles de l'utilisateur (vue globale) et produis le rapport JSON demandé. Concentre-toi sur: diversification globale, exposition par portefeuille, performance agrégée, risques de concentration, suggestions de rééquilibrage.\n\nDonnées:\n".json_encode($context, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)],
         ];
     }

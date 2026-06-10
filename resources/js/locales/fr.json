@@ -57,25 +57,33 @@
     },
     "portfolio": {
         "new": "Nouveau portefeuille",
+        "edit_title": "Modifier le portefeuille",
         "edit": "Modifier",
         "delete": "Supprimer",
-        "set_default": "Par défaut",
+        "set_default": "Définir par défaut",
         "name": "Nom du portefeuille",
-        "is_default": "Portefeuille par défaut",
+        "is_default": "Définir comme portefeuille par défaut",
         "create": "Créer",
         "update": "Mettre à jour",
         "cancel": "Annuler",
+        "portfolios": "Portefeuilles",
         "positions": "Positions",
         "transactions": "Transactions",
-        "no_portfolio": "Aucun portefeuille."
+        "no_portfolio": "Aucun portefeuille",
+        "delete_confirm": "Supprimer le portefeuille « {{name}} » ? Cette action est irréversible.",
+        "delete_error": "Impossible de supprimer ce portefeuille."
     },
     "position": {
         "symbol": "Symbole",
+        "type": "Type",
         "quantity": "Quantité",
         "unit_price": "Prix unitaire",
         "date": "Date",
         "notes": "Notes",
         "note": "Note",
+        "note_optional": "Note (optionnelle)",
+        "transaction_new": "Nouvelle transaction",
+        "transaction_edit": "Modifier la transaction",
         "add_line": "Ajouter une ligne",
         "add": "Ajouter",
         "delete": "Supprimer la position",
@@ -186,7 +194,10 @@
         "income_section_title": "Revenus",
         "income_empty": "Aucune source de revenu pour le moment.",
         "income_placeholder": "Ex. Salaire",
-        "income_add": "Ajouter une source de revenu"
+        "income_add": "Ajouter une source de revenu",
+        "line_label": "Libellé",
+        "remove_group": "Supprimer la catégorie",
+        "remove_line": "Supprimer la ligne"
     },
     "calculator": {
         "title": "Calculateur d'intérêts composés",
@@ -229,12 +240,23 @@
         "additional_contributions": "Versements complémentaires",
         "monthly_savings_cumul": "Cumul des épargnes mensuelles",
         "total_contributed": "Versé au total",
-        "capital_plus_savings": "Capital + versements"
+        "capital_plus_savings": "Capital + versements",
+        "eur_per_month": "EUR / MOIS",
+        "years_unit": "ANNÉES",
+        "months_unit": "MOIS",
+        "projection_title_one": "Projection sur {{count}} an",
+        "projection_title_other": "Projection sur {{count}} ans",
+        "year_count_one": "{{count}} an",
+        "year_count_other": "{{count}} ans",
+        "year_label": "Année {{label}}"
     },
     "watchlist": {
         "title": "Ma liste de suivi",
         "new": "Nouvelle liste",
+        "new_title": "Nouvelle liste de suivi",
         "rename": "Renommer",
+        "rename_title": "Renommer la liste",
+        "name": "Nom",
         "delete": "Supprimer",
         "add_symbol": "Ajouter un symbole",
         "no_watchlist": "Aucune liste de suivi. Créez-en une pour commencer.",
@@ -260,7 +282,10 @@
         "trading_chart_error": "Impossible de charger le graphique.",
         "trading_chart_no_data": "Aucune donnée disponible.",
         "trading_chart_position_line": "PRU",
-        "trading_chart_position_toggle": "Afficher/masquer votre prix de revient"
+        "trading_chart_position_toggle": "Afficher/masquer votre prix de revient",
+        "add_to_list": "Ajouter à une liste",
+        "add_to_empty": "Aucune liste. Créez-en une depuis la page des listes de suivi.",
+        "no_symbol_chart": "Aucun symbole à afficher."
     },
     "news": {
         "title": "Actualités",
@@ -435,6 +460,27 @@
         "fr": "Français",
         "en": "English"
     },
+    "ai": {
+        "open": "Ouvrir l'assistant IA",
+        "title": "Assistant IA",
+        "empty_chat": "Posez une question sur vos portefeuilles et listes de suivi, ou lancez une analyse.",
+        "thinking": "L'assistant réfléchit...",
+        "message_placeholder": "Votre message...",
+        "new_conversation": "Nouvelle conversation",
+        "no_conversation": "Aucune conversation.",
+        "untitled": "Sans titre",
+        "daily_analysis": "Analyse IA du jour",
+        "no_report": "Aucun rapport disponible pour aujourd'hui. Le prochain rapport sera généré automatiquement.",
+        "report_failed": "La génération du rapport a échoué.",
+        "highlights": "Points clés",
+        "risks": "Risques",
+        "recommendations": "Recommandations",
+        "detailed_analysis": "Analyse détaillée",
+        "disclaimer": "Généré par IA - informations à vocation indicative, pas de conseil en investissement.",
+        "portfolio_analysis": "Analyse IA — portefeuille",
+        "global_analysis": "Analyse IA — global",
+        "news_analysis": "Sélection IA — actualités & screener"
+    },
     "common": {
         "save": "Enregistrer",
         "cancel": "Annuler",
@@ -454,6 +500,8 @@
         "reset": "Réinitialiser",
         "export": "Exporter",
         "import": "Importer",
-        "refresh": "Actualiser"
+        "refresh": "Actualiser",
+        "no_data": "Aucune donnée.",
+        "other": "Autres"
     }
 }

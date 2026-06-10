@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ResponsiveContainer, Sankey, Tooltip, useChartWidth } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CHART_COLORS } from '@/lib/constants';
-import type { BudgetPayload } from '@/types';
+import type { BudgetPayload } from '@/types/budget';
 
 type Props = { budget: BudgetPayload };
 
@@ -42,12 +42,13 @@ function SankeyTooltipContent({
     const item = payload[0];
     const data = item.payload;
     const value = eur.format(Number(item.value ?? data?.value ?? 0) || 0);
-    const label = data?.source && data?.target
-        ? `${data.source.name ?? ''} → ${data.target.name ?? ''}`
-        : data?.name ?? item.name ?? '';
+    const label =
+        data?.source && data?.target
+            ? `${data.source.name ?? ''} → ${data.target.name ?? ''}`
+            : (data?.name ?? item.name ?? '');
 
     return (
-        <div className="border-border/50 bg-background grid min-w-32 items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl">
+        <div className="grid min-w-32 items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
             <div className="font-medium">{label}</div>
             <div className="text-muted-foreground">{value}</div>
         </div>
@@ -62,7 +63,9 @@ export function BudgetSankey({ budget }: Props) {
         const nodes: SankeyNode[] = [];
         const links: SankeyLink[] = [];
 
-        const incomeLines = budget.income.lines.filter((l) => (l.amount || 0) > 0);
+        const incomeLines = budget.income.lines.filter(
+            (l) => (l.amount || 0) > 0,
+        );
         const investmentGroups = budget.investments.groups
             .map((g) => ({
                 ...g,
@@ -100,7 +103,11 @@ export function BudgetSankey({ budget }: Props) {
 
         for (const line of incomeLines) {
             const idx = addNode(line.name || t('budget.sankey_income_node'));
-            links.push({ source: idx, target: budgetNodeIdx, value: line.amount });
+            links.push({
+                source: idx,
+                target: budgetNodeIdx,
+                value: line.amount,
+            });
         }
 
         for (const group of investmentGroups) {
@@ -110,12 +117,24 @@ export function BudgetSankey({ budget }: Props) {
                 continue;
             }
 
-            const groupIdx = addNode(group.name || t('budget.sankey_investments_node'));
-            links.push({ source: budgetNodeIdx, target: groupIdx, value: groupTotal });
+            const groupIdx = addNode(
+                group.name || t('budget.sankey_investments_node'),
+            );
+            links.push({
+                source: budgetNodeIdx,
+                target: groupIdx,
+                value: groupTotal,
+            });
 
             for (const line of group.lines) {
-                const lineIdx = addNode(line.name || t('budget.sankey_investments_node'));
-                links.push({ source: groupIdx, target: lineIdx, value: line.amount });
+                const lineIdx = addNode(
+                    line.name || t('budget.sankey_investments_node'),
+                );
+                links.push({
+                    source: groupIdx,
+                    target: lineIdx,
+                    value: line.amount,
+                });
             }
         }
 
@@ -126,12 +145,24 @@ export function BudgetSankey({ budget }: Props) {
                 continue;
             }
 
-            const groupIdx = addNode(group.name || t('budget.sankey_expenses_node'));
-            links.push({ source: budgetNodeIdx, target: groupIdx, value: groupTotal });
+            const groupIdx = addNode(
+                group.name || t('budget.sankey_expenses_node'),
+            );
+            links.push({
+                source: budgetNodeIdx,
+                target: groupIdx,
+                value: groupTotal,
+            });
 
             for (const line of group.lines) {
-                const lineIdx = addNode(line.name || t('budget.sankey_expenses_node'));
-                links.push({ source: groupIdx, target: lineIdx, value: line.amount });
+                const lineIdx = addNode(
+                    line.name || t('budget.sankey_expenses_node'),
+                );
+                links.push({
+                    source: groupIdx,
+                    target: lineIdx,
+                    value: line.amount,
+                });
             }
         }
 
@@ -139,7 +170,11 @@ export function BudgetSankey({ budget }: Props) {
 
         if (remaining > 0) {
             const idx = addNode(t('budget.sankey_remainder_node'));
-            links.push({ source: budgetNodeIdx, target: idx, value: remaining });
+            links.push({
+                source: budgetNodeIdx,
+                target: idx,
+                value: remaining,
+            });
         }
 
         if (links.length === 0) {
@@ -164,13 +199,45 @@ export function BudgetSankey({ budget }: Props) {
                                 nodeWidth={14}
                                 linkCurvature={0.5}
                                 iterations={64}
-                                margin={{ left: 8, right: 8, top: 8, bottom: 8 }}
-                                link={{ stroke: '#94a3b8', strokeOpacity: 0.25 }}
-                                node={(props: { x: number; y: number; width: number; height: number; index: number; payload: SankeyNode & { sourceLinks?: unknown[]; targetLinks?: unknown[] } }) => {
-                                    const { x, y, width, height, index, payload } = props;
-                                    const color = CHART_COLORS.PALETTE[index % CHART_COLORS.PALETTE.length];
-                                    const isStart = !payload.targetLinks || payload.targetLinks.length === 0;
-                                    const isOut = isStart && x + width + 6 > (containerWidth ?? 0);
+                                margin={{
+                                    left: 8,
+                                    right: 8,
+                                    top: 8,
+                                    bottom: 8,
+                                }}
+                                link={{
+                                    stroke: '#94a3b8',
+                                    strokeOpacity: 0.25,
+                                }}
+                                node={(props: {
+                                    x: number;
+                                    y: number;
+                                    width: number;
+                                    height: number;
+                                    index: number;
+                                    payload: SankeyNode & {
+                                        sourceLinks?: unknown[];
+                                        targetLinks?: unknown[];
+                                    };
+                                }) => {
+                                    const {
+                                        x,
+                                        y,
+                                        width,
+                                        height,
+                                        index,
+                                        payload,
+                                    } = props;
+                                    const color =
+                                        CHART_COLORS.PALETTE[
+                                            index % CHART_COLORS.PALETTE.length
+                                        ];
+                                    const isStart =
+                                        !payload.targetLinks ||
+                                        payload.targetLinks.length === 0;
+                                    const isOut =
+                                        isStart &&
+                                        x + width + 6 > (containerWidth ?? 0);
 
                                     return (
                                         <g>
@@ -183,10 +250,16 @@ export function BudgetSankey({ budget }: Props) {
                                                 stroke="none"
                                             />
                                             <text
-                                                x={isOut ? x - 6 : x + width + 6}
+                                                x={
+                                                    isOut
+                                                        ? x - 6
+                                                        : x + width + 6
+                                                }
                                                 y={y + height / 2}
                                                 dy="0.35em"
-                                                textAnchor={isOut ? 'end' : 'start'}
+                                                textAnchor={
+                                                    isOut ? 'end' : 'start'
+                                                }
                                                 fontSize={11}
                                                 fill="currentColor"
                                             >
@@ -196,7 +269,10 @@ export function BudgetSankey({ budget }: Props) {
                                     );
                                 }}
                             >
-                                <Tooltip content={<SankeyTooltipContent />} cursor={false} />
+                                <Tooltip
+                                    content={<SankeyTooltipContent />}
+                                    cursor={false}
+                                />
                             </Sankey>
                         </ResponsiveContainer>
                     </div>

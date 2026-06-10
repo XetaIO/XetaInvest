@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\Position\CreatePosition;
+use App\Actions\Position\DeletePosition;
 use App\Http\Requests\Position\StorePositionRequest;
 use App\Models\Portfolio;
 use App\Models\Position;
@@ -30,11 +31,13 @@ class PositionController extends Controller
         return back();
     }
 
-    public function destroy(Request $request, Position $position): RedirectResponse
-    {
+    public function destroy(
+        Request $request,
+        Position $position,
+        DeletePosition $action,
+    ): RedirectResponse {
         $this->authorize('delete', $position);
-
-        $position->delete();
+        $action->handle($position);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.position.deleted')]);
 

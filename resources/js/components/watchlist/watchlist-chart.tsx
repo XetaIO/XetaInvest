@@ -20,7 +20,7 @@ type Props = {
 };
 
 export function WatchlistChart({ series }: Props) {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const loc = i18n.resolvedLanguage ?? 'fr';
     const config = useMemo<ChartConfig>(() => {
         const c: ChartConfig = {};
@@ -83,19 +83,37 @@ export function WatchlistChart({ series }: Props) {
     if (series.length === 0) {
         return (
             <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-                Aucun symbol à afficher.
+                {t('watchlist.no_symbol_chart')}
             </div>
         );
     }
 
     return (
         <ChartContainer config={config} className="aspect-auto h-80 w-full">
-            <AreaChart data={data} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+            <AreaChart
+                data={data}
+                margin={{ top: 10, right: 16, left: 0, bottom: 0 }}
+            >
                 <defs>
                     {series.map((s) => (
-                        <linearGradient key={s.symbol} id={`fill-${s.symbol}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor={s.color} stopOpacity={0.35} />
-                            <stop offset="100%" stopColor={s.color} stopOpacity={0} />
+                        <linearGradient
+                            key={s.symbol}
+                            id={`fill-${s.symbol}`}
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                        >
+                            <stop
+                                offset="0%"
+                                stopColor={s.color}
+                                stopOpacity={0.35}
+                            />
+                            <stop
+                                offset="100%"
+                                stopColor={s.color}
+                                stopOpacity={0}
+                            />
                         </linearGradient>
                     ))}
                 </defs>
@@ -133,15 +151,23 @@ export function WatchlistChart({ series }: Props) {
                     content={
                         <ChartTooltipContent
                             labelFormatter={(_label, payload) => {
-                                const first = (payload as Array<{ payload?: { t?: number } }> | undefined)?.[0];
+                                const first = (
+                                    payload as
+                                        | Array<{ payload?: { t?: number } }>
+                                        | undefined
+                                )?.[0];
                                 const t = first?.payload?.t;
 
-                                return t ? new Date(Number(t)).toLocaleString() : '';
+                                return t
+                                    ? new Date(Number(t)).toLocaleString()
+                                    : '';
                             }}
                             formatter={(value, name) => (
                                 <div className="flex w-full items-center gap-2">
-                                    <span className="text-muted-foreground">{String(name)}</span>
-                                    <span className="ml-auto font-mono font-medium tabular-nums text-foreground">
+                                    <span className="text-muted-foreground">
+                                        {String(name)}
+                                    </span>
+                                    <span className="ml-auto font-mono font-medium text-foreground tabular-nums">
                                         {formatSignedPercent(Number(value))}
                                     </span>
                                 </div>

@@ -15,6 +15,7 @@ use App\Http\Controllers\SymbolSearchController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WatchlistController;
 use App\Http\Controllers\WatchlistItemController;
+use App\Http\Controllers\WatchlistSectionController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
@@ -48,6 +49,9 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::patch('watchlists/{watchlist}', [WatchlistController::class, 'update'])->name('watchlists.update');
     Route::delete('watchlists/{watchlist}', [WatchlistController::class, 'destroy'])->name('watchlists.destroy');
     Route::patch('watchlists/{watchlist}/reorder', [WatchlistController::class, 'reorder'])->name('watchlists.reorder');
+    Route::post('watchlists/{watchlist}/sections', [WatchlistSectionController::class, 'store'])->name('watchlists.sections.store');
+    Route::patch('watchlist-sections/{section}', [WatchlistSectionController::class, 'update'])->name('watchlists.sections.update');
+    Route::delete('watchlist-sections/{section}', [WatchlistSectionController::class, 'destroy'])->name('watchlists.sections.destroy');
 
     Route::post('watchlists/{watchlist}/items', [WatchlistItemController::class, 'store'])->name('watchlists.items.store');
     Route::delete('watchlist-items/{item}', [WatchlistItemController::class, 'destroy'])->name('watchlists.items.destroy');

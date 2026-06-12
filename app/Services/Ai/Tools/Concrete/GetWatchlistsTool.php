@@ -46,12 +46,14 @@ class GetWatchlistsTool implements AiTool
 
         $watchlists = Watchlist::query()
             ->where('user_id', $user->id)
-            ->with('items.instrument')
+            ->with(['sections.items.instrument'])
             ->orderBy('position')
             ->get();
 
         $symbols = $watchlists
-            ->flatMap(fn (Watchlist $w) => $w->items->pluck('instrument.symbol'))
+            ->flatMap(fn (Watchlist $w) => $w->sections->flatMap(
+                fn ($section) => $section->items->pluck('instrument.symbol')
+            ))
             ->filter()
             ->unique()
             ->values()
@@ -72,17 +74,22 @@ class GetWatchlistsTool implements AiTool
                 return [
                     'id' => $w->id,
                     'name' => $w->name,
-                    'items' => $w->items->map(static function ($i) use ($quotes): array {
-                        $symbol = strtoupper((string) ($i->instrument->symbol ?? ''));
-                        $q = $quotes[$symbol] ?? null;
-
+                    'sections' => $w->sections->map(static function ($section) use ($quotes): array {
                         return [
-                            'symbol' => $symbol,
-                            'name' => $i->instrument->name ?? null,
-                            'exchange' => $i->instrument->exchange ?? null,
-                            'currency' => $i->instrument->currency ?? null,
-                            'price' => $q['regularMarketPrice'] ?? null,
-                            'change_percent' => $q['regularMarketChangePercent'] ?? null,
+                            'name' => $section->name,
+                            'items' => $section->items->map(static function ($i) use ($quotes): array {
+                                $symbol = strtoupper((string) ($i->instrument->symbol ?? ''));
+                                $q = $quotes[$symbol] ?? null;
+
+                                return [
+                                    'symbol' => $symbol,
+                                    'name' => $i->instrument->name ?? null,
+                                    'exchange' => $i->instrument->exchange ?? null,
+                                    'currency' => $i->instrument->currency ?? null,
+                                    'price' => $q['regularMarketPrice'] ?? null,
+                                    'change_percent' => $q['regularMarketChangePercent'] ?? null,
+                                ];
+                            })->all(),
                         ];
                     })->all(),
                 ];

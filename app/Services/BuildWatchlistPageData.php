@@ -19,28 +19,37 @@ class BuildWatchlistPageData
     public function build(User $user, string $activeId): array
     {
         $watchlists = $user->watchlists()
-            ->with(['items.instrument'])
+            ->with(['sections.items.instrument'])
             ->get()
             ->map(fn (Watchlist $watchlist): array => [
                 'id' => $watchlist->id,
                 'name' => $watchlist->name,
                 'position' => $watchlist->position,
-                'items' => $watchlist->items->map(fn ($item): array => [
-                    'id' => $item->id,
-                    'position' => $item->position,
-                    'instrument' => [
-                        'id' => $item->instrument->id,
-                        'symbol' => $item->instrument->symbol,
-                        'name' => $item->instrument->name,
-                        'exchange' => $item->instrument->exchange,
-                        'type' => $item->instrument->type,
-                        'currency' => $item->instrument->currency,
-                    ],
+                'sections' => $watchlist->sections->map(fn ($section): array => [
+                    'id' => $section->id,
+                    'name' => $section->name,
+                    'position' => $section->position,
+                    'is_default' => $section->is_default,
+                    'items' => $section->items->map(fn ($item): array => [
+                        'id' => $item->id,
+                        'section_id' => $item->section_id,
+                        'position' => $item->position,
+                        'instrument' => [
+                            'id' => $item->instrument->id,
+                            'symbol' => $item->instrument->symbol,
+                            'name' => $item->instrument->name,
+                            'exchange' => $item->instrument->exchange,
+                            'type' => $item->instrument->type,
+                            'currency' => $item->instrument->currency,
+                        ],
+                    ])->values(),
                 ])->values(),
             ])->values();
 
         $active = $watchlists->firstWhere('id', $activeId) ?? $watchlists->first();
         $symbols = $watchlists
+            ->pluck('sections')
+            ->flatten(1)
             ->pluck('items')
             ->flatten(1)
             ->pluck('instrument.symbol')

@@ -20,6 +20,14 @@ return [
     'watchlist.deleted' => 'Watchlist deleted.',
     'watchlist.limit_reached' => 'The maximum number of watchlists has been reached.',
     'watchlist.invalid_order' => 'The ordered list must contain every tracked item exactly once.',
+    'watchlist.invalid_layout' => 'The layout must contain every section and symbol exactly once.',
+    'watchlist.default_section' => 'General',
+
+    // WatchlistSectionController
+    'watchlist_section.created' => 'Section created.',
+    'watchlist_section.renamed' => 'Section renamed.',
+    'watchlist_section.deleted' => 'Section deleted.',
+    'watchlist_section.default_protected' => 'The default section cannot be deleted.',
 
     // TransactionController
     'transaction.added' => 'Transaction added.',
@@ -30,6 +38,7 @@ return [
     // WatchlistItemController
     'watchlist_item.symbol_not_found' => 'Symbol not found.',
     'watchlist_item.already_present' => 'Symbol already in watchlist.',
+    'watchlist_item.moved' => 'Symbol moved.',
     'watchlist_item.added' => 'Symbol added.',
     'watchlist_item.removed' => 'Symbol removed.',
 

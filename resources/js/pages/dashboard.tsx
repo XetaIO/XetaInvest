@@ -12,8 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AUTO_REFRESH_INTERVAL_MS } from '@/lib/constants';
 import { formatEur, formatPercent, formatTime } from '@/lib/format';
-import type { DashboardProps } from '@/types/portfolio';
 import { dashboard } from '@/routes';
+import type { DashboardProps } from '@/types/portfolio';
 
 export default function Dashboard({
     portfolios,

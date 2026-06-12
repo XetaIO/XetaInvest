@@ -33,4 +33,9 @@ class Watchlist extends Model
     {
         return $this->hasMany(WatchlistItem::class)->orderBy('position');
     }
+
+    public function sections(): HasMany
+    {
+        return $this->hasMany(WatchlistSection::class)->orderBy('position');
+    }
 }

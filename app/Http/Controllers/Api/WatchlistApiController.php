@@ -16,8 +16,13 @@ class WatchlistApiController extends Controller
     public function summary(Request $request): JsonResponse
     {
         $watchlists = $request->user()->watchlists()
+            ->with('sections')
             ->get(['id', 'name'])
-            ->map(fn ($w) => ['id' => $w->id, 'name' => $w->name])
+            ->map(fn ($watchlist) => [
+                'id' => $watchlist->id,
+                'name' => $watchlist->name,
+                'default_section_id' => $watchlist->sections->firstWhere('is_default', true)?->id,
+            ])
             ->values();
 
         return response()->json(['data' => $watchlists]);

@@ -20,11 +20,11 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import type { NavItem } from '@/types/navigation';
 import { dashboard } from '@/routes';
 import { show as budgetShow } from '@/routes/budget';
 import { show as calculatorShow } from '@/routes/calculator';
 import { index as watchlistsIndex } from '@/routes/watchlists';
+import type { NavItem } from '@/types/navigation';
 
 export function AppSidebar() {
     const { t } = useTranslation();

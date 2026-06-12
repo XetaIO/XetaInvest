@@ -57,12 +57,12 @@ export function AddToWatchlistButton({
         };
     }, [open, lists]);
 
-    const addTo = (watchlistId: string) => {
+    const addTo = (watchlist: WatchlistSummary) => {
         setLoading(true);
 
         router.post(
-            `/watchlists/${watchlistId}/items`,
-            { symbol },
+            `/watchlists/${watchlist.id}/items`,
+            { symbol, section_id: watchlist.default_section_id },
             {
                 preserveScroll: true,
                 onFinish: () => {
@@ -105,7 +105,7 @@ export function AddToWatchlistButton({
                             disabled={loading}
                             onSelect={(e) => {
                                 e.preventDefault();
-                                addTo(l.id);
+                                addTo(l);
                             }}
                         >
                             {l.name}

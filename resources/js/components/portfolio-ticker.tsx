@@ -4,8 +4,8 @@ import { Area, AreaChart } from 'recharts';
 import { CHART_COLORS } from '@/lib/constants';
 import { formatSignedNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import type { PortfolioTickerEntry } from '@/types/ticker';
 import { show as symbolShow } from '@/routes/symbol';
+import type { PortfolioTickerEntry } from '@/types/ticker';
 
 function TickerItem({ entry }: { entry: PortfolioTickerEntry }) {
     const { i18n } = useTranslation();

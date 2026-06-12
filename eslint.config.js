@@ -81,6 +81,17 @@ export default [
                         'sibling',
                         'index',
                     ],
+                    pathGroups: [
+                        {
+                            pattern: '@/**',
+                            group: 'internal',
+                            position: 'after',
+                        },
+                    ],
+                    pathGroupsExcludedImportTypes: [
+                        'builtin',
+                        'external',
+                    ],
                     alphabetize: { order: 'asc', caseInsensitive: true },
                 },
             ],

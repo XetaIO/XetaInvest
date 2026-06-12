@@ -149,8 +149,8 @@ export function WatchlistPanel({
 
     return (
         <>
-            <Card className="min-w-0 py-0">
-                <CardHeader className="flex flex-row items-center justify-between border-b px-3 py-3">
+            <Card className="h-[calc(100dvh-8rem)] min-h-96 min-w-0 overflow-hidden py-0 2xl:h-full 2xl:min-h-0">
+                <CardHeader className="flex shrink-0 flex-row items-center justify-between border-b px-3 py-3">
                     <CardTitle className="min-w-0 truncate text-base">
                         {watchlist.name}
                         <span className="ml-2 text-xs font-normal text-muted-foreground">
@@ -167,8 +167,8 @@ export function WatchlistPanel({
                         {t('watchlist.section_new')}
                     </Button>
                 </CardHeader>
-                <CardContent className="p-0">
-                    <div className="grid grid-cols-[minmax(120px,1fr)_90px_80px_80px_64px] border-b bg-muted/30 text-xs text-muted-foreground">
+                <CardContent className="flex min-h-0 flex-1 flex-col p-0">
+                    <div className="grid shrink-0 grid-cols-[minmax(120px,1fr)_90px_80px_80px_64px] border-b bg-muted/30 text-xs text-muted-foreground">
                         <span className="px-3 py-2">
                             {t('watchlist.column_symbol')}
                         </span>
@@ -184,31 +184,35 @@ export function WatchlistPanel({
                         <span />
                     </div>
 
-                    <DndContext
-                        sensors={sensors}
-                        collisionDetection={closestCenter}
-                        onDragEnd={handleDragEnd}
-                    >
-                        <SortableContext
-                            items={sections.map((section) => section.id)}
-                            strategy={verticalListSortingStrategy}
+                    <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEnd}
                         >
-                            {sections.map((section) => (
-                                <SortableSection
-                                    key={section.id}
-                                    section={section}
-                                    collapsed={collapsed.has(section.id)}
-                                    prices={prices}
-                                    selectedSymbol={selectedSymbol}
-                                    onSelectSymbol={onSelectSymbol}
-                                    onToggle={() => toggleCollapsed(section.id)}
-                                    onAdd={() => setSymbolSection(section)}
-                                    onRename={() => setEditSection(section)}
-                                    onDelete={() => deleteSection(section)}
-                                />
-                            ))}
-                        </SortableContext>
-                    </DndContext>
+                            <SortableContext
+                                items={sections.map((section) => section.id)}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                {sections.map((section) => (
+                                    <SortableSection
+                                        key={section.id}
+                                        section={section}
+                                        collapsed={collapsed.has(section.id)}
+                                        prices={prices}
+                                        selectedSymbol={selectedSymbol}
+                                        onSelectSymbol={onSelectSymbol}
+                                        onToggle={() =>
+                                            toggleCollapsed(section.id)
+                                        }
+                                        onAdd={() => setSymbolSection(section)}
+                                        onRename={() => setEditSection(section)}
+                                        onDelete={() => deleteSection(section)}
+                                    />
+                                ))}
+                            </SortableContext>
+                        </DndContext>
+                    </div>
                 </CardContent>
             </Card>
 

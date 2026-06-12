@@ -256,7 +256,7 @@ export default function WatchlistPage({
                 )}
 
                 {active && (
-                    <div className="grid min-w-0 grid-cols-1 gap-4 2xl:grid-cols-[minmax(0,1fr)_520px]">
+                    <div className="grid min-w-0 grid-cols-1 gap-4 2xl:h-[calc(100dvh-12rem)] 2xl:min-h-[32rem] 2xl:grid-cols-[minmax(0,1fr)_520px]">
                         {items.length > 0 ? (
                             <WatchlistTradingChart
                                 key={active.id}
@@ -264,7 +264,6 @@ export default function WatchlistPage({
                                 wsUrl={wsUrl}
                                 positions={positions}
                                 selectedSymbol={effectiveSelectedSymbol}
-                                onSelectedSymbolChange={setSelectedSymbol}
                             />
                         ) : (
                             <Card>

@@ -83,9 +83,16 @@ export function WatchlistRow({ item, price, selected, onSelect }: Props) {
                 <button
                     type="button"
                     onClick={onSelect}
-                    className="min-w-0 flex-1 truncate text-left font-medium hover:underline"
+                    className="min-w-0 flex-1 text-left"
                 >
-                    {item.instrument.symbol}
+                    <span className="block truncate font-medium hover:underline">
+                        {item.instrument.symbol}
+                    </span>
+                    {item.instrument.name && (
+                        <span className="block truncate text-xs text-muted-foreground">
+                            {item.instrument.name}
+                        </span>
+                    )}
                 </button>
             </div>
             <button

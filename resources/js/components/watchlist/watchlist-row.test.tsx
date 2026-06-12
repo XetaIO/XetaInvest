@@ -44,9 +44,10 @@ describe('WatchlistRow', () => {
             </I18nextProvider>,
         );
 
-        await user.click(screen.getByRole('button', { name: 'AAPL' }));
+        await user.click(screen.getByRole('button', { name: 'AAPL Apple' }));
 
         expect(onSelect).toHaveBeenCalledOnce();
+        expect(screen.getByText('Apple')).toBeInTheDocument();
         expect(screen.getByText(/110[,.]00/)).toBeInTheDocument();
         expect(screen.getByText(/\+10[,.]00%/)).toBeInTheDocument();
     });

@@ -42,13 +42,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import { useFinanceQueryStream } from '@/hooks/use-finance-query-stream';
 import { apiFetch } from '@/lib/api';
 import { CHART_RANGE_LABELS } from '@/lib/constants';
@@ -71,9 +64,7 @@ type Props = {
     items: WatchlistItem[];
     wsUrl: string;
     positions?: Record<string, WatchlistPosition>;
-    defaultSymbol?: string;
-    selectedSymbol?: string;
-    onSelectedSymbolChange?: (symbol: string) => void;
+    selectedSymbol: string;
 };
 
 type ChartResult = {
@@ -143,9 +134,7 @@ export function WatchlistTradingChart({
     items,
     wsUrl,
     positions = {},
-    defaultSymbol,
-    selectedSymbol: controlledSymbol,
-    onSelectedSymbolChange,
+    selectedSymbol,
 }: Props) {
     const { t, i18n } = useTranslation();
     const locale = i18n.resolvedLanguage ?? 'fr';
@@ -153,22 +142,20 @@ export function WatchlistTradingChart({
         () => items.map((item) => item.instrument.symbol.toUpperCase()),
         [items],
     );
-    const initialSymbol = (
-        defaultSymbol ??
-        controlledSymbol ??
-        symbols[0] ??
-        ''
-    ).toUpperCase();
-    const [internalSymbol, setInternalSymbol] = useState(initialSymbol);
-    const requestedPrimary = (controlledSymbol ?? internalSymbol).toUpperCase();
+    const requestedPrimary = selectedSymbol.toUpperCase();
     const activeSymbol = symbols.includes(requestedPrimary)
         ? requestedPrimary
         : (symbols[0] ?? '');
-    const [compareSymbols, setCompareSymbols] = useState<string[]>([]);
+    const [storedCompareSymbols, setCompareSymbols] = useState<string[]>([]);
     const [chartType, setChartType] = useState<ChartType>('candlestick');
     const [range, setRange] = useState<SymbolRange>('3mo');
     const [results, setResults] = useState<Record<string, ChartResult>>({});
     const [showPositionLine, setShowPositionLine] = useState(true);
+    const compareSymbols = useMemo(
+        () => storedCompareSymbols.filter((symbol) => symbol !== activeSymbol),
+        [activeSymbol, storedCompareSymbols],
+    );
+
     const displayedSymbols = useMemo(
         () => [activeSymbol, ...compareSymbols].filter(Boolean),
         [activeSymbol, compareSymbols],
@@ -214,15 +201,6 @@ export function WatchlistTradingChart({
                 .map(([symbol, result]) => [symbol, [...result.points]]),
         );
     }, [results, range]);
-
-    const selectSymbol = (symbol: string) => {
-        const normalized = symbol.toUpperCase();
-        setInternalSymbol(normalized);
-        setCompareSymbols((current) =>
-            current.filter((candidate) => candidate !== normalized),
-        );
-        onSelectedSymbolChange?.(normalized);
-    };
 
     const fetchChart = useCallback(
         async (symbol: string, selectedRange: SymbolRange) => {
@@ -537,14 +515,10 @@ export function WatchlistTradingChart({
         items.find(
             (item) => item.instrument.symbol.toUpperCase() === activeSymbol,
         )?.instrument.currency ?? '';
-    const symbolOptions = items.map((item) => ({
-        value: item.instrument.symbol.toUpperCase(),
-        name: item.instrument.name,
-    }));
 
     return (
-        <Card className="min-w-0 py-6">
-            <CardHeader className="space-y-3 pb-2">
+        <Card className="h-[calc(100dvh-8rem)] min-h-[32rem] min-w-0 py-6 2xl:h-full 2xl:min-h-0">
+            <CardHeader className="shrink-0 space-y-3 pb-2">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <CardTitle className="text-base">
                         {t('watchlist.trading_chart_title')}
@@ -556,35 +530,6 @@ export function WatchlistTradingChart({
                     </CardTitle>
 
                     <div className="flex flex-wrap items-center gap-2">
-                        <Select
-                            value={activeSymbol}
-                            onValueChange={selectSymbol}
-                        >
-                            <SelectTrigger className="h-7 w-36 text-xs">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {symbolOptions.map((option) => (
-                                    <SelectItem
-                                        key={option.value}
-                                        value={option.value}
-                                        className="text-xs"
-                                    >
-                                        <span className="font-medium">
-                                            {option.value}
-                                        </span>
-                                        {option.name && (
-                                            <span className="ml-1 text-muted-foreground">
-                                                {option.name.length > 18
-                                                    ? `${option.name.slice(0, 18)}...`
-                                                    : option.name}
-                                            </span>
-                                        )}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-
                         <ComparisonSearch
                             excludedSymbols={displayedSymbols}
                             onAdd={(symbol) =>
@@ -737,27 +682,27 @@ export function WatchlistTradingChart({
                 )}
             </CardHeader>
 
-            <CardContent className="p-0 pt-2">
+            <CardContent className="flex min-h-0 flex-1 flex-col p-0 pt-2">
                 {loading && (
-                    <div className="flex h-95 items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex min-h-96 flex-1 items-center justify-center gap-2 text-sm text-muted-foreground">
                         <Loader2 className="h-4 w-4 animate-spin" />
                         {t('watchlist.trading_chart_loading')}
                     </div>
                 )}
                 {!loading && error && (
-                    <div className="flex h-95 items-center justify-center text-sm text-destructive">
+                    <div className="flex min-h-96 flex-1 items-center justify-center text-sm text-destructive">
                         {error}
                     </div>
                 )}
                 {!loading && !error && primaryPoints.length === 0 && (
-                    <div className="flex h-95 items-center justify-center text-sm text-muted-foreground">
+                    <div className="flex min-h-96 flex-1 items-center justify-center text-sm text-muted-foreground">
                         {t('watchlist.trading_chart_no_data')}
                     </div>
                 )}
                 <div
                     ref={containerRef}
                     className={cn(
-                        'h-120 w-full overflow-hidden rounded-b-xl',
+                        'min-h-96 w-full flex-1 overflow-hidden rounded-b-xl',
                         (loading || error || primaryPoints.length === 0) &&
                             'hidden',
                     )}

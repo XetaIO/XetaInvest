@@ -22,10 +22,18 @@ class CreateWatchlist
                 ]);
             }
 
-            return $user->watchlists()->create([
+            $watchlist = $user->watchlists()->create([
                 'name' => $name,
                 'position' => (int) $user->watchlists()->max('position') + 1,
             ]);
+
+            $watchlist->sections()->create([
+                'name' => __('messages.watchlist.default_section'),
+                'position' => 0,
+                'is_default' => true,
+            ]);
+
+            return $watchlist;
         });
     }
 }

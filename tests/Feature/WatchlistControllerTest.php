@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\User;
 use App\Models\Watchlist;
 use App\Models\WatchlistItem;
+use App\Models\WatchlistSection;
 
 beforeEach(function (): void {
     $this->user = User::factory()->create();
@@ -26,7 +27,9 @@ test('user can create a watchlist', function () {
         ->assertRedirect();
 
     expect($this->user->watchlists()->count())->toBe(1)
-        ->and($this->user->watchlists()->first()->name)->toBe('Tech');
+        ->and($this->user->watchlists()->first()->name)->toBe('Tech')
+        ->and($this->user->watchlists()->first()->sections()->count())->toBe(1)
+        ->and($this->user->watchlists()->first()->sections()->first()->is_default)->toBeTrue();
 });
 
 test('user cannot exceed the watchlist limit', function () {
@@ -85,27 +88,55 @@ test('user cannot delete another user watchlist', function () {
 
 test('user can reorder items in a watchlist', function () {
     $w = Watchlist::factory()->forUser($this->user)->create();
-    $i1 = WatchlistItem::factory()->forWatchlist($w)->create(['position' => 0]);
-    $i2 = WatchlistItem::factory()->forWatchlist($w)->create(['position' => 1]);
+    $default = WatchlistSection::factory()->forWatchlist($w)->default()->create(['position' => 0]);
+    $other = WatchlistSection::factory()->forWatchlist($w)->create(['position' => 1]);
+    $i1 = WatchlistItem::factory()->forSection($default)->create(['position' => 0]);
+    $i2 = WatchlistItem::factory()->forSection($default)->create(['position' => 1]);
 
     $this->actingAs($this->user)
         ->patch(route('watchlists.reorder', $w), [
-            'item_ids' => [$i2->id, $i1->id],
+            'sections' => [
+                ['id' => $other->id, 'item_ids' => [$i2->id]],
+                ['id' => $default->id, 'item_ids' => [$i1->id]],
+            ],
         ])
         ->assertRedirect();
 
-    expect($i1->fresh()->position)->toBe(1)
+    expect($other->fresh()->position)->toBe(0)
+        ->and($default->fresh()->position)->toBe(1)
+        ->and($i1->fresh()->section_id)->toBe($default->id)
+        ->and($i1->fresh()->position)->toBe(0)
+        ->and($i2->fresh()->section_id)->toBe($other->id)
         ->and($i2->fresh()->position)->toBe(0);
 });
 
-test('reorder requires every watchlist item exactly once', function () {
+test('reorder requires every section and item exactly once', function () {
     $watchlist = Watchlist::factory()->forUser($this->user)->create();
-    $item = WatchlistItem::factory()->forWatchlist($watchlist)->create(['position' => 0]);
-    WatchlistItem::factory()->forWatchlist($watchlist)->create(['position' => 1]);
+    $section = WatchlistSection::factory()->forWatchlist($watchlist)->default()->create();
+    $item = WatchlistItem::factory()->forSection($section)->create(['position' => 0]);
+    WatchlistItem::factory()->forSection($section)->create(['position' => 1]);
 
     $this->actingAs($this->user)
         ->patch(route('watchlists.reorder', $watchlist), [
-            'item_ids' => [$item->id],
+            'sections' => [
+                ['id' => $section->id, 'item_ids' => [$item->id]],
+            ],
         ])
-        ->assertSessionHasErrors('item_ids');
+        ->assertSessionHasErrors('sections');
+});
+
+test('reorder rejects sections and items from another watchlist', function () {
+    $watchlist = Watchlist::factory()->forUser($this->user)->create();
+    $section = WatchlistSection::factory()->forWatchlist($watchlist)->default()->create();
+    $other = Watchlist::factory()->forUser($this->user)->create();
+    $otherSection = WatchlistSection::factory()->forWatchlist($other)->default()->create();
+    $otherItem = WatchlistItem::factory()->forSection($otherSection)->create();
+
+    $this->actingAs($this->user)
+        ->patch(route('watchlists.reorder', $watchlist), [
+            'sections' => [
+                ['id' => $section->id, 'item_ids' => [$otherItem->id]],
+            ],
+        ])
+        ->assertSessionHasErrors('sections.0.item_ids.0');
 });

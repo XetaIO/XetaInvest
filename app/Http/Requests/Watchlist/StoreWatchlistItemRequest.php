@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Watchlist;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreWatchlistItemRequest extends FormRequest
 {
@@ -22,6 +23,12 @@ class StoreWatchlistItemRequest extends FormRequest
     {
         return [
             'symbol' => ['required', 'string', 'max:32'],
+            'section_id' => [
+                'required',
+                'uuid',
+                Rule::exists('watchlist_sections', 'id')
+                    ->where('watchlist_id', $this->route('watchlist')?->getKey()),
+            ],
         ];
     }
 }

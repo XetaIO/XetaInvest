@@ -20,7 +20,15 @@ import {
     LineStyle,
     TickMarkType,
 } from 'lightweight-charts';
-import { BarChart2, Loader2, TrendingUp, Wallet } from 'lucide-react';
+import {
+    BarChart2,
+    Loader2,
+    Plus,
+    Search,
+    TrendingUp,
+    Wallet,
+    X,
+} from 'lucide-react';
 import {
     useCallback,
     useEffect,
@@ -30,8 +38,10 @@ import {
     useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
     Select,
     SelectContent,
@@ -40,26 +50,37 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useFinanceQueryStream } from '@/hooks/use-finance-query-stream';
+import { apiFetch } from '@/lib/api';
 import { CHART_RANGE_LABELS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
-import type { ChartPoint, SymbolRange } from '@/types/symbol';
-import type { PriceUpdate, WatchlistItem } from '@/types/watchlist';
-import type { WatchlistPosition } from '@/types/watchlist';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+import { normalizeChartPoints } from '@/lib/watchlist';
+import type {
+    ChartPoint,
+    SymbolRange,
+    SymbolSearchResult,
+} from '@/types/symbol';
+import type {
+    PriceUpdate,
+    WatchlistItem,
+    WatchlistPosition,
+} from '@/types/watchlist';
 
 type ChartType = 'candlestick' | 'line' | 'line-markers';
 
 type Props = {
     items: WatchlistItem[];
     wsUrl: string;
-    /** Open positions (PRU) keyed by uppercase symbol */
     positions?: Record<string, WatchlistPosition>;
-    /** Initially selected symbol (defaults to the first item) */
     defaultSymbol?: string;
+    selectedSymbol?: string;
+    onSelectedSymbolChange?: (symbol: string) => void;
 };
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+type ChartResult = {
+    range: SymbolRange;
+    points: ChartPoint[];
+    error: string | null;
+};
 
 const RANGES: SymbolRange[] = [
     '1d',
@@ -72,10 +93,6 @@ const RANGES: SymbolRange[] = [
     '5y',
 ];
 
-// Seconds between two candles for each range — mirrors the backend interval
-// mapping (1d→5m, 5d→15m, monthly+→1d, multi-year→1wk). Live WS updates are
-// bucketed on this interval so a new candle is only appended when the bucket
-// boundary is crossed.
 const INTERVAL_SECONDS: Record<SymbolRange, number> = {
     '1d': 5 * 60,
     '5d': 15 * 60,
@@ -88,6 +105,17 @@ const INTERVAL_SECONDS: Record<SymbolRange, number> = {
     '10y': 30 * 24 * 60 * 60,
     ytd: 24 * 60 * 60,
 };
+
+const COMPARISON_COLORS = [
+    '#0ea5e9',
+    '#10b981',
+    '#f59e0b',
+    '#ef4444',
+    '#8b5cf6',
+    '#ec4899',
+    '#14b8a6',
+    '#f97316',
+];
 
 const CHART_TYPES: {
     value: ChartType;
@@ -111,539 +139,324 @@ const CHART_TYPES: {
     },
 ];
 
-// Builds Lightweight Charts options matching the current CSS theme
-function buildChartOptions(): DeepPartial<ChartOptions> {
-    // Resolve oklch CSS variables to rgb by letting the browser compute them
-    const text = cssColor('--muted-foreground');
-    const grid = cssColor('--border');
-    const labelBg = cssColor('--secondary');
-
-    return {
-        autoSize: true,
-        layout: {
-            background: { type: ColorType.Solid, color: 'transparent' },
-            textColor: text,
-            fontFamily: 'inherit',
-            fontSize: 11,
-        },
-        grid: {
-            vertLines: { color: grid },
-            horzLines: { color: grid },
-        },
-        crosshair: {
-            vertLine: { color: grid, labelBackgroundColor: labelBg },
-            horzLine: { color: grid, labelBackgroundColor: labelBg },
-        },
-        rightPriceScale: {
-            borderColor: grid,
-        },
-        timeScale: {
-            borderColor: grid,
-            timeVisible: true,
-            secondsVisible: false,
-            rightOffset: 4,
-            tickMarkFormatter: (
-                time: UTCTimestamp | BusinessDay,
-                tickMarkType: TickMarkType,
-            ) => {
-                if (typeof time === 'number') {
-                    const d = new Date(time * 1000);
-                    const fmt = new Intl.DateTimeFormat('fr-FR', {
-                        timeZone: 'Europe/Paris',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    });
-                    const fmtDate = new Intl.DateTimeFormat('fr-FR', {
-                        timeZone: 'Europe/Paris',
-                        day: '2-digit',
-                        month: '2-digit',
-                    });
-
-                    if (
-                        tickMarkType === TickMarkType.DayOfMonth ||
-                        tickMarkType === TickMarkType.Month
-                    ) {
-                        return fmtDate.format(d);
-                    }
-
-                    return fmt.format(d);
-                }
-
-                // BusinessDay
-                if (tickMarkType === TickMarkType.Year) {
-                    return String(time.year);
-                }
-
-                if (tickMarkType === TickMarkType.Month) {
-                    return new Intl.DateTimeFormat('fr-FR', {
-                        month: 'short',
-                    }).format(new Date(Date.UTC(time.year, time.month - 1, 1)));
-                }
-
-                return `${String(time.day).padStart(2, '0')}/${String(time.month).padStart(2, '0')}`;
-            },
-        },
-        handleScroll: {
-            mouseWheel: true,
-            pressedMouseMove: true,
-            horzTouchDrag: true,
-            vertTouchDrag: false,
-        },
-        handleScale: {
-            mouseWheel: true,
-            pinch: true,
-            axisPressedMouseMove: {
-                time: true,
-                price: true,
-            },
-        },
-        localization: {
-            locale: 'fr-FR',
-            timeFormatter: (time: BusinessDay | UTCTimestamp) => {
-                if (typeof time === 'number') {
-                    // Intraday — UTCTimestamp (seconds) → affiche heure Paris
-                    return new Intl.DateTimeFormat('fr-FR', {
-                        timeZone: 'Europe/Paris',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    }).format(new Date(time * 1000));
-                }
-
-                // Daily — BusinessDay {year, month, day}
-                const d = new Date(
-                    Date.UTC(time.year, time.month - 1, time.day),
-                );
-
-                return new Intl.DateTimeFormat('fr-FR', {
-                    timeZone: 'Europe/Paris',
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                }).format(d);
-            },
-        },
-    };
-}
-
-// Stable empty array so derived `points` keeps a constant identity while loading
-const EMPTY_POINTS: ChartPoint[] = [];
-
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export function WatchlistTradingChart({
     items,
     wsUrl,
     positions = {},
     defaultSymbol,
+    selectedSymbol: controlledSymbol,
+    onSelectedSymbolChange,
 }: Props) {
     const { t, i18n } = useTranslation();
-
-    // Symbols available in the active watchlist (uppercase)
+    const locale = i18n.resolvedLanguage ?? 'fr';
     const symbols = useMemo(
-        () => items.map((i) => i.instrument.symbol.toUpperCase()),
+        () => items.map((item) => item.instrument.symbol.toUpperCase()),
         [items],
     );
-
     const initialSymbol = (
         defaultSymbol ??
-        items[0]?.instrument.symbol ??
+        controlledSymbol ??
+        symbols[0] ??
         ''
     ).toUpperCase();
-    const [selectedSymbol, setSelectedSymbol] = useState<string>(initialSymbol);
-    // Fall back to the first symbol when the selected one leaves the watchlist —
-    // derived instead of being synced through an effect.
-    const activeSymbol = symbols.includes(selectedSymbol)
-        ? selectedSymbol
+    const [internalSymbol, setInternalSymbol] = useState(initialSymbol);
+    const requestedPrimary = (controlledSymbol ?? internalSymbol).toUpperCase();
+    const activeSymbol = symbols.includes(requestedPrimary)
+        ? requestedPrimary
         : (symbols[0] ?? '');
-
+    const [compareSymbols, setCompareSymbols] = useState<string[]>([]);
     const [chartType, setChartType] = useState<ChartType>('candlestick');
     const [range, setRange] = useState<SymbolRange>('3mo');
-    // Last resolved chart payload. loading/error/points are derived from it so
-    // the data-fetching effect never calls setState synchronously.
-    const [result, setResult] = useState<{
-        symbol: string;
-        range: SymbolRange;
-        points: ChartPoint[];
-        error: string | null;
-    }>({ symbol: '', range: '3mo', points: EMPTY_POINTS, error: null });
+    const [results, setResults] = useState<Record<string, ChartResult>>({});
     const [showPositionLine, setShowPositionLine] = useState(true);
+    const displayedSymbols = useMemo(
+        () => [activeSymbol, ...compareSymbols].filter(Boolean),
+        [activeSymbol, compareSymbols],
+    );
+    const comparisonMode = compareSymbols.length > 0;
+    const primaryResult = results[activeSymbol];
+    const primaryFresh = primaryResult?.range === range;
+    const loading = activeSymbol !== '' && !primaryFresh;
+    const primaryPoints = useMemo(
+        () => (primaryFresh ? primaryResult.points : []),
+        [primaryFresh, primaryResult],
+    );
+    const error = primaryFresh ? primaryResult.error : null;
+    const failedComparisons = compareSymbols.filter(
+        (symbol) =>
+            results[symbol]?.range === range && results[symbol]?.error !== null,
+    );
 
-    const isFresh = result.symbol === activeSymbol && result.range === range;
-    const loading = activeSymbol !== '' && !isFresh;
-    const points = isFresh ? result.points : EMPTY_POINTS;
-    const error = isFresh ? result.error : null;
-
-    // Lightweight chart refs
     const containerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
-    const seriesRef = useRef<
-        ISeriesApi<'Candlestick'> | ISeriesApi<'Line'> | null
-    >(null);
-    // Always holds the latest rendered points so the WS callback can reference them
-    const pointsRef = useRef<ChartPoint[]>([]);
-    const chartTypeRef = useRef<ChartType>(chartType);
-    const rangeRef = useRef<SymbolRange>(range);
+    const seriesRefs = useRef<
+        Map<string, ISeriesApi<'Candlestick'> | ISeriesApi<'Line'>>
+    >(new Map());
     const priceLineRef = useRef<IPriceLine | null>(null);
+    const pointsRef = useRef<Record<string, ChartPoint[]>>({});
+    const chartTypeRef = useRef(chartType);
+    const rangeRef = useRef(range);
+    const comparisonModeRef = useRef(comparisonMode);
 
-    useEffect(() => {
-        pointsRef.current = points;
-    }, [points]);
     useEffect(() => {
         chartTypeRef.current = chartType;
     }, [chartType]);
     useEffect(() => {
         rangeRef.current = range;
     }, [range]);
+    useEffect(() => {
+        comparisonModeRef.current = comparisonMode;
+    }, [comparisonMode]);
+    useEffect(() => {
+        pointsRef.current = Object.fromEntries(
+            Object.entries(results)
+                .filter(([, result]) => result.range === range)
+                .map(([symbol, result]) => [symbol, [...result.points]]),
+        );
+    }, [results, range]);
 
-    // ── Data fetching ──────────────────────────────────────────────────────────
+    const selectSymbol = (symbol: string) => {
+        const normalized = symbol.toUpperCase();
+        setInternalSymbol(normalized);
+        setCompareSymbols((current) =>
+            current.filter((candidate) => candidate !== normalized),
+        );
+        onSelectedSymbolChange?.(normalized);
+    };
+
     const fetchChart = useCallback(
-        async (
-            symbol: string,
-            r: SymbolRange,
-        ): Promise<{ points: ChartPoint[]; error: string | null }> => {
+        async (symbol: string, selectedRange: SymbolRange) => {
             try {
-                const res = await fetch(
-                    `/symbol/${encodeURIComponent(symbol)}/chart?range=${encodeURIComponent(r)}`,
+                const response = await fetch(
+                    `/symbol/${encodeURIComponent(symbol)}/chart?range=${encodeURIComponent(selectedRange)}`,
                     { headers: { Accept: 'application/json' } },
                 );
 
-                if (!res.ok) {
+                if (!response.ok) {
                     throw new Error('fetch error');
                 }
 
-                const json: { points?: ChartPoint[] } = await res.json();
+                const payload = (await response.json()) as {
+                    points?: ChartPoint[];
+                };
 
-                return { points: json.points ?? [], error: null };
+                return {
+                    range: selectedRange,
+                    points: payload.points ?? [],
+                    error: null,
+                } satisfies ChartResult;
             } catch {
                 return {
+                    range: selectedRange,
                     points: [],
                     error: t('watchlist.trading_chart_error'),
-                };
+                } satisfies ChartResult;
             }
         },
         [t],
     );
 
-    // Fetch when symbol or range changes; setState only runs once the request
-    // resolves (asynchronously), never synchronously in the effect body.
     useEffect(() => {
-        if (!activeSymbol) {
+        if (displayedSymbols.length === 0) {
             return;
         }
 
         let cancelled = false;
 
-        void fetchChart(activeSymbol, range).then((res) => {
+        void Promise.all(
+            displayedSymbols.map(
+                async (symbol) =>
+                    [symbol, await fetchChart(symbol, range)] as const,
+            ),
+        ).then((entries) => {
             if (cancelled) {
                 return;
             }
 
-            setResult({
-                symbol: activeSymbol,
-                range,
-                points: res.points,
-                error: res.error,
-            });
+            setResults((current) => ({
+                ...current,
+                ...Object.fromEntries(entries),
+            }));
         });
 
         return () => {
             cancelled = true;
         };
-    }, [activeSymbol, range, fetchChart]);
+    }, [displayedSymbols, range, fetchChart]);
 
-    // ── Live WebSocket update ──────────────────────────────────────────────────
-    // Live ticks are bucketed on the range's candle interval: a new candle is
-    // only appended when the bucket boundary is crossed, otherwise the current
-    // candle is updated in place (avoids the "one candle per second" artefact).
-    const handleLiveUpdate = useCallback(
-        (update: PriceUpdate) => {
-            const series = seriesRef.current;
-
-            if (!series) {
-                return;
-            }
-
-            if (update.id.toUpperCase() !== activeSymbol.toUpperCase()) {
-                return;
-            }
-
-            const price = update.price;
-            const last = pointsRef.current[pointsRef.current.length - 1];
-
-            if (!last) {
-                return;
-            }
-
-            const isIntraday = /^\d+$/.test(last.date);
-
-            // Daily / weekly ranges use BusinessDay times — we can't append a
-            // UTCTimestamp candle without mixing time formats, so we only refresh
-            // the last candle in place.
-            if (!isIntraday) {
-                if (chartTypeRef.current === 'candlestick') {
-                    const high = Math.max(last.high ?? price, price);
-                    const low = Math.min(last.low ?? price, price);
-                    (series as ISeriesApi<'Candlestick'>).update({
-                        time: last.date as Time,
-                        open: last.open ?? price,
-                        high,
-                        low,
-                        close: price,
-                    });
-                    pointsRef.current[pointsRef.current.length - 1] = {
-                        ...last,
-                        high,
-                        low,
-                        close: price,
-                    };
-                } else {
-                    (series as ISeriesApi<'Line'>).update({
-                        time: last.date as Time,
-                        value: price,
-                    });
-                    pointsRef.current[pointsRef.current.length - 1] = {
-                        ...last,
-                        close: price,
-                    };
-                }
-
-                return;
-            }
-
-            // Intraday — bucket the current time on the range interval.
-            const interval = INTERVAL_SECONDS[rangeRef.current];
-            const nowSec = Math.floor(Date.now() / 1000);
-            const bucket = Math.floor(nowSec / interval) * interval;
-            const lastTime = Number(last.date);
-            const isNewBucket = bucket > lastTime;
-            const time = bucket as UTCTimestamp;
-
-            if (chartTypeRef.current === 'candlestick') {
-                if (isNewBucket) {
-                    (series as ISeriesApi<'Candlestick'>).update({
-                        time,
-                        open: price,
-                        high: price,
-                        low: price,
-                        close: price,
-                    });
-                    pointsRef.current = [
-                        ...pointsRef.current,
-                        {
-                            ...last,
-                            date: String(bucket),
-                            open: price,
-                            high: price,
-                            low: price,
-                            close: price,
-                        },
-                    ];
-                } else {
-                    const high = Math.max(last.high ?? price, price);
-                    const low = Math.min(last.low ?? price, price);
-                    (series as ISeriesApi<'Candlestick'>).update({
-                        time: lastTime as UTCTimestamp,
-                        open: last.open ?? price,
-                        high,
-                        low,
-                        close: price,
-                    });
-                    pointsRef.current[pointsRef.current.length - 1] = {
-                        ...last,
-                        high,
-                        low,
-                        close: price,
-                    };
-                }
-            } else {
-                (series as ISeriesApi<'Line'>).update({
-                    time: isNewBucket ? time : (lastTime as UTCTimestamp),
-                    value: price,
-                });
-
-                if (isNewBucket) {
-                    pointsRef.current = [
-                        ...pointsRef.current,
-                        { ...last, date: String(bucket), close: price },
-                    ];
-                } else {
-                    pointsRef.current[pointsRef.current.length - 1] = {
-                        ...last,
-                        close: price,
-                    };
-                }
-            }
-        },
-        [activeSymbol],
-    );
-
-    useFinanceQueryStream({
-        symbols: activeSymbol ? [activeSymbol] : [],
-        wsUrl,
-        onUpdate: handleLiveUpdate,
-        enabled: !!activeSymbol && !!wsUrl,
-    });
-
-    // ── Chart initialization & theme watch ─────────────────────────────────────
     useLayoutEffect(() => {
-        if (!containerRef.current) {
+        const container = containerRef.current;
+
+        if (!container) {
             return;
         }
 
-        const chart = createChart(containerRef.current, buildChartOptions());
-
+        const chart = createChart(container, buildChartOptions(locale));
+        const mountedSeries = seriesRefs.current;
         chartRef.current = chart;
-
-        // Dark mode observer — reapply colors when class toggles
-        const mo = new MutationObserver(() => {
-            chart.applyOptions(buildChartOptions());
+        const themeObserver = new MutationObserver(() => {
+            chart.applyOptions(buildChartOptions(locale));
         });
-        mo.observe(document.documentElement, {
+        themeObserver.observe(document.documentElement, {
             attributes: true,
             attributeFilter: ['class'],
         });
 
+        let resizeFrame: number | null = null;
+        const resizeObserver = new ResizeObserver((entries) => {
+            const entry = entries[0];
+
+            if (!entry || entry.contentRect.width <= 0) {
+                return;
+            }
+
+            if (resizeFrame !== null) {
+                window.cancelAnimationFrame(resizeFrame);
+            }
+
+            resizeFrame = window.requestAnimationFrame(() => {
+                chart.timeScale().fitContent();
+                resizeFrame = null;
+            });
+        });
+        resizeObserver.observe(container);
+
         return () => {
-            mo.disconnect();
+            themeObserver.disconnect();
+            resizeObserver.disconnect();
+
+            if (resizeFrame !== null) {
+                window.cancelAnimationFrame(resizeFrame);
+            }
+
             chart.remove();
             chartRef.current = null;
-            seriesRef.current = null;
+            mountedSeries.clear();
         };
-    }, []); // run once — re-creating chart is expensive
+    }, [locale]);
 
-    // ── Series rendering ───────────────────────────────────────────────────────
     useEffect(() => {
         const chart = chartRef.current;
 
-        if (!chart || loading || points.length === 0) {
+        if (!chart || loading || primaryPoints.length === 0) {
             return;
         }
 
-        // Remove existing series
-        if (seriesRef.current) {
-            try {
-                chart.removeSeries(seriesRef.current);
-            } catch {
-                /* already removed */
-            }
+        removeAllSeries(chart, seriesRefs.current);
+        priceLineRef.current = null;
 
-            seriesRef.current = null;
-        }
+        if (comparisonMode) {
+            displayedSymbols.forEach((symbol, index) => {
+                const result = results[symbol];
 
-        const loc = i18n.resolvedLanguage ?? 'fr';
+                if (
+                    !result ||
+                    result.range !== range ||
+                    result.points.length === 0
+                ) {
+                    return;
+                }
 
-        if (chartType === 'candlestick') {
-            const upColor = '#10b981';
-            const downColor = '#ef4444';
-
-            const series = chart.addSeries(CandlestickSeries, {
-                upColor,
-                downColor,
-                borderUpColor: upColor,
-                borderDownColor: downColor,
-                wickUpColor: upColor,
-                wickDownColor: downColor,
+                const series = chart.addSeries(LineSeries, {
+                    color: COMPARISON_COLORS[index % COMPARISON_COLORS.length],
+                    lineWidth: 2,
+                    crosshairMarkerVisible: true,
+                    priceLineVisible: false,
+                    lastValueVisible: true,
+                    priceFormat: {
+                        type: 'custom',
+                        formatter: (value: number) =>
+                            `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`,
+                    },
+                });
+                series.setData(
+                    normalizeChartPoints(result.points).map((point) => ({
+                        time: toChartTime(point.time),
+                        value: point.value,
+                    })),
+                );
+                seriesRefs.current.set(symbol, series);
             });
-
-            const candleData: CandlestickData[] = points
+        } else if (chartType === 'candlestick') {
+            const series = chart.addSeries(CandlestickSeries, {
+                upColor: '#10b981',
+                downColor: '#ef4444',
+                borderUpColor: '#10b981',
+                borderDownColor: '#ef4444',
+                wickUpColor: '#10b981',
+                wickDownColor: '#ef4444',
+            });
+            const data: CandlestickData[] = primaryPoints
                 .filter(
-                    (p) => p.open !== null && p.high !== null && p.low !== null,
+                    (point) =>
+                        point.open !== null &&
+                        point.high !== null &&
+                        point.low !== null,
                 )
-                .map((p) => ({
-                    time: toChartTime(p.date),
-                    open: p.open as number,
-                    high: p.high as number,
-                    low: p.low as number,
-                    close: p.close,
+                .map((point) => ({
+                    time: toChartTime(point.date),
+                    open: point.open as number,
+                    high: point.high as number,
+                    low: point.low as number,
+                    close: point.close,
                 }));
-
-            series.setData(candleData);
-            seriesRef.current = series;
+            series.setData(data);
+            seriesRefs.current.set(activeSymbol, series);
         } else {
-            // line or line-markers
             const isUp =
-                points.length >= 2 &&
-                points[points.length - 1].close >= points[0].close;
-            const lineColor = isUp ? '#10b981' : '#ef4444';
-
+                primaryPoints.length >= 2 &&
+                primaryPoints[primaryPoints.length - 1].close >=
+                    primaryPoints[0].close;
             const series = chart.addSeries(LineSeries, {
-                color: lineColor,
+                color: isUp ? '#10b981' : '#ef4444',
                 lineWidth: 2,
                 crosshairMarkerVisible: true,
                 crosshairMarkerRadius: 4,
                 priceLineVisible: true,
             });
-
-            const lineData: LineData[] = points.map((p) => ({
-                time: toChartTime(p.date),
-                value: p.close,
+            const data: LineData[] = primaryPoints.map((point) => ({
+                time: toChartTime(point.date),
+                value: point.close,
             }));
-
-            series.setData(lineData);
+            series.setData(data);
 
             if (chartType === 'line-markers') {
-                // Add a marker at each high/low turning point (local maxima/minima)
-                const markers: SeriesMarker<Time>[] = [];
-
-                for (let i = 1; i < points.length - 1; i++) {
-                    const prev = points[i - 1].close;
-                    const curr = points[i].close;
-                    const next = points[i + 1].close;
-
-                    if (curr > prev && curr > next) {
-                        // Local high
-                        markers.push({
-                            time: toChartTime(points[i].date),
-                            position: 'aboveBar',
-                            color: '#10b981',
-                            shape: 'arrowDown',
-                            size: 0.8,
-                            text: formatVal(curr, loc),
-                        });
-                    } else if (curr < prev && curr < next) {
-                        // Local low
-                        markers.push({
-                            time: toChartTime(points[i].date),
-                            position: 'belowBar',
-                            color: '#ef4444',
-                            shape: 'arrowUp',
-                            size: 0.8,
-                            text: formatVal(curr, loc),
-                        });
-                    }
-                }
-
-                // Limit markers to avoid clutter (keep most significant)
-                const step = Math.max(1, Math.floor(markers.length / 20));
-                const filteredMarkers = markers.filter(
-                    (_, i) => i % step === 0,
+                createSeriesMarkers(
+                    series,
+                    buildTurningPointMarkers(primaryPoints, locale),
                 );
-
-                createSeriesMarkers(series, filteredMarkers);
             }
 
-            seriesRef.current = series;
+            seriesRefs.current.set(activeSymbol, series);
         }
 
         chart.timeScale().fitContent();
-    }, [points, chartType, loading, i18n.resolvedLanguage]);
+    }, [
+        activeSymbol,
+        chartType,
+        comparisonMode,
+        displayedSymbols,
+        loading,
+        locale,
+        primaryPoints,
+        range,
+        results,
+    ]);
 
-    // ── Position cost-basis (PRU) price line ───────────────────────────────────
     const position = positions[activeSymbol];
 
     useEffect(() => {
-        const series = seriesRef.current;
+        const series = seriesRefs.current.get(activeSymbol);
 
-        if (!series) {
+        if (!series || comparisonMode) {
             return;
         }
 
-        // Clear any previous line first
         if (priceLineRef.current) {
             try {
                 series.removePriceLine(priceLineRef.current);
             } catch {
-                /* series already removed */
+                // The series was replaced.
             }
 
             priceLineRef.current = null;
@@ -661,58 +474,110 @@ export function WatchlistTradingChart({
             axisLabelVisible: true,
             title: t('watchlist.trading_chart_position_line'),
         });
-    }, [showPositionLine, position, points, chartType, loading, t]);
+    }, [
+        activeSymbol,
+        chartType,
+        comparisonMode,
+        position,
+        primaryPoints,
+        showPositionLine,
+        t,
+    ]);
 
-    // ── Helpers ────────────────────────────────────────────────────────────────
+    const handleLiveUpdate = useCallback(
+        (update: PriceUpdate) => {
+            const symbol = update.id.toUpperCase();
+            const series = seriesRefs.current.get(symbol);
+            const points = pointsRef.current[symbol];
+
+            if (!series || !points || points.length === 0) {
+                return;
+            }
+
+            const last = points[points.length - 1];
+
+            if (comparisonModeRef.current) {
+                const baseline = points[0]?.close;
+
+                if (!baseline) {
+                    return;
+                }
+
+                (series as ISeriesApi<'Line'>).update({
+                    time: liveChartTime(last, rangeRef.current),
+                    value: ((update.price - baseline) / baseline) * 100,
+                });
+
+                return;
+            }
+
+            if (symbol !== activeSymbol) {
+                return;
+            }
+
+            updatePrimarySeries(
+                series,
+                points,
+                update.price,
+                chartTypeRef.current,
+                rangeRef.current,
+            );
+        },
+        [activeSymbol],
+    );
+
+    useFinanceQueryStream({
+        symbols: displayedSymbols,
+        wsUrl,
+        onUpdate: handleLiveUpdate,
+        enabled: displayedSymbols.length > 0 && wsUrl !== '',
+    });
 
     const currency =
-        items.find((i) => i.instrument.symbol.toUpperCase() === activeSymbol)
-            ?.instrument.currency ?? '';
-
-    const symbolOptions = items.map((i) => ({
-        value: i.instrument.symbol.toUpperCase(),
-        label: i.instrument.symbol.toUpperCase(),
-        name: i.instrument.name,
+        items.find(
+            (item) => item.instrument.symbol.toUpperCase() === activeSymbol,
+        )?.instrument.currency ?? '';
+    const symbolOptions = items.map((item) => ({
+        value: item.instrument.symbol.toUpperCase(),
+        name: item.instrument.name,
     }));
 
     return (
-        <Card className="py-6">
-            <CardHeader className="pb-2">
+        <Card className="min-w-0 py-6">
+            <CardHeader className="space-y-3 pb-2">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <CardTitle className="text-base">
                         {t('watchlist.trading_chart_title')}
-                        {currency && (
+                        {!comparisonMode && currency && (
                             <span className="ml-2 text-xs font-normal text-muted-foreground">
                                 {currency}
                             </span>
                         )}
                     </CardTitle>
 
-                    {/* Controls row */}
                     <div className="flex flex-wrap items-center gap-2">
-                        {/* Symbol selector */}
                         <Select
                             value={activeSymbol}
-                            onValueChange={setSelectedSymbol}
+                            onValueChange={selectSymbol}
                         >
-                            <SelectTrigger className="h-7 w-32 text-xs">
+                            <SelectTrigger className="h-7 w-36 text-xs">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                {symbolOptions.map((opt) => (
+                                {symbolOptions.map((option) => (
                                     <SelectItem
-                                        key={opt.value}
-                                        value={opt.value}
+                                        key={option.value}
+                                        value={option.value}
                                         className="text-xs"
                                     >
                                         <span className="font-medium">
-                                            {opt.label}
+                                            {option.value}
                                         </span>
-                                        {opt.name && (
+                                        {option.name && (
                                             <span className="ml-1 text-muted-foreground">
-                                                {opt.name.length > 18
-                                                    ? `${opt.name.slice(0, 18)}…`
-                                                    : opt.name}
+                                                {option.name.length > 18
+                                                    ? `${option.name.slice(0, 18)}...`
+                                                    : option.name}
                                             </span>
                                         )}
                                     </SelectItem>
@@ -720,27 +585,46 @@ export function WatchlistTradingChart({
                             </SelectContent>
                         </Select>
 
-                        {/* Chart type buttons */}
+                        <ComparisonSearch
+                            excludedSymbols={displayedSymbols}
+                            onAdd={(symbol) =>
+                                setCompareSymbols((current) => [
+                                    ...current,
+                                    symbol,
+                                ])
+                            }
+                        />
+
                         <div className="flex items-center rounded-md border bg-muted/40 p-0.5">
-                            {CHART_TYPES.map((ct) => (
+                            {CHART_TYPES.map((type) => (
                                 <button
-                                    key={ct.value}
+                                    key={type.value}
                                     type="button"
-                                    onClick={() => setChartType(ct.value)}
-                                    title={t(
-                                        ct.labelKey as Parameters<typeof t>[0],
-                                    )}
+                                    onClick={() => setChartType(type.value)}
+                                    disabled={comparisonMode}
+                                    title={
+                                        comparisonMode
+                                            ? t(
+                                                  'watchlist.comparison_line_only',
+                                              )
+                                            : t(
+                                                  type.labelKey as Parameters<
+                                                      typeof t
+                                                  >[0],
+                                              )
+                                    }
                                     className={cn(
-                                        'flex items-center gap-1 rounded px-2 py-1 text-xs transition-colors',
-                                        chartType === ct.value
+                                        'flex items-center gap-1 rounded px-2 py-1 text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+                                        !comparisonMode &&
+                                            chartType === type.value
                                             ? 'bg-background text-foreground shadow-sm'
                                             : 'text-muted-foreground hover:text-foreground',
                                     )}
                                 >
-                                    {ct.icon}
+                                    {type.icon}
                                     <span className="hidden sm:inline">
                                         {t(
-                                            ct.labelKey as Parameters<
+                                            type.labelKey as Parameters<
                                                 typeof t
                                             >[0],
                                         )}
@@ -749,77 +633,133 @@ export function WatchlistTradingChart({
                             ))}
                         </div>
 
-                        {/* Position cost-basis (PRU) toggle */}
-                        {position && position.avg_price > 0 && (
-                            <Button
-                                type="button"
-                                variant={showPositionLine ? 'default' : 'ghost'}
-                                size="sm"
-                                className="h-7 gap-1 px-2 text-xs"
-                                title={t(
-                                    'watchlist.trading_chart_position_toggle',
-                                )}
-                                onClick={() => setShowPositionLine((v) => !v)}
-                            >
-                                <Wallet className="h-3.5 w-3.5" />
-                                <span className="hidden sm:inline">
-                                    {t('watchlist.trading_chart_position_line')}
-                                </span>
-                            </Button>
-                        )}
-
-                        {/* Range buttons */}
-                        <div className="flex items-center gap-0.5">
-                            {RANGES.map((r) => (
+                        {!comparisonMode &&
+                            position &&
+                            position.avg_price > 0 && (
                                 <Button
-                                    key={r}
                                     type="button"
-                                    variant={r === range ? 'default' : 'ghost'}
+                                    variant={
+                                        showPositionLine ? 'default' : 'ghost'
+                                    }
                                     size="sm"
-                                    className={cn(
-                                        'h-7 px-2 text-xs',
-                                        r === range && 'font-semibold',
+                                    className="h-7 gap-1 px-2 text-xs"
+                                    title={t(
+                                        'watchlist.trading_chart_position_toggle',
                                     )}
-                                    onClick={() => setRange(r)}
+                                    onClick={() =>
+                                        setShowPositionLine((value) => !value)
+                                    }
+                                >
+                                    <Wallet className="h-3.5 w-3.5" />
+                                    <span className="hidden sm:inline">
+                                        {t(
+                                            'watchlist.trading_chart_position_line',
+                                        )}
+                                    </span>
+                                </Button>
+                            )}
+
+                        <div className="flex items-center gap-0.5">
+                            {RANGES.map((candidate) => (
+                                <Button
+                                    key={candidate}
+                                    type="button"
+                                    variant={
+                                        candidate === range
+                                            ? 'default'
+                                            : 'ghost'
+                                    }
+                                    size="sm"
+                                    className="h-7 px-2 text-xs"
+                                    onClick={() => setRange(candidate)}
                                     disabled={loading}
                                 >
-                                    {CHART_RANGE_LABELS[r]}
+                                    {CHART_RANGE_LABELS[candidate]}
                                 </Button>
                             ))}
                         </div>
                     </div>
                 </div>
+
+                {comparisonMode && (
+                    <div className="flex flex-wrap items-center gap-2">
+                        {displayedSymbols.map((symbol, index) => (
+                            <Badge
+                                key={symbol}
+                                variant="outline"
+                                className={cn(
+                                    'gap-1',
+                                    failedComparisons.includes(symbol) &&
+                                        'border-destructive text-destructive',
+                                )}
+                                style={{
+                                    borderColor:
+                                        COMPARISON_COLORS[
+                                            index % COMPARISON_COLORS.length
+                                        ],
+                                }}
+                            >
+                                <span
+                                    className="h-2 w-2 rounded-full"
+                                    style={{
+                                        backgroundColor:
+                                            COMPARISON_COLORS[
+                                                index % COMPARISON_COLORS.length
+                                            ],
+                                    }}
+                                />
+                                {symbol}
+                                {symbol !== activeSymbol && (
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setCompareSymbols((current) =>
+                                                current.filter(
+                                                    (candidate) =>
+                                                        candidate !== symbol,
+                                                ),
+                                            )
+                                        }
+                                        aria-label={t(
+                                            'watchlist.remove_comparison',
+                                            { symbol },
+                                        )}
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                )}
+                            </Badge>
+                        ))}
+                        <span className="text-xs text-muted-foreground">
+                            {t('watchlist.comparison_performance_hint')}
+                        </span>
+                    </div>
+                )}
             </CardHeader>
 
             <CardContent className="p-0 pt-2">
-                {/* Loading overlay */}
                 {loading && (
                     <div className="flex h-95 items-center justify-center gap-2 text-sm text-muted-foreground">
                         <Loader2 className="h-4 w-4 animate-spin" />
                         {t('watchlist.trading_chart_loading')}
                     </div>
                 )}
-
-                {/* Error */}
                 {!loading && error && (
                     <div className="flex h-95 items-center justify-center text-sm text-destructive">
                         {error}
                     </div>
                 )}
-
-                {/* Empty state */}
-                {!loading && !error && points.length === 0 && (
+                {!loading && !error && primaryPoints.length === 0 && (
                     <div className="flex h-95 items-center justify-center text-sm text-muted-foreground">
                         {t('watchlist.trading_chart_no_data')}
                     </div>
                 )}
-
-                {/* Chart container — always rendered so Lightweight Charts can mount */}
                 <div
                     ref={containerRef}
                     className={cn(
-                        'h-100 w-full overflow-hidden rounded-b-xl',
-                        (loading || error || points.length === 0) && 'hidden',
+                        'h-120 w-full overflow-hidden rounded-b-xl',
+                        (loading || error || primaryPoints.length === 0) &&
+                            'hidden',
                     )}
                 />
             </CardContent>
@@ -827,55 +767,404 @@ export function WatchlistTradingChart({
     );
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+function ComparisonSearch({
+    excludedSymbols,
+    onAdd,
+}: {
+    excludedSymbols: string[];
+    onAdd: (symbol: string) => void;
+}) {
+    const { t } = useTranslation();
+    const [open, setOpen] = useState(false);
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState<SymbolSearchResult[]>([]);
+    const [loading, setLoading] = useState(false);
 
-/**
- * Resolves a CSS custom property to an rgb() string compatible with
- * Lightweight Charts. Uses an offscreen canvas to convert any color format
- * (including oklch) to raw pixel values — the only cross-browser safe approach.
- */
-function cssColor(varName: string): string {
-    // Read the raw CSS variable value from :root
+    useEffect(() => {
+        const trimmed = query.trim();
+
+        if (!open || trimmed.length < 2) {
+            return;
+        }
+
+        const controller = new AbortController();
+        const timeout = window.setTimeout(async () => {
+            setLoading(true);
+
+            try {
+                const payload = await apiFetch<{
+                    data?: SymbolSearchResult[];
+                }>(`/symbol-search?q=${encodeURIComponent(trimmed)}`, {
+                    signal: controller.signal,
+                });
+                setResults(
+                    (payload.data ?? []).filter(
+                        (result) =>
+                            !excludedSymbols.includes(
+                                result.symbol.toUpperCase(),
+                            ),
+                    ),
+                );
+            } catch {
+                if (!controller.signal.aborted) {
+                    setResults([]);
+                }
+            } finally {
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                }
+            }
+        }, 250);
+
+        return () => {
+            window.clearTimeout(timeout);
+            controller.abort();
+        };
+    }, [excludedSymbols, open, query]);
+
+    const add = (symbol: string) => {
+        onAdd(symbol.toUpperCase());
+        setQuery('');
+        setResults([]);
+        setOpen(false);
+    };
+
+    return (
+        <div className="relative">
+            {open ? (
+                <div className="relative">
+                    <Search className="pointer-events-none absolute top-1.5 left-2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                        value={query}
+                        onChange={(event) => setQuery(event.target.value)}
+                        onBlur={() =>
+                            window.setTimeout(() => setOpen(false), 150)
+                        }
+                        className="h-7 w-48 pr-7 pl-7 text-xs"
+                        placeholder={t('watchlist.compare_placeholder')}
+                        autoFocus
+                    />
+                    {loading && (
+                        <Loader2 className="absolute top-1.5 right-2 h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                    )}
+                    {query.trim().length >= 2 && results.length > 0 && (
+                        <div className="absolute top-8 left-0 z-50 max-h-64 w-72 overflow-y-auto rounded-md border bg-popover p-1 shadow-md">
+                            {results.map((result) => (
+                                <button
+                                    key={`${result.symbol}-${result.exchange}`}
+                                    type="button"
+                                    onMouseDown={(event) =>
+                                        event.preventDefault()
+                                    }
+                                    onClick={() => add(result.symbol)}
+                                    className="flex w-full items-center justify-between rounded px-2 py-1.5 text-left text-xs hover:bg-accent"
+                                >
+                                    <span>
+                                        <strong>{result.symbol}</strong>
+                                        {result.name && (
+                                            <span className="ml-2 text-muted-foreground">
+                                                {result.name}
+                                            </span>
+                                        )}
+                                    </span>
+                                    <span className="text-muted-foreground">
+                                        {result.exchange}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 gap-1 px-2 text-xs"
+                    onClick={() => setOpen(true)}
+                >
+                    <Plus className="h-3.5 w-3.5" />
+                    {t('watchlist.compare_btn')}
+                </Button>
+            )}
+        </div>
+    );
+}
+
+function buildChartOptions(locale: string): DeepPartial<ChartOptions> {
+    const text = cssColor('--muted-foreground');
+    const grid = cssColor('--border');
+    const labelBackground = cssColor('--secondary');
+
+    return {
+        autoSize: true,
+        layout: {
+            background: { type: ColorType.Solid, color: 'transparent' },
+            textColor: text,
+            fontFamily: 'inherit',
+            fontSize: 11,
+        },
+        grid: {
+            vertLines: { color: grid },
+            horzLines: { color: grid },
+        },
+        crosshair: {
+            vertLine: {
+                color: grid,
+                labelBackgroundColor: labelBackground,
+            },
+            horzLine: {
+                color: grid,
+                labelBackgroundColor: labelBackground,
+            },
+        },
+        rightPriceScale: { borderColor: grid },
+        timeScale: {
+            borderColor: grid,
+            timeVisible: true,
+            secondsVisible: false,
+            rightOffset: 4,
+            tickMarkFormatter: (
+                time: UTCTimestamp | BusinessDay,
+                tickMarkType: TickMarkType,
+            ) => formatTick(time, tickMarkType, locale),
+        },
+        handleScroll: {
+            mouseWheel: true,
+            pressedMouseMove: true,
+            horzTouchDrag: true,
+            vertTouchDrag: false,
+        },
+        handleScale: {
+            mouseWheel: true,
+            pinch: true,
+            axisPressedMouseMove: { time: true, price: true },
+        },
+        localization: {
+            locale,
+            timeFormatter: (time: BusinessDay | UTCTimestamp) =>
+                formatTime(time, locale),
+        },
+    };
+}
+
+function removeAllSeries(
+    chart: IChartApi,
+    series: Map<string, ISeriesApi<'Candlestick'> | ISeriesApi<'Line'>>,
+) {
+    for (const current of series.values()) {
+        try {
+            chart.removeSeries(current);
+        } catch {
+            // Already removed during a chart refresh.
+        }
+    }
+
+    series.clear();
+}
+
+function updatePrimarySeries(
+    series: ISeriesApi<'Candlestick'> | ISeriesApi<'Line'>,
+    points: ChartPoint[],
+    price: number,
+    chartType: ChartType,
+    range: SymbolRange,
+) {
+    const last = points[points.length - 1];
+    const isIntraday = /^\d+$/.test(last.date);
+
+    if (!isIntraday) {
+        if (chartType === 'candlestick') {
+            const high = Math.max(last.high ?? price, price);
+            const low = Math.min(last.low ?? price, price);
+            (series as ISeriesApi<'Candlestick'>).update({
+                time: last.date as Time,
+                open: last.open ?? price,
+                high,
+                low,
+                close: price,
+            });
+            points[points.length - 1] = { ...last, high, low, close: price };
+        } else {
+            (series as ISeriesApi<'Line'>).update({
+                time: last.date as Time,
+                value: price,
+            });
+            points[points.length - 1] = { ...last, close: price };
+        }
+
+        return;
+    }
+
+    const interval = INTERVAL_SECONDS[range];
+    const now = Math.floor(Date.now() / 1000);
+    const bucket = Math.floor(now / interval) * interval;
+    const lastTime = Number(last.date);
+    const isNewBucket = bucket > lastTime;
+    const time = (isNewBucket ? bucket : lastTime) as UTCTimestamp;
+
+    if (chartType === 'candlestick') {
+        const high = isNewBucket ? price : Math.max(last.high ?? price, price);
+        const low = isNewBucket ? price : Math.min(last.low ?? price, price);
+        (series as ISeriesApi<'Candlestick'>).update({
+            time,
+            open: isNewBucket ? price : (last.open ?? price),
+            high,
+            low,
+            close: price,
+        });
+        const next = {
+            ...last,
+            date: String(time),
+            open: isNewBucket ? price : last.open,
+            high,
+            low,
+            close: price,
+        };
+
+        if (isNewBucket) {
+            points.push(next);
+        } else {
+            points[points.length - 1] = next;
+        }
+    } else {
+        (series as ISeriesApi<'Line'>).update({ time, value: price });
+        const next = { ...last, date: String(time), close: price };
+
+        if (isNewBucket) {
+            points.push(next);
+        } else {
+            points[points.length - 1] = next;
+        }
+    }
+}
+
+function liveChartTime(last: ChartPoint, range: SymbolRange): Time {
+    if (!/^\d+$/.test(last.date)) {
+        return last.date as Time;
+    }
+
+    const interval = INTERVAL_SECONDS[range];
+    const now = Math.floor(Date.now() / 1000);
+
+    return (Math.floor(now / interval) * interval) as UTCTimestamp;
+}
+
+function buildTurningPointMarkers(
+    points: ChartPoint[],
+    locale: string,
+): SeriesMarker<Time>[] {
+    const markers: SeriesMarker<Time>[] = [];
+
+    for (let index = 1; index < points.length - 1; index++) {
+        const previous = points[index - 1].close;
+        const current = points[index].close;
+        const next = points[index + 1].close;
+
+        if (current > previous && current > next) {
+            markers.push({
+                time: toChartTime(points[index].date),
+                position: 'aboveBar',
+                color: '#10b981',
+                shape: 'arrowDown',
+                size: 0.8,
+                text: formatValue(current, locale),
+            });
+        } else if (current < previous && current < next) {
+            markers.push({
+                time: toChartTime(points[index].date),
+                position: 'belowBar',
+                color: '#ef4444',
+                shape: 'arrowUp',
+                size: 0.8,
+                text: formatValue(current, locale),
+            });
+        }
+    }
+
+    const step = Math.max(1, Math.floor(markers.length / 20));
+
+    return markers.filter((_, index) => index % step === 0);
+}
+
+function cssColor(variable: string): string {
     const raw = getComputedStyle(document.documentElement)
-        .getPropertyValue(varName)
+        .getPropertyValue(variable)
         .trim();
 
     if (!raw) {
         return '#888888';
     }
 
-    // Paint the color onto a 1×1 canvas; getImageData always returns sRGB bytes
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = 1;
-    const ctx = canvas.getContext('2d');
+    const context = canvas.getContext('2d');
 
-    if (!ctx) {
+    if (!context) {
         return '#888888';
     }
 
-    ctx.fillStyle = raw;
-    ctx.fillRect(0, 0, 1, 1);
-    const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+    context.fillStyle = raw;
+    context.fillRect(0, 0, 1, 1);
+    const [red, green, blue] = context.getImageData(0, 0, 1, 1).data;
 
-    return `rgb(${r}, ${g}, ${b})`;
+    return `rgb(${red}, ${green}, ${blue})`;
 }
 
-/**
- * Converts a date value from the API to a lightweight-charts `Time`.
- * - If the string is a Unix timestamp (all digits), cast it as UTCTimestamp.
- * - Otherwise, assume it's already a `yyyy-mm-dd` business day string.
- */
 function toChartTime(date: string): Time {
-    if (/^\d+$/.test(date)) {
-        return Number(date) as UTCTimestamp;
+    return /^\d+$/.test(date) ? (Number(date) as UTCTimestamp) : (date as Time);
+}
+
+function formatTick(
+    time: UTCTimestamp | BusinessDay,
+    tickMarkType: TickMarkType,
+    locale: string,
+): string {
+    if (typeof time === 'number') {
+        const date = new Date(time * 1000);
+
+        if (
+            tickMarkType === TickMarkType.DayOfMonth ||
+            tickMarkType === TickMarkType.Month
+        ) {
+            return new Intl.DateTimeFormat(locale, {
+                day: '2-digit',
+                month: '2-digit',
+            }).format(date);
+        }
+
+        return new Intl.DateTimeFormat(locale, {
+            hour: '2-digit',
+            minute: '2-digit',
+        }).format(date);
     }
 
-    return date as Time;
+    if (tickMarkType === TickMarkType.Year) {
+        return String(time.year);
+    }
+
+    return new Intl.DateTimeFormat(locale, {
+        day: tickMarkType === TickMarkType.Month ? undefined : '2-digit',
+        month: tickMarkType === TickMarkType.Month ? 'short' : '2-digit',
+    }).format(new Date(Date.UTC(time.year, time.month - 1, time.day)));
 }
 
-function formatVal(v: number, locale: string): string {
+function formatTime(time: BusinessDay | UTCTimestamp, locale: string): string {
+    if (typeof time === 'number') {
+        return new Intl.DateTimeFormat(locale, {
+            dateStyle: 'short',
+            timeStyle: 'short',
+        }).format(new Date(time * 1000));
+    }
+
+    return new Intl.DateTimeFormat(locale, {
+        dateStyle: 'medium',
+    }).format(new Date(Date.UTC(time.year, time.month - 1, time.day)));
+}
+
+function formatValue(value: number, locale: string): string {
     return new Intl.NumberFormat(locale, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
-    }).format(v);
+    }).format(value);
 }

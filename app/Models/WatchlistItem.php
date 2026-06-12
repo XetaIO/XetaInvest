@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['watchlist_id', 'instrument_id', 'position'])]
+#[Fillable(['watchlist_id', 'section_id', 'instrument_id', 'position'])]
 class WatchlistItem extends Model
 {
     /** @use HasFactory<WatchlistItemFactory> */
@@ -27,5 +27,10 @@ class WatchlistItem extends Model
     public function instrument(): BelongsTo
     {
         return $this->belongsTo(Instrument::class);
+    }
+
+    public function section(): BelongsTo
+    {
+        return $this->belongsTo(WatchlistSection::class, 'section_id');
     }
 }

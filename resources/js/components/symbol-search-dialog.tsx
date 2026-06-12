@@ -15,8 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AddToWatchlistButton } from '@/components/watchlist/add-to-watchlist-button';
 import { apiFetch } from '@/lib/api';
 import { TAB_ORDER } from '@/lib/constants';
-import type { SymbolSearchResult } from '@/types/symbol';
 import { search as symbolSearch, show as symbolShow } from '@/routes/symbol';
+import type { SymbolSearchResult } from '@/types/symbol';
 
 type QuoteType = (typeof TAB_ORDER)[number];
 

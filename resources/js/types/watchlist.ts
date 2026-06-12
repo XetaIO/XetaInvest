@@ -9,20 +9,30 @@ export type WatchlistInstrument = {
 
 export type WatchlistItem = {
     id: string;
+    section_id: string;
     position: number;
     instrument: WatchlistInstrument;
+};
+
+export type WatchlistSection = {
+    id: string;
+    name: string;
+    position: number;
+    is_default: boolean;
+    items: WatchlistItem[];
 };
 
 export type Watchlist = {
     id: string;
     name: string;
     position: number;
-    items: WatchlistItem[];
+    sections: WatchlistSection[];
 };
 
 export type WatchlistSummary = {
     id: string;
     name: string;
+    default_section_id: string;
 };
 
 export type WatchlistLimits = {
@@ -52,4 +62,9 @@ export type PriceUpdate = {
     quote_type?: string;
     market_hours?: string;
     time?: string;
+};
+
+export type WatchlistLayoutSection = {
+    id: string;
+    item_ids: string[];
 };

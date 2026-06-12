@@ -1,18 +1,16 @@
 import { Head, router, setLayoutProps, usePage } from '@inertiajs/react';
-import { ListPlus, Pencil, Plus, Trash2, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ListPlus, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AiReportCard } from '@/components/ai/ai-report-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { WatchlistChart } from '@/components/watchlist/watchlist-chart';
-import type { ChartSeries } from '@/components/watchlist/watchlist-chart';
+import { Card, CardContent } from '@/components/ui/card';
 import { WatchlistFormDialog } from '@/components/watchlist/watchlist-form-dialog';
-import { WatchlistRow } from '@/components/watchlist/watchlist-row';
+import { WatchlistPanel } from '@/components/watchlist/watchlist-panel';
 import { WatchlistTradingChart } from '@/components/watchlist/watchlist-trading-chart';
 import { useFinanceQueryStream } from '@/hooks/use-finance-query-stream';
+import { flattenWatchlistItems, mergePriceUpdate } from '@/lib/watchlist';
 import type { AiReport } from '@/types/ai';
 import type {
     PriceUpdate,
@@ -21,7 +19,9 @@ import type {
     WatchlistPosition,
 } from '@/types/watchlist';
 
-type SharedExtra = { financeQueryWsUrl?: string };
+type SharedProps = {
+    financeQueryWsUrl?: string;
+};
 
 type PageProps = {
     watchlists: Watchlist[];
@@ -31,23 +31,20 @@ type PageProps = {
     positions: Record<string, WatchlistPosition>;
 };
 
-const PALETTE = [
-    '#0ea5e9',
-    '#10b981',
-    '#f59e0b',
-    '#ef4444',
-    '#8b5cf6',
-    '#ec4899',
-    '#14b8a6',
-    '#f97316',
-    '#6366f1',
-    '#84cc16',
-];
-
-const MAX_POINTS = 600;
-const MAX_AGE_MS = 24 * 60 * 60 * 1000;
-
-type LivePoint = { t: number; v: number };
+type RawQuote = {
+    regularMarketPrice?: unknown;
+    price?: unknown;
+    regularMarketOpen?: unknown;
+    open?: unknown;
+    regularMarketPreviousClose?: unknown;
+    previousClose?: unknown;
+    regularMarketChange?: unknown;
+    change?: unknown;
+    regularMarketChangePercent?: unknown;
+    changePercent?: unknown;
+    currency?: unknown;
+    exchange?: unknown;
+};
 
 export default function WatchlistPage({
     watchlists,
@@ -57,228 +54,121 @@ export default function WatchlistPage({
     positions,
 }: PageProps) {
     const { t } = useTranslation();
+    const page = usePage<SharedProps>();
+    const wsUrl = page.props.financeQueryWsUrl ?? '';
+    const [createOpen, setCreateOpen] = useState(false);
+    const [renameOpen, setRenameOpen] = useState(false);
+    const [prices, setPrices] = useState<Map<string, PriceUpdate>>(new Map());
+
     setLayoutProps({
         breadcrumbs: [{ title: t('watchlist.title'), href: '/watchlists' }],
     });
-    const page = usePage<{ financeQueryWsUrl?: string } & SharedExtra>();
-    const wsUrl = page.props.financeQueryWsUrl ?? '';
-
-    const [createOpen, setCreateOpen] = useState(false);
-    const [renameOpen, setRenameOpen] = useState(false);
-    const [addSymbol, setAddSymbol] = useState('');
-    const [compareSymbol, setCompareSymbol] = useState('');
-    const [compareSymbols, setCompareSymbols] = useState<string[]>([]);
-    const [hidden, setHidden] = useState<Set<string>>(new Set());
-
-    const prices = useRef<Map<string, PriceUpdate>>(new Map());
-    const history = useRef<Map<string, LivePoint[]>>(new Map());
-    const [tick, setTick] = useState(0);
 
     const active = useMemo(
-        () => watchlists.find((w) => w.id === activeWatchlistId) ?? null,
+        () =>
+            watchlists.find(
+                (watchlist) => watchlist.id === activeWatchlistId,
+            ) ?? null,
         [watchlists, activeWatchlistId],
     );
-
-    const itemSymbols = useMemo(
-        () =>
-            (active?.items ?? []).map((i) => i.instrument.symbol.toUpperCase()),
+    const items = useMemo(
+        () => flattenWatchlistItems(active?.sections ?? []),
         [active],
     );
-
-    const allSymbols = useMemo(
-        () =>
-            Array.from(
-                new Set([
-                    ...itemSymbols,
-                    ...compareSymbols.map((s) => s.toUpperCase()),
-                ]),
-            ),
-        [itemSymbols, compareSymbols],
+    const symbols = useMemo(
+        () => items.map((item) => item.instrument.symbol.toUpperCase()),
+        [items],
     );
-
-    const handleUpdate = useCallback((u: PriceUpdate) => {
-        const sym = u.id.toUpperCase();
-        prices.current.set(sym, u);
-
-        const t = u.time ? Date.parse(u.time) : Date.now();
-        const list = history.current.get(sym) ?? [];
-        const last = list[list.length - 1];
-
-        if (!last || last.t !== t) {
-            list.push({ t, v: u.price });
-
-            if (list.length > MAX_POINTS) {
-                list.shift();
-            }
-
-            history.current.set(sym, list);
-        } else {
-            last.v = u.price;
-        }
-
-        setTick((n) => (n + 1) % 1_000_000);
-    }, []);
-
-    useFinanceQueryStream({
-        symbols: allSymbols,
-        wsUrl,
-        onUpdate: handleUpdate,
-        enabled: allSymbols.length > 0,
-    });
+    const [selectedSymbol, setSelectedSymbol] = useState('');
+    const effectiveSelectedSymbol = symbols.includes(selectedSymbol)
+        ? selectedSymbol
+        : (symbols[0] ?? '');
 
     useEffect(() => {
-        // Drop history entries that are no longer subscribed
-        for (const key of Array.from(history.current.keys())) {
-            if (!allSymbols.includes(key)) {
-                history.current.delete(key);
-                prices.current.delete(key);
-            }
-        }
-    }, [allSymbols]);
-
-    useEffect(() => {
-        // Seed history with recent baseline so the chart isn't empty when markets are closed
-        const missing = allSymbols.filter((s) => !history.current.has(s));
-
-        if (missing.length === 0) {
+        if (symbols.length === 0) {
             return;
         }
 
-        let cancelled = false;
-        const url = `/api/watchlists/history?symbols=${encodeURIComponent(missing.join(','))}`;
+        const controller = new AbortController();
 
-        fetch(url, {
-            headers: { Accept: 'application/json' },
-            credentials: 'same-origin',
-        })
-            .then((r) => (r.ok ? r.json() : null))
-            .then((payload: { data?: Record<string, LivePoint[]> } | null) => {
-                if (cancelled || !payload?.data) {
-                    return;
-                }
+        void fetch(
+            `/api/quotes?symbols=${encodeURIComponent(symbols.join(','))}`,
+            {
+                headers: { Accept: 'application/json' },
+                credentials: 'same-origin',
+                signal: controller.signal,
+            },
+        )
+            .then((response) => (response.ok ? response.json() : null))
+            .then(
+                (
+                    payload: {
+                        quotes?: Record<string, RawQuote>;
+                    } | null,
+                ) => {
+                    const quotes = payload?.quotes;
 
-                for (const [sym, points] of Object.entries(payload.data)) {
-                    if (
-                        !history.current.has(sym) &&
-                        Array.isArray(points) &&
-                        points.length > 0
-                    ) {
-                        history.current.set(sym, points.slice(-MAX_POINTS));
+                    if (!quotes) {
+                        return;
                     }
-                }
 
-                setTick((n) => (n + 1) % 1_000_000);
-            })
+                    setPrices((current) => {
+                        const next = new Map(current);
+
+                        for (const [symbol, quote] of Object.entries(quotes)) {
+                            const normalized = normalizeQuote(symbol, quote);
+
+                            if (normalized) {
+                                next.set(symbol.toUpperCase(), normalized);
+                            }
+                        }
+
+                        return next;
+                    });
+                },
+            )
             .catch(() => {
-                /* ignore */
+                // Live updates can still populate the table.
             });
 
-        return () => {
-            cancelled = true;
-        };
-    }, [allSymbols]);
+        return () => controller.abort();
+    }, [symbols]);
 
-    const colorFor = useCallback(
-        (symbol: string) => {
-            const idx = allSymbols.indexOf(symbol.toUpperCase());
+    const handlePriceUpdate = useCallback((update: PriceUpdate) => {
+        const symbol = update.id.toUpperCase();
 
-            return PALETTE[Math.max(0, idx) % PALETTE.length];
-        },
-        [allSymbols],
-    );
+        setPrices((current) => {
+            const next = new Map(current);
+            const previous = next.get(symbol);
+            next.set(symbol, mergePriceUpdate(previous, update));
+
+            return next;
+        });
+    }, []);
+
+    useFinanceQueryStream({
+        symbols,
+        wsUrl,
+        onUpdate: handlePriceUpdate,
+        enabled: symbols.length > 0,
+    });
 
     const switchTo = (id: string) => {
         router.visit(`/watchlists?watchlist=${id}`, { preserveScroll: true });
     };
 
-    const submitAdd = (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!active || !addSymbol.trim()) {
-            return;
-        }
-
-        router.post(
-            `/watchlists/${active.id}/items`,
-            { symbol: addSymbol.trim().toUpperCase() },
-            {
-                preserveScroll: true,
-                onSuccess: () => setAddSymbol(''),
-            },
-        );
-    };
-
-    const addCompare = (e: React.FormEvent) => {
-        e.preventDefault();
-        const s = compareSymbol.trim().toUpperCase();
-
-        if (!s) {
-            return;
-        }
-
-        if (compareSymbols.includes(s)) {
-            return;
-        }
-
-        if (itemSymbols.includes(s)) {
-            return;
-        }
-
-        setCompareSymbols((prev) => [...prev, s]);
-        setCompareSymbol('');
-    };
-
-    const removeCompare = (s: string) => {
-        setCompareSymbols((prev) => prev.filter((x) => x !== s));
-    };
-
-    const toggleHidden = (sym: string) => {
-        setHidden((prev) => {
-            const next = new Set(prev);
-
-            if (next.has(sym)) {
-                next.delete(sym);
-            } else {
-                next.add(sym);
-            }
-
-            return next;
-        });
-    };
-
     const deleteActive = () => {
-        if (!active) {
+        if (
+            !active ||
+            !confirm(t('watchlist.delete_confirm', { name: active.name }))
+        ) {
             return;
         }
 
-        if (!confirm(t('watchlist.delete_confirm', { name: active.name }))) {
-            return;
-        }
-
-        router.delete(`/watchlists/${active.id}`, { preserveScroll: false });
+        router.delete(`/watchlists/${active.id}`);
     };
-
-    const series: ChartSeries[] = useMemo(() => {
-        // suppress unused tick warning – `tick` triggers re-render
-        void tick;
-
-        // eslint-disable-next-line react-hooks/purity
-        const cutoff = Date.now() - MAX_AGE_MS;
-        const symbols = allSymbols.filter((s) => !hidden.has(s));
-
-        // eslint-disable-next-line react-hooks/refs
-        return symbols.map((sym) => ({
-            symbol: sym,
-            color: colorFor(sym),
-            // eslint-disable-next-line react-hooks/refs
-            points: (history.current.get(sym) ?? []).filter(
-                (p) => p.t >= cutoff,
-            ),
-        }));
-    }, [allSymbols, hidden, colorFor, tick]);
 
     const atListLimit = watchlists.length >= limits.maxPerUser;
-    const atItemLimit = active ? active.items.length >= limits.maxItems : false;
 
     return (
         <>
@@ -287,21 +177,29 @@ export default function WatchlistPage({
             <div className="flex h-full flex-1 flex-col gap-4 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex flex-wrap items-center gap-2">
-                        {watchlists.map((w) => (
-                            <Button
-                                key={w.id}
-                                variant={
-                                    w.id === active?.id ? 'default' : 'outline'
-                                }
-                                size="sm"
-                                onClick={() => switchTo(w.id)}
-                            >
-                                {w.name}
-                                <Badge variant="secondary" className="ml-2">
-                                    {w.items.length}
-                                </Badge>
-                            </Button>
-                        ))}
+                        {watchlists.map((watchlist) => {
+                            const count = flattenWatchlistItems(
+                                watchlist.sections,
+                            ).length;
+
+                            return (
+                                <Button
+                                    key={watchlist.id}
+                                    variant={
+                                        watchlist.id === active?.id
+                                            ? 'default'
+                                            : 'outline'
+                                    }
+                                    size="sm"
+                                    onClick={() => switchTo(watchlist.id)}
+                                >
+                                    {watchlist.name}
+                                    <Badge variant="secondary" className="ml-2">
+                                        {count}
+                                    </Badge>
+                                </Button>
+                            );
+                        })}
 
                         <Button
                             variant="outline"
@@ -316,7 +214,7 @@ export default function WatchlistPage({
                                     : t('watchlist.create_hint')
                             }
                         >
-                            <ListPlus className="mr-1 h-4 w-4" />{' '}
+                            <ListPlus className="mr-1 h-4 w-4" />
                             {t('watchlist.new')}
                         </Button>
                     </div>
@@ -328,7 +226,7 @@ export default function WatchlistPage({
                                 size="sm"
                                 onClick={() => setRenameOpen(true)}
                             >
-                                <Pencil className="mr-1 h-4 w-4" />{' '}
+                                <Pencil className="mr-1 h-4 w-4" />
                                 {t('watchlist.rename')}
                             </Button>
                             <Button
@@ -336,7 +234,7 @@ export default function WatchlistPage({
                                 size="sm"
                                 onClick={deleteActive}
                             >
-                                <Trash2 className="mr-1 h-4 w-4" />{' '}
+                                <Trash2 className="mr-1 h-4 w-4" />
                                 {t('watchlist.delete')}
                             </Button>
                         </div>
@@ -350,7 +248,7 @@ export default function WatchlistPage({
                                 {t('watchlist.no_watchlist')}
                             </p>
                             <Button onClick={() => setCreateOpen(true)}>
-                                <Plus className="mr-1 h-4 w-4" />{' '}
+                                <Plus className="mr-1 h-4 w-4" />
                                 {t('watchlist.create_first')}
                             </Button>
                         </CardContent>
@@ -358,164 +256,38 @@ export default function WatchlistPage({
                 )}
 
                 {active && (
-                    <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_400px]">
-                        <Card className="py-6">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-base">
-                                    {t('watchlist.evolution_title')}
-                                </CardTitle>
-                                <span className="text-xs text-muted-foreground">
-                                    {t('watchlist.realtime')}
-                                </span>
-                            </CardHeader>
-                            <CardContent>
-                                <WatchlistChart series={series} />
+                    <div className="grid min-w-0 grid-cols-1 gap-4 2xl:grid-cols-[minmax(0,1fr)_520px]">
+                        {items.length > 0 ? (
+                            <WatchlistTradingChart
+                                key={active.id}
+                                items={items}
+                                wsUrl={wsUrl}
+                                positions={positions}
+                                selectedSymbol={effectiveSelectedSymbol}
+                                onSelectedSymbolChange={setSelectedSymbol}
+                            />
+                        ) : (
+                            <Card>
+                                <CardContent className="flex h-96 items-center justify-center text-sm text-muted-foreground">
+                                    {t('watchlist.no_symbol_chart')}
+                                </CardContent>
+                            </Card>
+                        )}
 
-                                <form
-                                    onSubmit={addCompare}
-                                    className="mt-4 flex items-center gap-2"
-                                >
-                                    <Input
-                                        value={compareSymbol}
-                                        onChange={(e) =>
-                                            setCompareSymbol(e.target.value)
-                                        }
-                                        placeholder={t(
-                                            'watchlist.compare_placeholder',
-                                        )}
-                                        className="max-w-xs"
-                                    />
-                                    <Button
-                                        type="submit"
-                                        variant="outline"
-                                        size="sm"
-                                    >
-                                        <Plus className="mr-1 h-4 w-4" />{' '}
-                                        {t('watchlist.compare_btn')}
-                                    </Button>
-                                </form>
-
-                                {compareSymbols.length > 0 && (
-                                    <div className="mt-3 flex flex-wrap gap-2">
-                                        {compareSymbols.map((s) => (
-                                            <Badge
-                                                key={s}
-                                                variant="secondary"
-                                                className="flex items-center gap-1"
-                                                style={{
-                                                    borderColor: colorFor(s),
-                                                    borderWidth: 1,
-                                                }}
-                                            >
-                                                {s}
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        removeCompare(s)
-                                                    }
-                                                    className="ml-1 hover:text-rose-500"
-                                                    aria-label={t(
-                                                        'watchlist.remove_symbol',
-                                                        { symbol: s },
-                                                    )}
-                                                >
-                                                    <X className="h-3 w-3" />
-                                                </button>
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-
-                        <Card className="py-6">
-                            <CardHeader className="space-y-2 pb-3">
-                                <CardTitle className="text-base">
-                                    {active.name}
-                                    <span className="ml-2 text-xs font-normal text-muted-foreground">
-                                        {active.items.length} /{' '}
-                                        {limits.maxItems}
-                                    </span>
-                                </CardTitle>
-                                <form
-                                    onSubmit={submitAdd}
-                                    className="flex items-center gap-2"
-                                >
-                                    <Input
-                                        value={addSymbol}
-                                        onChange={(e) =>
-                                            setAddSymbol(e.target.value)
-                                        }
-                                        placeholder={t(
-                                            'watchlist.add_placeholder',
-                                        )}
-                                        disabled={atItemLimit}
-                                    />
-                                    <Button
-                                        type="submit"
-                                        size="sm"
-                                        disabled={
-                                            atItemLimit || !addSymbol.trim()
-                                        }
-                                    >
-                                        <Plus className="h-4 w-4" />
-                                    </Button>
-                                </form>
-                                {atItemLimit && (
-                                    <p className="text-xs text-amber-500">
-                                        {t('watchlist.item_limit', {
-                                            max: limits.maxItems,
-                                        })}
-                                    </p>
-                                )}
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                {active.items.length === 0 ? (
-                                    <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-                                        {t('watchlist.no_symbol_add')}
-                                    </p>
-                                ) : (
-                                    <ul>
-                                        {/* eslint-disable-next-line react-hooks/refs */}
-                                        {active.items.map((item) => {
-                                            const sym =
-                                                item.instrument.symbol.toUpperCase();
-
-                                            return (
-                                                <WatchlistRow
-                                                    key={item.id}
-                                                    item={item}
-                                                    price={
-                                                        prices.current.get(
-                                                            sym,
-                                                        ) ?? null
-                                                    }
-                                                    visible={!hidden.has(sym)}
-                                                    color={colorFor(sym)}
-                                                    onToggleVisible={() =>
-                                                        toggleHidden(sym)
-                                                    }
-                                                />
-                                            );
-                                        })}
-                                    </ul>
-                                )}
-                            </CardContent>
-                        </Card>
+                        <WatchlistPanel
+                            key={watchlistPanelKey(active)}
+                            watchlist={active}
+                            prices={prices}
+                            maxItems={limits.maxItems}
+                            selectedSymbol={effectiveSelectedSymbol}
+                            onSelectSymbol={setSelectedSymbol}
+                        />
                     </div>
-                )}
-
-                {active && active.items.length > 0 && (
-                    <WatchlistTradingChart
-                        items={active.items}
-                        wsUrl={wsUrl}
-                        positions={positions}
-                    />
                 )}
 
                 <AiReportCard
                     report={aiWatchlistReport}
-                    title="Analyse IA — watchlists"
+                    title={t('watchlist.ai_report_title')}
                 />
             </div>
 
@@ -532,4 +304,50 @@ export default function WatchlistPage({
             )}
         </>
     );
+}
+
+function normalizeQuote(symbol: string, quote: RawQuote): PriceUpdate | null {
+    const price = numeric(quote.regularMarketPrice) ?? numeric(quote.price);
+
+    if (price === undefined) {
+        return null;
+    }
+
+    return {
+        id: symbol.toUpperCase(),
+        price,
+        change:
+            numeric(quote.regularMarketChange) ?? numeric(quote.change) ?? 0,
+        change_percent:
+            numeric(quote.regularMarketChangePercent) ??
+            numeric(quote.changePercent) ??
+            0,
+        open_price: numeric(quote.regularMarketOpen) ?? numeric(quote.open),
+        previous_close:
+            numeric(quote.regularMarketPreviousClose) ??
+            numeric(quote.previousClose),
+        currency:
+            typeof quote.currency === 'string' ? quote.currency : undefined,
+        exchange:
+            typeof quote.exchange === 'string' ? quote.exchange : undefined,
+    };
+}
+
+function numeric(value: unknown): number | undefined {
+    return typeof value === 'number' && Number.isFinite(value)
+        ? value
+        : undefined;
+}
+
+function watchlistPanelKey(watchlist: Watchlist): string {
+    const layout = watchlist.sections
+        .map(
+            (section) =>
+                `${section.id}:${section.name}:${section.items
+                    .map((item) => item.id)
+                    .join(',')}`,
+        )
+        .join('|');
+
+    return `${watchlist.id}:${layout}`;
 }

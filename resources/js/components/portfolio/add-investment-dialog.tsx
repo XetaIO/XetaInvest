@@ -13,9 +13,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import type { SearchResult } from '@/types/portfolio';
 import { search as apiSearch } from '@/routes/api';
 import { store as storePosition } from '@/routes/positions';
+import type { SearchResult } from '@/types/portfolio';
 
 type Line = {
     quantity: string;

@@ -7,8 +7,8 @@ namespace App\Http\Controllers;
 use App\Actions\Watchlist\CreateWatchlist;
 use App\Actions\Watchlist\DeleteWatchlist;
 use App\Actions\Watchlist\RenameWatchlist;
-use App\Actions\Watchlist\ReorderWatchlistItems;
-use App\Http\Requests\Watchlist\ReorderWatchlistRequest;
+use App\Actions\Watchlist\ReorderWatchlistLayout;
+use App\Http\Requests\Watchlist\ReorderWatchlistLayoutRequest;
 use App\Http\Requests\Watchlist\StoreWatchlistRequest;
 use App\Http\Requests\Watchlist\UpdateWatchlistRequest;
 use App\Models\Watchlist;
@@ -63,11 +63,11 @@ class WatchlistController extends Controller
     }
 
     public function reorder(
-        ReorderWatchlistRequest $request,
+        ReorderWatchlistLayoutRequest $request,
         Watchlist $watchlist,
-        ReorderWatchlistItems $action,
+        ReorderWatchlistLayout $action,
     ): RedirectResponse {
-        $action->handle($watchlist, $request->validated('item_ids'));
+        $action->handle($watchlist, $request->validated('sections'));
 
         return back();
     }

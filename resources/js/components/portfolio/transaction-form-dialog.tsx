@@ -18,11 +18,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import type { TransactionTypeOption } from '@/types/portfolio';
 import {
     store as storeTransaction,
     update as updateTransaction,
 } from '@/routes/transactions';
+import type { TransactionTypeOption } from '@/types/portfolio';
 
 export type TransactionFormValues = {
     type: 'buy' | 'sell';

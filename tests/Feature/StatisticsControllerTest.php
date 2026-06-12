@@ -151,12 +151,18 @@ test('quote_error is exposed when finance-query fails', function () {
         );
 });
 
-test('history is empty when no snapshots exist', function () {
+test('history contains the current KPI point when no snapshots exist', function () {
     fakeFinanceQuery();
 
     $this->actingAs($this->user)->get(route('statistics'))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->where('stats.history', []));
+        ->assertInertia(fn ($page) => $page
+            ->has('stats.history', 1)
+            ->where('stats.history.0.date', today()->toDateString())
+            ->where('stats.history.0.value_eur', 1525)
+            ->where('stats.history.0.invested_eur', 1050)
+            ->where('stats.history.0.pnl_eur', 475)
+        );
 });
 
 test('history exposes snapshot points for a single portfolio scope', function () {
@@ -186,11 +192,14 @@ test('history exposes snapshot points for a single portfolio scope', function ()
         ->get(route('statistics', ['portfolio' => $this->portfolioA->id]))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->has('stats.history', 2)
+            ->has('stats.history', 3)
             ->where('stats.history.0.date', '2026-05-20')
             ->where('stats.history.0.value_eur', 1100)
             ->where('stats.history.1.date', '2026-05-21')
             ->where('stats.history.1.value_eur', 1200)
+            ->where('stats.history.2.date', today()->toDateString())
+            ->where('stats.history.2.value_eur', 1350)
+            ->where('stats.history.2.invested_eur', 900)
         );
 });
 
@@ -224,10 +233,36 @@ test('history aggregates snapshots across all user portfolios for all scope', fu
         ->get(route('statistics'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->has('stats.history', 1)
+            ->has('stats.history', 2)
             ->where('stats.history.0.date', '2026-05-21')
             ->where('stats.history.0.value_eur', 1700)
             ->where('stats.history.0.invested_eur', 1500)
             ->where('stats.history.0.pnl_eur', 200)
+            ->where('stats.history.1.date', today()->toDateString())
+            ->where('stats.history.1.value_eur', 1525)
+            ->where('stats.history.1.invested_eur', 1050)
+            ->where('stats.history.1.pnl_eur', 475)
+        );
+});
+
+test('current KPI point replaces a stale snapshot captured today', function () {
+    fakeFinanceQuery();
+
+    PortfolioSnapshot::factory()->forPortfolio($this->portfolioA)->onDate(today())->create([
+        'invested_eur' => 100,
+        'current_value_eur' => 110,
+        'pnl_eur' => 10,
+        'position_count' => 1,
+    ]);
+
+    $this->actingAs($this->user)
+        ->get(route('statistics', ['portfolio' => $this->portfolioA->id]))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('stats.history', 1)
+            ->where('stats.history.0.date', today()->toDateString())
+            ->where('stats.history.0.value_eur', 1350)
+            ->where('stats.history.0.invested_eur', 900)
+            ->where('stats.history.0.pnl_eur', 450)
         );
 });

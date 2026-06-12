@@ -28,7 +28,7 @@ class PortfolioStatistics
      */
     public function compute(User $user, ?Portfolio $portfolio = null, bool $forceRefresh = false): array
     {
-        $cacheKey = sprintf('stats:user:%d:%s', $user->id, $portfolio?->id ?? 'all');
+        $cacheKey = sprintf('stats:v2:user:%d:%s', $user->id, $portfolio?->id ?? 'all');
 
         if ($forceRefresh) {
             Cache::forget($cacheKey);
@@ -189,6 +189,12 @@ class PortfolioStatistics
 
         $pnlEur = $totalCurrent - $totalInvested;
         $dailyEur = $totalCurrent - $totalPrevious;
+        $history = $this->withCurrentHistoryPoint(
+            $this->buildHistory($user, $portfolio),
+            $totalCurrent,
+            $totalInvested,
+            $pnlEur,
+        );
 
         return [
             'scope' => $portfolio
@@ -217,7 +223,7 @@ class PortfolioStatistics
             ],
             'generated_at' => now()->toIso8601String(),
             'quote_error' => $error,
-            'history' => $this->buildHistory($user, $portfolio),
+            'history' => $history,
         ];
     }
 
@@ -267,5 +273,32 @@ class PortfolioStatistics
             'invested_eur' => (float) $r->invested_eur,
             'pnl_eur' => (float) $r->pnl_eur,
         ])->all();
+    }
+
+    /**
+     * @param  array<int, array{date: string, value_eur: float, invested_eur: float, pnl_eur: float}>  $history
+     * @return array<int, array{date: string, value_eur: float, invested_eur: float, pnl_eur: float}>
+     */
+    private function withCurrentHistoryPoint(
+        array $history,
+        float $currentValue,
+        float $invested,
+        float $pnl,
+    ): array {
+        $today = today()->toDateString();
+        $history = array_values(array_filter(
+            $history,
+            fn (array $point): bool => $point['date'] !== $today,
+        ));
+        $history[] = [
+            'date' => $today,
+            'value_eur' => $currentValue,
+            'invested_eur' => $invested,
+            'pnl_eur' => $pnl,
+        ];
+
+        usort($history, fn (array $a, array $b): int => $a['date'] <=> $b['date']);
+
+        return $history;
     }
 }

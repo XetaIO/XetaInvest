@@ -15,7 +15,14 @@ class UpdateTransaction
     {
     }
 
-    /** @param array<string, mixed> $data */
+    /**
+     * Updates the specified transaction with the provided data and validates the associated position's inventory. It ensures that the position is locked for update during the transaction update process to maintain data integrity.
+     *
+     * @param Transaction $transaction The transaction to be updated.
+     * @param array $data The data for updating the transaction, including type, amount, and other relevant details.
+     *
+     * @return Transaction The updated transaction instance.
+     */
     public function handle(Transaction $transaction, array $data): Transaction
     {
         return DB::transaction(function () use ($transaction, $data): Transaction {

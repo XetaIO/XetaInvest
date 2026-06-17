@@ -13,10 +13,19 @@ use Illuminate\Support\Facades\Log;
 
 class NewsAggregator
 {
+    /**
+     * Maximum number of news items to fetch per symbol when no specific symbol filter is applied.
+     */
     public const PER_SYMBOL_LIMIT = 5;
 
+    /**
+     * Number of news items to display per page in the paginated results.
+     */
     public const PER_PAGE = 20;
 
+    /**
+     * Base URL for stockanalysis.com, used to resolve relative news links to absolute URLs.
+     */
     protected const STOCKANALYSIS_BASE_URL = 'https://stockanalysis.com';
 
     public function __construct(
@@ -25,7 +34,14 @@ class NewsAggregator
     }
 
     /**
-     * @return array{news: LengthAwarePaginator<int, array<string, mixed>>, available_symbols: array<int, string>}
+     * Aggregate news articles for a given user, optionally filtered by a specific symbol.
+     *
+     * @param User $user The user for whom to aggregate news.
+     * @param string|null $symbolFilter Optional symbol to filter news articles.
+     * @param int $page The page number for pagination.
+     * @param string|null $baseUrl Optional base URL for pagination links.
+     *
+     * @return array An array containing the paginated news articles and available symbols.
      */
     public function aggregateForUser(User $user, ?string $symbolFilter = null, int $page = 1, ?string $baseUrl = null): array
     {
@@ -48,7 +64,7 @@ class NewsAggregator
         $symbolsToFetch = $symbolFilter !== null ? [$symbolFilter] : $userSymbols;
         $applyPerSymbolLimit = $symbolFilter === null;
 
-        $items = new Collection;
+        $items = new Collection();
 
         foreach ($symbolsToFetch as $symbol) {
             try {
@@ -115,7 +131,11 @@ class NewsAggregator
     }
 
     /**
-     * Resolve relative news links scraped from stockanalysis.com to absolute URLs.
+     * Normalize a news link to ensure it is an absolute URL. If the link is relative, it will be prefixed with the stockanalysis.com base URL.
+     *
+     * @param string $link The news link to normalize.
+     *
+     * @return string The normalized absolute URL.
      */
     protected function normalizeLink(string $link): string
     {
@@ -129,8 +149,11 @@ class NewsAggregator
     }
 
     /**
-     * Convert a relative time string like "3 hours ago" into minutes ago (lower = more recent).
-     * Returns PHP_INT_MAX for unparseable strings so they sink to the bottom.
+     * Parse a relative time string (e.g., "2 hours ago") into the number of minutes since that time.
+     *
+     * @param string $time The relative time string to parse.
+     *
+     * @return int The number of minutes since the given time, or PHP_INT_MAX if the format is unrecognized.
      */
     protected function parseRelativeTime(string $time): int
     {

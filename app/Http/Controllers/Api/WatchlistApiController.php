@@ -13,6 +13,13 @@ use Illuminate\Http\Request;
 
 class WatchlistApiController extends Controller
 {
+    /**
+     * Retrieve a summary of the authenticated user's watchlists, including their IDs, names, and default section IDs.
+     *
+     * @param Request $request The incoming HTTP request.
+     *
+     * @return JsonResponse A JSON response containing the summary of the user's watchlists.
+     */
     public function summary(Request $request): JsonResponse
     {
         $watchlists = $request->user()->watchlists()
@@ -28,6 +35,14 @@ class WatchlistApiController extends Controller
         return response()->json(['data' => $watchlists]);
     }
 
+    /**
+     * Retrieve the historical price data for a list of symbols within the user's watchlists.
+     *
+     * @param WatchlistHistoryRequest $request The validated request containing the symbols.
+     * @param FinanceQueryClient $client The client responsible for fetching historical price data.
+     *
+     * @return JsonResponse A JSON response containing the historical price data for the specified symbols.
+     */
     public function history(WatchlistHistoryRequest $request, FinanceQueryClient $client): JsonResponse
     {
         $raw = (string) $request->validated('symbols');

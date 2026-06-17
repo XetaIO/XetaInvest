@@ -24,7 +24,13 @@ class PortfolioStatistics
     }
 
     /**
-     * @return array<string, mixed>
+     * Computes and retrieves portfolio statistics for a given user, optionally for a specific portfolio. The results are cached for performance, with an option to force refresh the data.
+     *
+     * @param User $user The user for whom to compute statistics.
+     * @param Portfolio|null $portfolio Optional specific portfolio to compute statistics for. If null, computes for all portfolios.
+     * @param bool $forceRefresh Whether to force refresh the cached data.
+     *
+     * @return array An associative array containing computed statistics and related data.
      */
     public function compute(User $user, ?Portfolio $portfolio = null, bool $forceRefresh = false): array
     {
@@ -38,7 +44,13 @@ class PortfolioStatistics
     }
 
     /**
-     * @return array<string, mixed>
+     * Builds the portfolio statistics for a given user and portfolio.
+     *
+     * @param User $user The user for whom to build statistics.
+     * @param Portfolio|null $portfolio The specific portfolio to build statistics for.
+     * @param bool $forceRefresh Whether to force refresh the cached data.
+     *
+     * @return array<string, mixed> The computed statistics and related data.
      */
     protected function build(User $user, ?Portfolio $portfolio, bool $forceRefresh = false): array
     {
@@ -228,7 +240,12 @@ class PortfolioStatistics
     }
 
     /**
-     * @return array<int, array{date: string, value_eur: float, invested_eur: float, pnl_eur: float}>
+     * Builds the historical portfolio data for a given user and portfolio, limited to the last HISTORY_DAYS days.
+     *
+     * @param User $user The user for whom to build history.
+     * @param Portfolio|null $portfolio The specific portfolio to build history for. If null, builds history for all portfolios.
+     *
+     * @return array<int, array{date: string, value_eur: float, invested_eur: float, pnl_eur: float}> An array of historical data points.
      */
     protected function buildHistory(User $user, ?Portfolio $portfolio): array
     {
@@ -276,8 +293,14 @@ class PortfolioStatistics
     }
 
     /**
-     * @param  array<int, array{date: string, value_eur: float, invested_eur: float, pnl_eur: float}>  $history
-     * @return array<int, array{date: string, value_eur: float, invested_eur: float, pnl_eur: float}>
+     * Adds the current day's portfolio data to the historical data, ensuring that the history includes today's values.
+     *
+     * @param array<int, array{date: string, value_eur: float, invested_eur: float, pnl_eur: float}> $history The existing historical data.
+     * @param float $currentValue The current total value of the portfolio(s) in EUR.
+     * @param float $invested The total invested amount in EUR.
+     * @param float $pnl The total profit and loss in EUR.
+     *
+     * @return array<int, array{date: string, value_eur: float, invested_eur: float, pnl_eur: float}> The updated historical data including today's values.
      */
     private function withCurrentHistoryPoint(
         array $history,

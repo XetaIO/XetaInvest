@@ -1,4 +1,4 @@
-import type { Auth } from '@/types/auth';
+import type { User } from '@/types/auth';
 import type { PortfolioTickerEntry } from '@/types/ticker';
 
 declare module 'react' {
@@ -12,7 +12,9 @@ declare module '@inertiajs/core' {
     export interface InertiaConfig {
         sharedPageProps: {
             name: string;
-            auth: Auth;
+            auth: {
+                user: User | null;
+            };
             sidebarOpen: boolean;
             registrationEnabled: boolean;
             portfolioTicker: PortfolioTickerEntry[] | null;

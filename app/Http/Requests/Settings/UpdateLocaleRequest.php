@@ -11,10 +11,9 @@ class UpdateLocaleRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return true;
     }
 
-    /** @return array<string, mixed> */
     public function rules(): array
     {
         return [
@@ -22,7 +21,6 @@ class UpdateLocaleRequest extends FormRequest
         ];
     }
 
-    /** @return array<string, string> */
     public function messages(): array
     {
         return [

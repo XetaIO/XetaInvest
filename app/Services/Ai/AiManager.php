@@ -13,6 +13,15 @@ class AiManager
     /** @var array<string, AiProvider> */
     protected array $providers = [];
 
+    /**
+     * Get the AI provider instance by name. If no name is provided, the default provider is used.
+     *
+     * @param string|null $name The name of the AI provider to retrieve. If null, the default provider is used.
+     *
+     * @return AiProvider The AI provider instance.
+     *
+     * @throws AiException If the specified provider is not configured or unknown.
+     */
     public function driver(?string $name = null): AiProvider
     {
         $name ??= (string) config('ai.default');
@@ -20,6 +29,15 @@ class AiManager
         return $this->providers[$name] ??= $this->resolve($name);
     }
 
+    /**
+     * Resolve the AI provider instance by name. This method is responsible for creating the provider instance based on the configuration.
+     *
+     * @param string $name The name of the AI provider to resolve.
+     *
+     * @return AiProvider The resolved AI provider instance.
+     *
+     * @throws AiException If the specified provider is not configured or unknown.
+     */
     protected function resolve(string $name): AiProvider
     {
         $config = config('ai.providers.'.$name);

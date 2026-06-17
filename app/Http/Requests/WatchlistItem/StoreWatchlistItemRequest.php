@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Watchlist;
+namespace App\Http\Requests\WatchlistItem;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -16,9 +16,6 @@ class StoreWatchlistItemRequest extends FormRequest
         return $watchlist !== null && $this->user()?->can('update', $watchlist);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [

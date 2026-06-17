@@ -17,9 +17,6 @@ class StoreTransactionRequest extends FormRequest
         return $this->user()?->can('update', $position?->portfolio) ?? false;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [

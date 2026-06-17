@@ -15,9 +15,6 @@ class StoreWatchlistRequest extends FormRequest
         return $this->user()->can('create', Watchlist::class);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [

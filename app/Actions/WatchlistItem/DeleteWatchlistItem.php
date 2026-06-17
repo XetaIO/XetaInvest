@@ -2,13 +2,20 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Watchlist;
+namespace App\Actions\WatchlistItem;
 
 use App\Models\WatchlistItem;
 use Illuminate\Support\Facades\DB;
 
-class RemoveWatchlistItem
+class DeleteWatchlistItem
 {
+    /**
+     * Delete the specified watchlist item and adjusts the positions of other items in the same section accordingly.
+     *
+     * @param WatchlistItem $item The watchlist item to be removed.
+     *
+     * @return void
+     */
     public function handle(WatchlistItem $item): void
     {
         DB::transaction(function () use ($item): void {

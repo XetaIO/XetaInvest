@@ -12,6 +12,13 @@ class InstrumentResolver
     {
     }
 
+    /**
+     * Resolve an instrument by its symbol. If the instrument does not exist in the database, it will be fetched from the FinanceQuery API and stored.
+     *
+     * @param string $symbol The symbol of the instrument to resolve.
+     *
+     * @return Instrument|null The resolved instrument or null if not found.
+     */
     public function resolve(string $symbol): ?Instrument
     {
         $symbol = strtoupper(trim($symbol));

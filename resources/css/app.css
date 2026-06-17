@@ -158,3 +158,161 @@
 .ticker-wrapper:hover .ticker-track {
     animation-play-state: paused;
 }
+
+.landing-page {
+    color-scheme: dark;
+}
+
+.landing-hero-grid {
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: linear-gradient(to bottom, black, transparent 82%);
+}
+
+.landing-page::before {
+    position: fixed;
+    z-index: 60;
+    inset: 0;
+    pointer-events: none;
+    content: '';
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
+}
+
+.landing-reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+        opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+}
+
+.landing-reveal[data-visible='true'] {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.landing-mockup::after {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    content: '';
+    border-radius: inherit;
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.035);
+}
+
+.landing-reveal[data-visible='true'] .landing-metric {
+    animation: landing-metric-in 550ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--metric-index, 0) * 90ms + 180ms);
+}
+
+.landing-chart-path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+}
+
+.landing-reveal[data-visible='true'] .landing-chart-path {
+    animation: landing-draw-chart 1.5s cubic-bezier(0.16, 1, 0.3, 1) 250ms
+        forwards;
+}
+
+.landing-reveal[data-visible='true'] .landing-chart-path-secondary {
+    animation-delay: 420ms;
+}
+
+.landing-candle {
+    opacity: 0;
+    transform: scaleY(0.08);
+    transform-origin: bottom;
+}
+
+.landing-reveal[data-visible='true'] .landing-candle {
+    animation: landing-candle-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--candle-index, 0) * 35ms + 180ms);
+}
+
+.landing-budget-bar {
+    transform: scaleX(0);
+    transform-origin: left;
+}
+
+.landing-reveal[data-visible='true'] .landing-budget-bar {
+    animation: landing-budget-in 900ms cubic-bezier(0.16, 1, 0.3, 1) 260ms
+        forwards;
+}
+
+.landing-reveal[data-visible='true'] .landing-orb {
+    animation: landing-orb-pulse 6s ease-in-out infinite;
+}
+
+@keyframes landing-metric-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes landing-draw-chart {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes landing-candle-in {
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+
+@keyframes landing-budget-in {
+    to {
+        transform: scaleX(1);
+    }
+}
+
+@keyframes landing-orb-pulse {
+    0%,
+    100% {
+        opacity: 0.7;
+        transform: scale(0.96);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.04);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .landing-reveal,
+    .landing-metric,
+    .landing-chart-path,
+    .landing-candle,
+    .landing-budget-bar,
+    .landing-orb {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .landing-reveal,
+    .landing-metric,
+    .landing-candle {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    .landing-chart-path {
+        stroke-dashoffset: 0 !important;
+    }
+
+    .landing-budget-bar {
+        transform: scaleX(1) !important;
+    }
+}

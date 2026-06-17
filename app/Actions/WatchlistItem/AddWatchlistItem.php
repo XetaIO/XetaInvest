@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Watchlist;
+namespace App\Actions\WatchlistItem;
 
 use App\Models\Watchlist;
 use App\Models\WatchlistItem;
@@ -17,14 +17,17 @@ class AddWatchlistItem
     }
 
     /**
-     * @return 'added'|'moved'|'symbol_not_found'|'already_present'|'limit_reached'
+     * Adds an item to the specified watchlist and section based on the provided symbol. It checks for existing items, handles moving items between sections, and ensures that the watchlist does not exceed its maximum item limit.
+     *
+     * @param Watchlist $watchlist The watchlist to which the item will be added.
+     * @param WatchlistSection $section The section within the watchlist where the item will be added.
+     * @param string $symbol The symbol of the instrument to be added to the watchlist.
+     *
+     * @return string A status message indicating the result of the operation: 'symbol_not_found', 'already_present', 'moved', 'limit_reached', or 'added'.
      */
     public function handle(Watchlist $watchlist, WatchlistSection $section, string $symbol): string
     {
         return DB::transaction(function () use ($watchlist, $section, $symbol): string {
-            // Lock the parent watchlist row to serialize concurrent inserts.
-            // PostgreSQL forbids FOR UPDATE alongside aggregate functions, so we
-            // cannot lock with count() directly.
             Watchlist::query()->whereKey($watchlist->getKey())->lockForUpdate()->first();
 
             $instrument = $this->resolver->resolve($symbol);

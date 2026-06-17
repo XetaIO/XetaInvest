@@ -7,10 +7,15 @@ namespace App\Actions\Watchlist;
 use App\Models\Watchlist;
 use Illuminate\Support\Facades\DB;
 
-class ReorderWatchlistLayout
+class ReorderWatchlist
 {
     /**
-     * @param  array<int, array{id: string, item_ids: array<int, string>}>  $sections
+     * Reorders the sections and items of the specified watchlist based on the provided layout data.
+     *
+     * @param Watchlist $watchlist The watchlist to be reordered.
+     * @param array $sections An array containing the new order of sections and their associated items.
+     *
+     * @return void
      */
     public function handle(Watchlist $watchlist, array $sections): void
     {

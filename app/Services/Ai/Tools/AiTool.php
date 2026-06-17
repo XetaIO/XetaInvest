@@ -15,15 +15,15 @@ interface AiTool
     /**
      * JSON schema for parameters (OpenAI function calling format).
      *
-     * @return array<string, mixed>
+     * @return array
      */
     public function schema(): array;
 
     /**
      * Execute the tool. Must scope everything to the given user (read-only).
      *
-     * @param  array<string, mixed>  $args
-     * @return array<string, mixed>
+     * @param  array $args
+     * @return array
      */
     public function execute(User $user, array $args): array;
 }

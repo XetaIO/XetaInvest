@@ -11,6 +11,14 @@ use Inertia\Response;
 
 class StatisticsController extends Controller
 {
+    /**
+     * Display the statistics page with portfolio information and computed statistics.
+     *
+     * @param Request $request The incoming HTTP request.
+     * @param PortfolioStatistics $stats Service to compute portfolio statistics.
+     *
+     * @return Response An Inertia response rendering the statistics page with necessary data.
+     */
     public function show(Request $request, PortfolioStatistics $stats): Response
     {
         $user = $request->user();

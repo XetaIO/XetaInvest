@@ -19,9 +19,6 @@ class UpdateBudgetRequest extends FormRequest
         return $this->user()->can('update', $budget);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [

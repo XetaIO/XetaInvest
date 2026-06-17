@@ -27,6 +27,11 @@ class FinanceQueryClient
 
     protected int $newsTtl;
 
+    /**
+     * FinanceQueryClient constructor.
+     *
+     * Initializes the client with configuration settings for the FinanceQuery service, including base URL, timeout, and cache TTLs for various endpoints.
+     */
     public function __construct()
     {
         $this->baseUrl = rtrim((string) config('services.finance_query.url'), '/');
@@ -40,7 +45,11 @@ class FinanceQueryClient
     /**
      * Search symbols by name or ticker via /v2/lookup.
      *
-     * @return array<int, array<string, mixed>>
+     * @param string $query The search query.
+     * @param int $limit The maximum number of results to return.
+     * @param string $region The region for the search.
+     *
+     * @return array An array of search results, each containing symbol, name, exchange, type, and logo URL.
      */
     public function search(string $query, int $limit = 25, string $region = 'FR'): array
     {
@@ -76,9 +85,12 @@ class FinanceQueryClient
     }
 
     /**
-     * Get a single quote.
+     * Get a quote for a single symbol. Cached individually per symbol.
      *
-     * @return array<string, mixed>|null
+     * @param string $symbol The symbol for which to retrieve the quote.
+     * @param bool $force Whether to force a refresh of the cached quote.
+     *
+     * @return array<string, mixed>|null The quote data for the symbol, or null if not found.
      */
     public function quote(string $symbol, bool $force = false): ?array
     {
@@ -88,10 +100,12 @@ class FinanceQueryClient
     }
 
     /**
-     * Get quotes for multiple symbols. Cached individually per symbol.
+     * Get quotes for multiple symbols at once. Cached individually per symbol.
      *
-     * @param  array<int, string>  $symbols
-     * @return array<string, array<string, mixed>>
+     * @param array<int, string> $symbols The list of symbols for which to retrieve quotes.
+     * @param bool $force Whether to force a refresh of the cached quotes.
+     *
+     * @return array<string, array<string, mixed>> An associative array where keys are symbols and values are the corresponding quote data.
      */
     public function quotes(array $symbols, bool $force = false): array
     {
@@ -135,7 +149,13 @@ class FinanceQueryClient
     }
 
     /**
-     * @return array<string, mixed>
+     * Get chart data for a single symbol.
+     *
+     * @param string $symbol The symbol for which to retrieve chart data.
+     * @param string $interval The interval for the chart data.
+     * @param string $range The range for the chart data.
+     *
+     * @return array<string, mixed> The chart data for the symbol.
      */
     public function chart(string $symbol, string $interval = '1d', string $range = '1mo'): array
     {
@@ -146,7 +166,10 @@ class FinanceQueryClient
      * Get a detailed quote for a single symbol from /v2/quote/{symbol}.
      * Returns null if not found.
      *
-     * @return array<string, mixed>|null
+     * @param string $symbol The symbol for which to retrieve detailed quote data.
+     * @param bool $force Whether to force a refresh of the cached quote.
+     *
+     * @return array<string, mixed>|null The detailed quote data for the symbol, or null if not found.
      */
     public function quoteDetail(string $symbol, bool $force = false): ?array
     {
@@ -174,7 +197,11 @@ class FinanceQueryClient
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * Get news articles for a single symbol from /v2/news/{symbol}.
+     *
+     * @param string $symbol The symbol for which to retrieve news articles.
+     *
+     * @return array<int, array<string, mixed>> An array of news articles, each containing title, link, published date, and other details.
      */
     public function news(string $symbol): array
     {
@@ -192,6 +219,9 @@ class FinanceQueryClient
 
     /**
      * Get similar-symbol recommendations from /v2/recommendations/{symbol}.
+     *
+     * @param string $symbol The symbol for which to retrieve recommendations.
+     * @param int $limit The maximum number of recommendations to return.
      *
      * @return array<int, array{symbol: string, score: float|null}>
      */
@@ -227,6 +257,10 @@ class FinanceQueryClient
      * Get sparkline data for multiple symbols at once via /v2/spark.
      *
      * @param  array<int, string>  $symbols
+     * @param string $interval The interval for the sparkline data.
+     * @param string $range The range for the sparkline data.
+     * @param bool $force Whether to force a refresh of the cached sparkline data.
+     *
      * @return array<string, array{closes: array<int, float>, timestamps: array<int, int>, meta: array<string, mixed>}>
      */
     public function spark(array $symbols, string $interval = '1d', string $range = '1mo', bool $force = false): array
@@ -287,6 +321,11 @@ class FinanceQueryClient
 
     /**
      * Get FX rate to convert 1 unit of $from into $to.
+     *
+     * @param string $from The currency from which to convert.
+     * @param string $to The currency into which to convert.
+     *
+     * @return float The FX rate.
      */
     public function fxRate(string $from, string $to): float
     {
@@ -320,16 +359,25 @@ class FinanceQueryClient
         return $rate;
     }
 
+    /**
+     * Generate a cache key for storing quotes for a specific symbol.
+     *
+     * @param string $symbol The symbol for which to generate the cache key.
+     *
+     * @return string The generated cache key.
+     */
     protected function quoteKey(string $symbol): string
     {
         return 'fq:quote:'.$symbol;
     }
 
     /**
-     * POST /v2/screeners/custom — run a custom screener.
+     * Get screener results for a custom payload.
      *
-     * @param  array<string, mixed>  $payload
-     * @return array<string, mixed>
+     * @param array<string, mixed> $payload The payload for the screener request.
+     * @param bool $force Whether to force a refresh of the cached screener results.
+     *
+     * @return array The screener results.
      */
     public function screener(array $payload, bool $force = false): array
     {
@@ -345,8 +393,14 @@ class FinanceQueryClient
     }
 
     /**
-     * @param  array<string, mixed>  $payload
-     * @return array<string, mixed>
+     * Perform a POST request to the FinanceQuery API.
+     *
+     * @param string $path The API endpoint path.
+     * @param array $payload The payload for the POST request.
+     *
+     * @return array<string, mixed> The response data from the API.
+     *
+     * @throws FinanceQueryException If the request fails or the response is invalid.
      */
     protected function post(string $path, array $payload): array
     {
@@ -379,8 +433,14 @@ class FinanceQueryClient
     }
 
     /**
-     * @param  array<string, mixed>  $query
-     * @return array<string, mixed>
+     * Perform a GET request to the FinanceQuery API.
+     *
+     * @param string $path The API endpoint path.
+     * @param array $query The query parameters for the GET request.
+     *
+     * @return array<string, mixed> The response data from the API.
+     *
+     * @throws FinanceQueryException If the request fails or the response is invalid.
      */
     protected function get(string $path, array $query = []): array
     {
@@ -412,6 +472,11 @@ class FinanceQueryClient
         }
     }
 
+    /**
+     * Create a new HTTP client for making requests to the FinanceQuery API.
+     *
+     * @return PendingRequest The configured HTTP client.
+     */
     protected function client(): PendingRequest
     {
         return Http::acceptJson()

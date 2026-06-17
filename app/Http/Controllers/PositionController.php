@@ -15,6 +15,15 @@ use Inertia\Inertia;
 
 class PositionController extends Controller
 {
+    /**
+     * Store a newly created position in storage.
+     *
+     * @param StorePositionRequest $request The validated request containing the new position data.
+     * @param Portfolio $portfolio The portfolio model to which the position will be added.
+     * @param CreatePosition $action The action to create a new position.
+     *
+     * @return RedirectResponse A redirect response back to the previous page with a success message or error.
+     */
     public function store(
         StorePositionRequest $request,
         Portfolio $portfolio,
@@ -31,6 +40,15 @@ class PositionController extends Controller
         return back();
     }
 
+    /**
+     * Remove the specified position from storage.
+     *
+     * @param Request $request The incoming HTTP request.
+     * @param Position $position The position model to be deleted.
+     * @param DeletePosition $action The action to delete the position.
+     *
+     * @return RedirectResponse A redirect response back to the previous page with a success message.
+     */
     public function destroy(
         Request $request,
         Position $position,

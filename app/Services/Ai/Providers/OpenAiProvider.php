@@ -16,7 +16,11 @@ use Throwable;
 class OpenAiProvider implements AiProvider
 {
     /**
-     * @param  array<string, mixed>  $config
+     * OpenAiProvider constructor.
+     *
+     * @param array<string, mixed> $config Configuration settings for the OpenAI provider, including API key and base URL.
+     *
+     * @throws AiException If the API key is missing from the configuration.
      */
     public function __construct(protected array $config)
     {
@@ -25,15 +29,26 @@ class OpenAiProvider implements AiProvider
         }
     }
 
+    /**
+     * Returns the name of the AI provider.
+     *
+     * @return string The name of the provider, which is 'openai'.
+     */
     public function name(): string
     {
         return 'openai';
     }
 
     /**
-     * @param  array<int, array<string, mixed>>  $messages
-     * @param  array<int, array<string, mixed>>  $tools
-     * @param  array<string, mixed>  $options
+     * Sends a chat request to the OpenAI API with the provided messages and tools, and returns the AI response.
+     *
+     * @param array $messages The messages to send to the AI model.
+     * @param array $tools The tools available for the AI to use.
+     * @param array $options Additional options for the chat request, such as model and temperature.
+     *
+     * @return AiResponse The response from the AI model, including content, tool calls, and usage information.
+     *
+     * @throws AiException If there is an error with the OpenAI request or response.
      */
     public function chat(array $messages, array $tools = [], array $options = []): AiResponse
     {
@@ -94,7 +109,12 @@ class OpenAiProvider implements AiProvider
     }
 
     /**
-     * @param  array<string, mixed>|null  $payload
+     * Parses the response payload from the OpenAI API and constructs an AiResponse object.
+     *
+     * @param array|null $payload The response payload from the OpenAI API.
+     * @param string $model The model used for the request.
+     *
+     * @return AiResponse The parsed AI response, including content, tool calls, and usage information.
      */
     protected function parse(?array $payload, string $model): AiResponse
     {
@@ -135,6 +155,10 @@ class OpenAiProvider implements AiProvider
     /**
      * Newer OpenAI models (o1, o3, o4, gpt-5.x…) require `max_completion_tokens`.
      * Legacy models (gpt-3.x, gpt-4.x) use the old `max_tokens` parameter.
+     *
+     * @param string $model The model name to check.
+     *
+     * @return bool True if the model supports `max_tokens`, false if it requires `max_completion_tokens`.
      */
     private function supportsMaxTokens(string $model): bool
     {

@@ -17,6 +17,14 @@ use Inertia\Response;
 
 class BudgetController extends Controller
 {
+    /**
+     * Display the user's budget page with all associated groups and lines.
+     *
+     * @param Request $request The incoming HTTP request.
+     * @param EnsureBudgetExists $ensure Action to ensure the user has a budget.
+     *
+     * @return Response An Inertia response rendering the budget page with necessary data.
+     */
     public function show(Request $request, EnsureBudgetExists $ensure): Response
     {
         $budget = $ensure->handle($request->user());
@@ -27,6 +35,14 @@ class BudgetController extends Controller
         ]);
     }
 
+    /**
+     * Update the user's budget information.
+     *
+     * @param UpdateBudgetRequest $request The validated request containing the updated budget data.
+     * @param SyncBudget $action The action to synchronize the budget data.
+     *
+     * @return RedirectResponse A redirect response back to the budget page.
+     */
     public function update(UpdateBudgetRequest $request, SyncBudget $action): RedirectResponse
     {
         $budget = Budget::firstOrCreate(['user_id' => $request->user()->id]);
@@ -37,7 +53,11 @@ class BudgetController extends Controller
     }
 
     /**
-     * @return array<string, mixed>
+     * Transform the budget model into a structured array for the frontend.
+     *
+     * @param Budget $budget The budget model to transform.
+     *
+     * @return array The transformed budget data.
      */
     private function transform(Budget $budget): array
     {
@@ -64,8 +84,11 @@ class BudgetController extends Controller
     }
 
     /**
-     * @param  array<int, BudgetGroup>  $groups
-     * @return array<int, array<string, mixed>>
+     * Map budget groups to a structured array format for the frontend.
+     *
+     * @param array $groups The array of budget groups to map.
+     *
+     * @return array The mapped budget groups.
      */
     private function mapGroups(array $groups): array
     {

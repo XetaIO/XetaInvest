@@ -11,6 +11,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateWatchlist
 {
+    /**
+     * Creates a new watchlist for the specified user with the given name. It ensures that the user does not exceed the maximum allowed number of watchlists and creates a default section for the new watchlist.
+     *
+     * @param User $user The user for whom the watchlist is being created.
+     * @param string $name The name of the new watchlist.
+     *
+     * @return Watchlist The newly created watchlist instance.
+     */
     public function handle(User $user, string $name): Watchlist
     {
         return DB::transaction(function () use ($user, $name): Watchlist {

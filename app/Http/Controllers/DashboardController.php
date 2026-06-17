@@ -15,6 +15,15 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
+    /**
+     * Display the user's dashboard with portfolio information, KPIs, and AI-generated reports.
+     *
+     * @param Request $request The incoming HTTP request.
+     * @param FinanceQueryClient $client Service to fetch financial data.
+     * @param PortfolioCalculator $calculator Service to compute portfolio KPIs.
+     *
+     * @return Response An Inertia response rendering the dashboard page with necessary data.
+     */
     public function show(
         Request $request,
         FinanceQueryClient $client,

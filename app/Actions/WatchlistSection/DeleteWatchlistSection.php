@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Watchlist;
+namespace App\Actions\WatchlistSection;
 
 use App\Models\Watchlist;
 use App\Models\WatchlistItem;
@@ -12,6 +12,16 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteWatchlistSection
 {
+    /**
+     * Delete the specified watchlist section and adjusts the positions of other sections for the same watchlist accordingly.
+     * If the section is not default, it moves its items to the default section before deletion.
+     *
+     * @param WatchlistSection $section The watchlist section to be removed.
+     *
+     * @return void
+     *
+     * @throws ValidationException If the section is a default section and cannot be deleted.
+     */
     public function handle(WatchlistSection $section): void
     {
         DB::transaction(function () use ($section): void {

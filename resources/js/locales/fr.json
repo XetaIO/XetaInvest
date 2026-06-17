@@ -9,6 +9,133 @@
         "repository": "Dépôt",
         "documentation": "Documentation"
     },
+    "landing": {
+        "meta": {
+            "title": "Pilotez votre patrimoine",
+            "description": "XetaInvest réunit le suivi de portefeuille, les statistiques, les watchlists, le budget et l'analyse IA dans une application que vous maîtrisez."
+        },
+        "nav": {
+            "main": "Navigation principale",
+            "home": "Retour en haut de la page",
+            "features": "Fonctionnalités",
+            "ai": "Assistant IA",
+            "planning": "Budget & projection",
+            "security": "Hébergement",
+            "open_menu": "Ouvrir le menu",
+            "close_menu": "Fermer le menu"
+        },
+        "cta": {
+            "create_account": "Créer un compte",
+            "install_project": "Installer le projet",
+            "discover": "Découvrir XetaInvest"
+        },
+        "hero": {
+            "badge": "Votre patrimoine, une seule interface",
+            "title_start": "Pilotez tout votre patrimoine",
+            "title_accent": "depuis un seul tableau de bord.",
+            "description": "Suivez vos portefeuilles, analysez vos performances, préparez vos investissements et interrogez vos données avec un assistant IA pensé pour l'investisseur particulier."
+        },
+        "assets": {
+            "stocks": "Actions",
+            "etf": "ETF",
+            "crypto": "Crypto",
+            "indices": "Indices",
+            "currencies": "Devises"
+        },
+        "sections": {
+            "portfolio": {
+                "eyebrow": "Portefeuilles",
+                "title_start": "Chaque investissement,",
+                "title_accent": "parfaitement suivi.",
+                "description": "Centralisez plusieurs portefeuilles et conservez l'historique précis de vos achats, ventes et dividendes sans perdre le fil de votre stratégie.",
+                "feature_1": "Portefeuilles multiples et portefeuille par défaut",
+                "feature_2": "Positions, prix de revient et P&L réalisés ou latents",
+                "feature_3": "Historique complet des transactions"
+            },
+            "statistics": {
+                "eyebrow": "Statistiques",
+                "title_start": "Comprenez vraiment",
+                "title_accent": "ce qui fait votre performance.",
+                "description": "Passez de la valeur globale au détail de chaque exposition grâce à des graphiques lisibles et des répartitions conçues pour décider.",
+                "feature_1": "Évolution de la valeur et du capital investi",
+                "feature_2": "Répartition par actif, devise, type et portefeuille",
+                "feature_3": "Gagnants, perdants et carte des positions"
+            },
+            "ai": {
+                "eyebrow": "Assistant IA",
+                "title_start": "Posez vos questions,",
+                "title_accent": "vos données répondent.",
+                "description": "L'assistant s'appuie sur vos portefeuilles, vos watchlists et les données de marché pour produire des réponses contextualisées et des rapports structurés.",
+                "feature_1": "Conversation contextualisée sur vos investissements",
+                "feature_2": "Rapports portefeuille, globaux et watchlists",
+                "feature_3": "Points clés, risques et pistes de réflexion"
+            },
+            "watchlist": {
+                "eyebrow": "Watchlists",
+                "title_start": "Observez le marché,",
+                "title_accent": "sans perdre votre cap.",
+                "description": "Organisez les actifs qui vous intéressent, comparez leurs trajectoires et explorez leurs cours avec un graphique avancé.",
+                "feature_1": "Listes et sections réordonnables",
+                "feature_2": "Cours, variations et comparaisons",
+                "feature_3": "Bougies, lignes et horizons multiples"
+            },
+            "planning": {
+                "eyebrow": "Budget & projection",
+                "title_start": "Reliez votre épargne",
+                "title_accent": "à vos objectifs.",
+                "description": "Structurez vos revenus et dépenses, identifiez votre capacité d'investissement et projetez la croissance de votre capital selon plusieurs scénarios.",
+                "feature_1": "Budget mensuel et flux de trésorerie",
+                "feature_2": "Reste disponible à investir ou épargner",
+                "feature_3": "Projections optimiste, médiane et pessimiste"
+            },
+            "security": {
+                "eyebrow": "Votre instance",
+                "title_start": "Vos données restent",
+                "title_accent": "sous votre contrôle.",
+                "description": "Installez XetaInvest sur votre ordinateur ou votre propre serveur et choisissez vous-même l'environnement qui héberge vos données financières.",
+                "feature_1": "Installation locale ou serveur Linux",
+                "feature_2": "PostgreSQL, politiques d'accès et sessions sécurisées",
+                "feature_3": "Authentification à deux facteurs et clés d'accès"
+            }
+        },
+        "final": {
+            "eyebrow": "Commencez maintenant",
+            "title": "Un espace unique pour suivre, comprendre et préparer vos investissements.",
+            "description": "Déployez votre instance XetaInvest et reprenez une vue claire de votre patrimoine, de votre budget et de vos décisions."
+        },
+        "mockup": {
+            "portfolio": "Portefeuille actif",
+            "long_term": "Long terme",
+            "live": "Cours actualisés",
+            "transactions": "Journal des transactions",
+            "complete_history": "Un historique clair, ligne par ligne",
+            "buy": "Achat",
+            "dividend": "Dividende",
+            "sell": "Vente",
+            "portfolio_value": "Valeur de tous les portefeuilles",
+            "performance_chart": "Courbe de performance du portefeuille",
+            "stocks": "Actions",
+            "assistant": "Assistant IA",
+            "ai_question": "Analyse la diversification de mon portefeuille et ses principaux risques.",
+            "ai_answer": "Votre portefeuille progresse, mais son exposition aux marchés américains reste dominante. La diversification par devise et par zone géographique peut être renforcée.",
+            "risk": "Risque",
+            "moderate": "Modéré",
+            "diversification": "Diversification",
+            "ask_question": "Posez une question sur vos investissements...",
+            "advanced_chart": "Graphique avancé",
+            "watchlist": "Liste de suivi",
+            "monthly_budget": "Budget mensuel",
+            "projection": "Projection du capital",
+            "projection_chart": "Projection de croissance du capital",
+            "migrations_done": "migrations terminées",
+            "assets_built": "assets compilés",
+            "queue_active": "worker actif",
+            "enabled": "Activée",
+            "policies": "Politiques",
+            "active": "Actives",
+            "your_instance": "Votre instance"
+        }
+    },
     "auth": {
         "login": "Connexion",
         "logout": "Déconnexion",
@@ -26,7 +153,58 @@
         "send_reset_link": "Envoyer le lien",
         "back_to_login": "Retour à la connexion",
         "name": "Nom",
-        "name_placeholder": "Nom complet"
+        "name_placeholder": "Nom complet",
+        "login_title": "Connectez-vous à votre compte",
+        "login_description": "Saisissez votre adresse e-mail et votre mot de passe pour vous connecter.",
+        "register_title": "Créer un compte",
+        "register_description": "Saisissez vos informations pour créer votre compte.",
+        "registration_closed": "Les inscriptions sont actuellement fermées.",
+        "forgot_password_title": "Mot de passe oublié",
+        "forgot_password_description": "Saisissez votre adresse e-mail pour recevoir un lien de réinitialisation.",
+        "email_password_reset_link": "Envoyer le lien de réinitialisation",
+        "or_return_to": "Ou retourner à",
+        "reset_password_description": "Saisissez votre nouveau mot de passe.",
+        "confirm_password_title": "Confirmer le mot de passe",
+        "confirm_password_description": "Cette zone est sécurisée. Confirmez votre mot de passe avant de continuer.",
+        "two_factor_title": "Authentification à deux facteurs",
+        "two_factor_authentication_code": "Code d'authentification",
+        "two_factor_authentication_description": "Saisissez le code fourni par votre application d'authentification.",
+        "two_factor_recovery_code": "Code de récupération",
+        "two_factor_recovery_description": "Confirmez l'accès à votre compte avec l'un de vos codes de récupération d'urgence.",
+        "two_factor_recovery_placeholder": "Saisir le code de récupération",
+        "two_factor_use_authentication_code": "utiliser un code d'authentification",
+        "two_factor_use_recovery_code": "utiliser un code de récupération",
+        "or_you_can": "ou vous pouvez",
+        "continue": "Continuer",
+        "email_verification_title": "Vérification de l'e-mail",
+        "email_verification_description": "Vérifiez votre adresse e-mail en cliquant sur le lien que nous venons de vous envoyer.",
+        "verification_link_sent": "Un nouveau lien de vérification a été envoyé à l'adresse e-mail fournie lors de l'inscription.",
+        "resend_verification_email": "Renvoyer l'e-mail de vérification"
+    },
+    "passkeys": {
+        "title": "Clés d'accès",
+        "description": "Gérez vos clés d'accès pour vous connecter sans mot de passe.",
+        "sign_in": "Se connecter avec une clé d'accès",
+        "authenticating": "Authentification...",
+        "or_continue_with_email": "Ou continuer avec l'e-mail",
+        "confirm_with_passkey": "Confirmer avec une clé d'accès",
+        "confirming": "Confirmation...",
+        "or_confirm_with_password": "Ou confirmer avec le mot de passe",
+        "not_supported": "Les clés d'accès ne sont pas prises en charge par ce navigateur.",
+        "add": "Ajouter une clé d'accès",
+        "register": "Enregistrer la clé d'accès",
+        "registering": "Enregistrement...",
+        "name": "Nom de la clé d'accès",
+        "name_placeholder": "ex. MacBook Pro, iPhone",
+        "name_help": "Un nom vous aide à identifier cette clé d'accès plus tard.",
+        "empty_title": "Aucune clé d'accès",
+        "empty_description": "Ajoutez une clé d'accès pour vous connecter sans mot de passe.",
+        "added": "Ajoutée {{date}}",
+        "last_used": "Dernière utilisation {{date}}",
+        "remove": "Supprimer",
+        "remove_title": "Supprimer la clé d'accès",
+        "remove_description": "Voulez-vous vraiment supprimer la clé d'accès « {{name}} » ? Vous ne pourrez plus l'utiliser pour vous connecter.",
+        "removing": "Suppression..."
     },
     "user_menu": {
         "settings": "Paramètres",

@@ -35,7 +35,13 @@ abstract class BaseReportGenerator
     abstract protected function buildMessages(User $user, mixed $scope): array;
 
     /**
-     * Run the generation and persist the AiReport row.
+     * Generates an AI report for the specified user and scope, handling the entire process of creating or updating the report record, sending the request to the AI provider, and logging usage and errors.
+     *
+     * @param User $user The user for whom the report is being generated.
+     * @param mixed $scope The scope of the report (e.g., a specific portfolio or account).
+     * @param CarbonImmutable|null $date The date for which the report is generated. Defaults to tomorrow's date if not provided.
+     *
+     * @return AiReport The generated or updated AI report instance.
      */
     public function generate(User $user, mixed $scope = null, ?CarbonImmutable $date = null): AiReport
     {
@@ -110,6 +116,13 @@ abstract class BaseReportGenerator
         return $report->refresh();
     }
 
+    /**
+     * Extracts the ID from the given scope, which can be an object with an 'id' property or a numeric value. Returns null if the scope is null or does not contain a valid ID.
+     *
+     * @param mixed $scope The scope from which to extract the ID.
+     *
+     * @return int|null The extracted ID, or null if not applicable.
+     */
     protected function scopeId(mixed $scope): ?int
     {
         if ($scope === null) {
@@ -128,9 +141,11 @@ abstract class BaseReportGenerator
     }
 
     /**
-     * Decode the JSON content from the AI. Falls back to {narrative_md} if not valid JSON.
+     * Parses the content of the AI response, handling cases where the content is a JSON string or a nested JSON structure. Returns an associative array representing the parsed content.
      *
-     * @return array<string, mixed>
+     * @param AiResponse $response The AI response containing the content to parse.
+     *
+     * @return array The parsed content as an associative array.
      */
     protected function parseContent(AiResponse $response): array
     {
@@ -158,6 +173,13 @@ abstract class BaseReportGenerator
         return ['narrative_md' => $raw];
     }
 
+    /**
+     * Generates the system prompt for the AI report generation, specifying the expected output format and content structure. This prompt guides the AI in producing a structured JSON response with specific keys and value types.
+     *
+     * @param User $user The user for whom the report is being generated, used to determine the language of the prompt.
+     *
+     * @return string The system prompt string, detailing the required output format and content expectations.
+     */
     protected function systemPrompt(User $user): string
     {
         $language = $user->locale === 'en' ? 'English' : 'French';
@@ -176,6 +198,11 @@ abstract class BaseReportGenerator
         PROMPT;
     }
 
+    /**
+     * Ensures that the AI provider is properly configured with an API key, throwing an exception if the configuration is missing or invalid. This check is performed before making any requests to the AI provider.
+     *
+     * @throws AiException If the AI provider is not configured with a valid API key.
+     */
     protected function ensureProviderConfigured(): void
     {
         if (! config('ai.providers.'.config('ai.default').'.api_key')) {

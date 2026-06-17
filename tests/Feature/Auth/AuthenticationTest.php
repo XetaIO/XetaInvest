@@ -47,11 +47,12 @@ test('users with two factor enabled are redirected to two factor challenge', fun
 test('users can not authenticate with invalid password', function () {
     $user = User::factory()->create();
 
-    $this->post(route('login.store'), [
+    $response = $this->post(route('login.store'), [
         'email' => $user->email,
         'password' => 'wrong-password',
     ]);
 
+    $response->assertSessionHasErrors(['email' => __('auth.failed')]);
     $this->assertGuest();
 });
 

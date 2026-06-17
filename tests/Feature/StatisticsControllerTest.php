@@ -88,7 +88,8 @@ test('authenticated user sees aggregated stats across all portfolios', function 
     $response = $this->actingAs($this->user)->get(route('statistics'));
 
     $response->assertOk()
-        ->assertInertia(fn ($page) => $page
+        ->assertInertia(
+            fn ($page) => $page
             ->component('statistics')
             ->where('scope', 'all')
             ->where('stats.scope.type', 'all')
@@ -105,7 +106,8 @@ test('user can filter stats by a specific portfolio', function () {
     $this->actingAs($this->user)
         ->get(route('statistics', ['portfolio' => $this->portfolioA->id]))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page
+        ->assertInertia(
+            fn ($page) => $page
             ->where('scope', (string) $this->portfolioA->id)
             ->where('stats.scope.type', 'portfolio')
             ->where('stats.scope.id', $this->portfolioA->id)
@@ -146,7 +148,8 @@ test('quote_error is exposed when finance-query fails', function () {
 
     $this->actingAs($this->user)->get(route('statistics'))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page
+        ->assertInertia(
+            fn ($page) => $page
             ->where('stats.quote_error', fn ($value) => is_string($value) && $value !== '')
         );
 });
@@ -156,7 +159,8 @@ test('history contains the current KPI point when no snapshots exist', function 
 
     $this->actingAs($this->user)->get(route('statistics'))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page
+        ->assertInertia(
+            fn ($page) => $page
             ->has('stats.history', 1)
             ->where('stats.history.0.date', today()->toDateString())
             ->where('stats.history.0.value_eur', 1525)
@@ -191,7 +195,8 @@ test('history exposes snapshot points for a single portfolio scope', function ()
     $this->actingAs($this->user)
         ->get(route('statistics', ['portfolio' => $this->portfolioA->id]))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page
+        ->assertInertia(
+            fn ($page) => $page
             ->has('stats.history', 3)
             ->where('stats.history.0.date', '2026-05-20')
             ->where('stats.history.0.value_eur', 1100)
@@ -232,7 +237,8 @@ test('history aggregates snapshots across all user portfolios for all scope', fu
     $this->actingAs($this->user)
         ->get(route('statistics'))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page
+        ->assertInertia(
+            fn ($page) => $page
             ->has('stats.history', 2)
             ->where('stats.history.0.date', '2026-05-21')
             ->where('stats.history.0.value_eur', 1700)
@@ -258,7 +264,8 @@ test('current KPI point replaces a stale snapshot captured today', function () {
     $this->actingAs($this->user)
         ->get(route('statistics', ['portfolio' => $this->portfolioA->id]))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page
+        ->assertInertia(
+            fn ($page) => $page
             ->has('stats.history', 1)
             ->where('stats.history.0.date', today()->toDateString())
             ->where('stats.history.0.value_eur', 1350)

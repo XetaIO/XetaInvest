@@ -18,6 +18,13 @@ use Illuminate\Http\Request;
 
 class AiChatController extends Controller
 {
+    /**
+     * Retrieve a list of AI chat sessions for the authenticated user.
+     *
+     * @param Request $request The incoming HTTP request.
+     *
+     * @return JsonResponse A JSON response containing the list of chat sessions.
+     */
     public function sessions(Request $request): JsonResponse
     {
         $sessions = AiChatSession::query()
@@ -30,6 +37,14 @@ class AiChatController extends Controller
         return response()->json(['data' => $sessions]);
     }
 
+    /**
+     * Create a new AI chat session for the authenticated user.
+     *
+     * @param CreateChatSessionRequest $request The validated request containing the title for the new chat session.
+     * @param CreateChatSession $action The action responsible for creating the chat session.
+     *
+     * @return JsonResponse A JSON response containing the newly created chat session.
+     */
     public function storeSession(
         CreateChatSessionRequest $request,
         CreateChatSession $action,
@@ -39,6 +54,14 @@ class AiChatController extends Controller
         return response()->json(['data' => $session], 201);
     }
 
+    /**
+     * Retrieve the messages for a specific AI chat session.
+     *
+     * @param Request $request The incoming HTTP request.
+     * @param AiChatSession $session The chat session for which messages are being retrieved.
+     *
+     * @return JsonResponse A JSON response containing the list of messages for the specified chat session.
+     */
     public function messages(Request $request, AiChatSession $session): JsonResponse
     {
         $this->authorize('view', $session);
@@ -53,6 +76,15 @@ class AiChatController extends Controller
         return response()->json(['data' => $messages]);
     }
 
+    /**
+     * Send a message to the AI chat session and receive a response.
+     *
+     * @param SendChatMessageRequest $request The validated request containing the message content.
+     * @param AiChatSession $session The chat session to which the message is being sent.
+     * @param AiChatService $service The service responsible for handling AI chat interactions.
+     *
+     * @return JsonResponse A JSON response containing the updated chat session and the assistant's response message.
+     */
     public function sendMessage(SendChatMessageRequest $request, AiChatSession $session, AiChatService $service): JsonResponse
     {
         $this->authorize('update', $session);
@@ -77,6 +109,15 @@ class AiChatController extends Controller
         ]);
     }
 
+    /**
+     * Delete a specific AI chat session for the authenticated user.
+     *
+     * @param Request $request The incoming HTTP request.
+     * @param AiChatSession $session The chat session to be deleted.
+     * @param DeleteChatSession $action The action responsible for deleting the chat session.
+     *
+     * @return JsonResponse A JSON response indicating the success of the deletion operation.
+     */
     public function destroySession(
         Request $request,
         AiChatSession $session,

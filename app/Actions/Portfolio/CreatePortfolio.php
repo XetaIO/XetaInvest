@@ -11,7 +11,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreatePortfolio
 {
-    /** @param array<string, mixed> $data */
+    /**
+     * Creates a new portfolio for the given user with the provided data. It ensures that the user does not exceed the maximum allowed portfolios and handles the default portfolio logic.
+     *
+     * @param User $user The user for whom the portfolio is being created.
+     * @param array $data The data for the new portfolio, including its name and whether it should be the default portfolio.
+     *
+     * @return Portfolio The newly created portfolio instance.
+     */
     public function handle(User $user, array $data): Portfolio
     {
         return DB::transaction(function () use ($user, $data): Portfolio {

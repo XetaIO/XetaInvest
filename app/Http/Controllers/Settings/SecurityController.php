@@ -16,7 +16,11 @@ use Laravel\Fortify\Features;
 class SecurityController extends Controller
 {
     /**
-     * Show the user's security settings page.
+     * Show the form for managing the user's security settings, including two-factor authentication and passkeys.
+     *
+     * @param TwoFactorAuthenticationRequest $request The validated request for two-factor authentication.
+     *
+     * @return Response An Inertia response rendering the security settings page with necessary data.
      */
     public function edit(TwoFactorAuthenticationRequest $request): Response
     {
@@ -54,6 +58,10 @@ class SecurityController extends Controller
 
     /**
      * Update the user's password.
+     *
+     * @param PasswordUpdateRequest $request The validated request containing the new password.
+     *
+     * @return RedirectResponse A redirect response back to the security settings page.
      */
     public function update(PasswordUpdateRequest $request): RedirectResponse
     {

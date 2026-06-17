@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\Watchlist\AddWatchlistItem;
-use App\Actions\Watchlist\RemoveWatchlistItem;
-use App\Http\Requests\Watchlist\StoreWatchlistItemRequest;
+use App\Actions\WatchlistItem\AddWatchlistItem;
+use App\Actions\WatchlistItem\DeleteWatchlistItem;
+use App\Http\Requests\WatchlistItem\StoreWatchlistItemRequest;
 use App\Models\Watchlist;
 use App\Models\WatchlistItem;
 use App\Models\WatchlistSection;
@@ -16,6 +16,15 @@ use Inertia\Inertia;
 
 class WatchlistItemController extends Controller
 {
+    /**
+     * Store a newly created watchlist item in storage.
+     *
+     * @param StoreWatchlistItemRequest $request The validated request containing the watchlist item details.
+     * @param Watchlist $watchlist The watchlist to which the item is to be added.
+     * @param AddWatchlistItem $action The action to add the watchlist item.
+     *
+     * @return RedirectResponse A redirect response back to the previous page with a success or error message.
+     */
     public function store(
         StoreWatchlistItemRequest $request,
         Watchlist $watchlist,
@@ -35,10 +44,19 @@ class WatchlistItemController extends Controller
         return back();
     }
 
+    /**
+     * Remove the specified watchlist item from storage.
+     *
+     * @param Request $request The incoming HTTP request.
+     * @param WatchlistItem $item The watchlist item to be deleted.
+     * @param DeleteWatchlistItem $action The action to delete the watchlist item.
+     *
+     * @return RedirectResponse A redirect response to the previous page with a success message.
+     */
     public function destroy(
         Request $request,
         WatchlistItem $item,
-        RemoveWatchlistItem $action,
+        DeleteWatchlistItem $action,
     ): RedirectResponse {
         $this->authorize('delete', $item);
         $action->handle($item);

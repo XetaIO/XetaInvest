@@ -23,6 +23,13 @@ class SetLocale
         return $next($request);
     }
 
+    /**
+     * Resolve the locale to be used for the current request.
+     *
+     * @param Request $request The incoming HTTP request.
+     *
+     * @return string The resolved locale.
+     */
     private function resolveLocale(Request $request): string
     {
         // 1. Authenticated user preference

@@ -14,6 +14,14 @@ use Illuminate\Support\Str;
 
 class QuotesController extends Controller
 {
+    /**
+     * Handle the incoming request to fetch quotes for specified symbols.
+     *
+     * @param QuotesRequest $request The validated request containing the symbols and optional refresh flag.
+     * @param FinanceQueryClient $client The client responsible for fetching quotes from the finance API.
+     *
+     * @return JsonResponse A JSON response containing the fetched quotes or an error message if the provider fails.
+     */
     public function __invoke(QuotesRequest $request, FinanceQueryClient $client): JsonResponse
     {
         $validated = $request->validated();

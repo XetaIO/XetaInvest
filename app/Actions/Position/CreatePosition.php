@@ -19,14 +19,19 @@ class CreatePosition
     }
 
     /**
-     * @param  array<string, mixed>  $data
-     * @return Position|null Returns null when the symbol cannot be resolved
+     * Creates a new position in the specified portfolio based on the provided data. It fetches the latest quote for the instrument, creates or retrieves the instrument, and records the associated transactions.
+     *
+     * @param Portfolio $portfolio The portfolio in which to create the position.
+     * @param array $data The data for creating the position, including symbol and transaction lines.
+     *
+     * @return Position|null The newly created position instance, or null if the instrument quote could not be retrieved.
      */
     public function handle(Portfolio $portfolio, array $data): ?Position
     {
         $symbol = strtoupper(trim((string) $data['symbol']));
 
         try {
+            // Fetch the latest quote for the instrument using the FinanceQueryClient
             $quote = $this->client->quote($symbol);
         } catch (FinanceQueryException) {
             $quote = null;
@@ -37,6 +42,7 @@ class CreatePosition
         }
 
         return DB::transaction(function () use ($portfolio, $symbol, $quote, $data): Position {
+            // Create or retrieve the instrument based on the symbol and quote data
             $instrument = Instrument::firstOrCreate(
                 ['symbol' => $symbol],
                 [
@@ -48,11 +54,13 @@ class CreatePosition
                 ],
             );
 
+            // Create or retrieve the position for the specified portfolio and instrument
             $position = Position::firstOrCreate([
                 'portfolio_id' => $portfolio->id,
                 'instrument_id' => $instrument->id,
             ]);
 
+            // Record the associated transactions for the position based on the provided lines
             foreach ($data['lines'] as $line) {
                 $position->transactions()->create([
                     'type' => TransactionType::Buy,

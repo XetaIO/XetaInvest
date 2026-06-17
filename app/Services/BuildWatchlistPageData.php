@@ -15,7 +15,14 @@ class BuildWatchlistPageData
     {
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * Build the data structure for the watchlist page, including watchlists, sections, items, and positions.
+     *
+     * @param User $user The user for whom to build the watchlist page data.
+     * @param string $activeId The ID of the active watchlist to be highlighted.
+     *
+     * @return array The structured data for the watchlist page.
+     */
     public function build(User $user, string $activeId): array
     {
         $watchlists = $user->watchlists()
@@ -76,8 +83,12 @@ class BuildWatchlistPageData
     }
 
     /**
-     * @param  array<int, string>  $symbols
-     * @return array<string, array{avg_price: float, quantity: float, currency: string|null}>
+     * Retrieve the positions for the given user and symbols, aggregating invested amounts and quantities.
+     *
+     * @param int $userId The ID of the user for whom to retrieve positions.
+     * @param array<string> $symbols The list of symbols for which to retrieve positions.
+     *
+     * @return array<string, array{avg_price: float, quantity: float, currency: string|null}> An associative array where keys are symbols and values contain average price, quantity, and currency.
      */
     private function positionsBySymbol(int $userId, array $symbols): array
     {

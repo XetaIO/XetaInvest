@@ -9,6 +9,133 @@
         "repository": "Repository",
         "documentation": "Documentation"
     },
+    "landing": {
+        "meta": {
+            "title": "Take control of your wealth",
+            "description": "XetaInvest brings portfolio tracking, statistics, watchlists, budgeting and AI analysis together in an application you control."
+        },
+        "nav": {
+            "main": "Main navigation",
+            "home": "Back to the top",
+            "features": "Features",
+            "ai": "AI Assistant",
+            "planning": "Budget & projection",
+            "security": "Hosting",
+            "open_menu": "Open menu",
+            "close_menu": "Close menu"
+        },
+        "cta": {
+            "create_account": "Create an account",
+            "install_project": "Install project",
+            "discover": "Discover XetaInvest"
+        },
+        "hero": {
+            "badge": "Your wealth, one interface",
+            "title_start": "Manage your entire wealth",
+            "title_accent": "from a single dashboard.",
+            "description": "Track your portfolios, analyse performance, plan investments and explore your data with an AI assistant designed for individual investors."
+        },
+        "assets": {
+            "stocks": "Stocks",
+            "etf": "ETF",
+            "crypto": "Crypto",
+            "indices": "Indices",
+            "currencies": "Currencies"
+        },
+        "sections": {
+            "portfolio": {
+                "eyebrow": "Portfolios",
+                "title_start": "Every investment,",
+                "title_accent": "tracked with precision.",
+                "description": "Centralise multiple portfolios and keep an accurate history of buys, sells and dividends without losing sight of your strategy.",
+                "feature_1": "Multiple portfolios and a default portfolio",
+                "feature_2": "Positions, average cost and realised or unrealised P&L",
+                "feature_3": "Complete transaction history"
+            },
+            "statistics": {
+                "eyebrow": "Statistics",
+                "title_start": "Understand exactly",
+                "title_accent": "what drives performance.",
+                "description": "Move from total value to every exposure with readable charts and allocations designed to support decisions.",
+                "feature_1": "Value and invested capital over time",
+                "feature_2": "Allocation by asset, currency, type and portfolio",
+                "feature_3": "Gainers, losers and positions map"
+            },
+            "ai": {
+                "eyebrow": "AI Assistant",
+                "title_start": "Ask questions,",
+                "title_accent": "your data responds.",
+                "description": "The assistant uses your portfolios, watchlists and market data to provide contextual answers and structured reports.",
+                "feature_1": "Contextual conversations about your investments",
+                "feature_2": "Portfolio, global and watchlist reports",
+                "feature_3": "Highlights, risks and points to consider"
+            },
+            "watchlist": {
+                "eyebrow": "Watchlists",
+                "title_start": "Watch the market,",
+                "title_accent": "without losing direction.",
+                "description": "Organise assets that matter to you, compare their paths and explore prices with an advanced chart.",
+                "feature_1": "Reorderable lists and sections",
+                "feature_2": "Prices, changes and comparisons",
+                "feature_3": "Candlesticks, lines and multiple ranges"
+            },
+            "planning": {
+                "eyebrow": "Budget & projection",
+                "title_start": "Connect your savings",
+                "title_accent": "to your goals.",
+                "description": "Structure income and expenses, identify your investment capacity and project capital growth across several scenarios.",
+                "feature_1": "Monthly budget and cash flow",
+                "feature_2": "Amount available to invest or save",
+                "feature_3": "Optimistic, median and pessimistic projections"
+            },
+            "security": {
+                "eyebrow": "Your instance",
+                "title_start": "Keep your data",
+                "title_accent": "under your control.",
+                "description": "Install XetaInvest on your computer or your own server and choose the environment that hosts your financial data.",
+                "feature_1": "Local or Linux server installation",
+                "feature_2": "PostgreSQL, access policies and secure sessions",
+                "feature_3": "Two-factor authentication and passkeys"
+            }
+        },
+        "final": {
+            "eyebrow": "Get started",
+            "title": "One place to track, understand and plan your investments.",
+            "description": "Deploy your XetaInvest instance and regain a clear view of your wealth, budget and decisions."
+        },
+        "mockup": {
+            "portfolio": "Active portfolio",
+            "long_term": "Long term",
+            "live": "Updated prices",
+            "transactions": "Transaction journal",
+            "complete_history": "A clear, line-by-line history",
+            "buy": "Buy",
+            "dividend": "Dividend",
+            "sell": "Sell",
+            "portfolio_value": "Value of all portfolios",
+            "performance_chart": "Portfolio performance chart",
+            "stocks": "Stocks",
+            "assistant": "AI Assistant",
+            "ai_question": "Analyse my portfolio diversification and its main risks.",
+            "ai_answer": "Your portfolio is growing, but its exposure to US markets remains dominant. Diversification by currency and geographic region could be strengthened.",
+            "risk": "Risk",
+            "moderate": "Moderate",
+            "diversification": "Diversification",
+            "ask_question": "Ask a question about your investments...",
+            "advanced_chart": "Advanced chart",
+            "watchlist": "Watchlist",
+            "monthly_budget": "Monthly budget",
+            "projection": "Capital projection",
+            "projection_chart": "Capital growth projection",
+            "migrations_done": "migrations completed",
+            "assets_built": "assets built",
+            "queue_active": "worker active",
+            "enabled": "Enabled",
+            "policies": "Policies",
+            "active": "Active",
+            "your_instance": "Your instance"
+        }
+    },
     "auth": {
         "login": "Log in",
         "logout": "Log out",
@@ -26,7 +153,58 @@
         "send_reset_link": "Send reset link",
         "back_to_login": "Back to login",
         "name": "Name",
-        "name_placeholder": "Full name"
+        "name_placeholder": "Full name",
+        "login_title": "Log in to your account",
+        "login_description": "Enter your email and password below to log in.",
+        "register_title": "Create an account",
+        "register_description": "Enter your details below to create your account.",
+        "registration_closed": "Registration is currently closed.",
+        "forgot_password_title": "Forgot password",
+        "forgot_password_description": "Enter your email to receive a password reset link.",
+        "email_password_reset_link": "Email password reset link",
+        "or_return_to": "Or, return to",
+        "reset_password_description": "Please enter your new password below.",
+        "confirm_password_title": "Confirm password",
+        "confirm_password_description": "This is a secure area of the application. Please confirm your password before continuing.",
+        "two_factor_title": "Two-factor authentication",
+        "two_factor_authentication_code": "Authentication code",
+        "two_factor_authentication_description": "Enter the authentication code provided by your authenticator application.",
+        "two_factor_recovery_code": "Recovery code",
+        "two_factor_recovery_description": "Please confirm access to your account by entering one of your emergency recovery codes.",
+        "two_factor_recovery_placeholder": "Enter recovery code",
+        "two_factor_use_authentication_code": "log in using an authentication code",
+        "two_factor_use_recovery_code": "log in using a recovery code",
+        "or_you_can": "or you can",
+        "continue": "Continue",
+        "email_verification_title": "Email verification",
+        "email_verification_description": "Please verify your email address by clicking on the link we just emailed to you.",
+        "verification_link_sent": "A new verification link has been sent to the email address you provided during registration.",
+        "resend_verification_email": "Resend verification email"
+    },
+    "passkeys": {
+        "title": "Passkeys",
+        "description": "Manage your passkeys for passwordless sign-in.",
+        "sign_in": "Sign in with a passkey",
+        "authenticating": "Authenticating...",
+        "or_continue_with_email": "Or continue with email",
+        "confirm_with_passkey": "Confirm with passkey",
+        "confirming": "Confirming...",
+        "or_confirm_with_password": "Or confirm with password",
+        "not_supported": "Passkeys are not supported in this browser.",
+        "add": "Add passkey",
+        "register": "Register passkey",
+        "registering": "Registering...",
+        "name": "Passkey name",
+        "name_placeholder": "e.g., MacBook Pro, iPhone",
+        "name_help": "A name helps you identify this passkey later.",
+        "empty_title": "No passkeys yet",
+        "empty_description": "Add a passkey to sign in without a password.",
+        "added": "Added {{date}}",
+        "last_used": "Last used {{date}}",
+        "remove": "Remove",
+        "remove_title": "Remove passkey",
+        "remove_description": "Are you sure you want to remove the “{{name}}” passkey? You will no longer be able to use it to sign in.",
+        "removing": "Removing..."
     },
     "user_menu": {
         "settings": "Settings",

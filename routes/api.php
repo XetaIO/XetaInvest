@@ -2,5 +2,5 @@
 
 declare(strict_types=1);
 
-// API routes are defined in routes/web.php so they share the session guard
-// used by the Inertia SPA (Sanctum stateful via session cookies).
+// Session-authenticated JSON routes are defined in routes/web.php so they
+// share the same web guard and cookies as the Inertia application.

@@ -71,7 +71,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder="Password"
+                                    placeholder={t('auth.password')}
                                 />
                                 <InputError message={errors.password} />
                             </div>
@@ -106,7 +106,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                     {t('auth.sign_up')}
                                 </TextLink>
                             ) : (
-                                <span>Registration is currently closed.</span>
+                                <span>{t('auth.registration_closed')}</span>
                             )}
                         </div>
                     </>
@@ -123,6 +123,6 @@ export default function Login({ status, canResetPassword }: Props) {
 }
 
 Login.layout = {
-    title: 'Log in to your account',
-    description: 'Enter your email and password below to log in',
+    title: 'auth.login_title',
+    description: 'auth.login_description',
 };

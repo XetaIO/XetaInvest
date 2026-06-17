@@ -9,6 +9,13 @@ use Illuminate\Support\Facades\DB;
 
 class DeleteWatchlist
 {
+    /**
+     * Delete the specified watchlist and adjusts the positions of other watchlists for the same user accordingly.
+     *
+     * @param Watchlist $watchlist The watchlist to be removed.
+     *
+     * @return void
+     */
     public function handle(Watchlist $watchlist): void
     {
         DB::transaction(function () use ($watchlist): void {

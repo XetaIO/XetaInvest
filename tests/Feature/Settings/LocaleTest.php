@@ -26,10 +26,12 @@ describe('SetLocale middleware', function (): void {
 });
 
 describe('LocaleController', function (): void {
-    test('guest cannot update locale', function (): void {
+    test('guest can switch locale through a persistent cookie', function (): void {
         $response = $this->patch('/settings/locale', ['locale' => 'en']);
 
-        $response->assertRedirect('/login');
+        $response
+            ->assertRedirect()
+            ->assertPlainCookie('locale', 'en');
     });
 
     test('authenticated user can switch to English', function (): void {
@@ -54,7 +56,18 @@ describe('LocaleController', function (): void {
         $response = $this->actingAs($this->user)
             ->patch('/settings/locale', ['locale' => 'de']);
 
-        $response->assertRedirect();
+        $response
+            ->assertRedirect()
+            ->assertSessionHasErrors('locale');
         expect($this->user->fresh()->locale)->toBe('fr');
+    });
+
+    test('guest cannot persist an unsupported locale', function (): void {
+        $response = $this->patch('/settings/locale', ['locale' => 'de']);
+
+        $response
+            ->assertRedirect()
+            ->assertSessionHasErrors('locale')
+            ->assertCookieMissing('locale');
     });
 });

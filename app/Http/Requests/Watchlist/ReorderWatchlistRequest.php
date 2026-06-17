@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
-class ReorderWatchlistLayoutRequest extends FormRequest
+class ReorderWatchlistRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -37,6 +37,13 @@ class ReorderWatchlistLayoutRequest extends FormRequest
         ];
     }
 
+    /**
+     * Configure the validator instance to perform additional checks after the initial validation rules have been applied. This method ensures that the provided sections and item IDs match the existing structure of the watchlist, preventing inconsistencies in the layout.
+     *
+     * @param Validator $validator
+     *
+     * @return void
+     */
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {

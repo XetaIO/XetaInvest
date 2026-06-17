@@ -14,7 +14,11 @@ use Illuminate\Support\Facades\DB;
 class AiUsageLogger
 {
     /**
-     * Throws if the daily token quota for the user or globally is exceeded.
+     * Ensure that the user is within their daily quota limits. If the user has exceeded their quota, an exception will be thrown.
+     *
+     * @param User|null $user The user for whom to check the quota. If null, only global quotas are checked.
+     *
+     * @throws AiQuotaExceededException If the user has exceeded their daily quota.
      */
     public function ensureWithinQuota(?User $user): void
     {
@@ -22,6 +26,16 @@ class AiUsageLogger
         $this->release($reservation);
     }
 
+    /**
+     * Reserve a specified number of tokens for the user, ensuring that the reservation does not exceed the user's daily quota limits.
+     *
+     * @param User|null $user The user for whom to reserve tokens. If null, only global quotas are considered.
+     * @param int $tokens The number of tokens to reserve.
+     *
+     * @return AiQuotaReservation An object representing the reserved quota.
+     *
+     * @throws AiQuotaExceededException If the reservation exceeds the user's daily quota limits.
+     */
     public function reserve(?User $user, int $tokens): AiQuotaReservation
     {
         $date = now()->toDateString();
@@ -81,7 +95,14 @@ class AiUsageLogger
     }
 
     /**
-     * Persist a usage record and return the estimated cost.
+     * Record the usage of AI tokens for a specific user and purpose, along with the associated response and any reserved quota.
+     *
+     * @param User|null $user The user for whom the usage is being recorded. If null, only global usage is recorded.
+     * @param string $purpose The purpose of the AI usage (e.g., 'chat', 'report').
+     * @param AiResponse $response The response from the AI provider, containing token counts and other details.
+     * @param AiQuotaReservation|null $reservation An optional reservation object representing previously reserved quota.
+     *
+     * @return float The estimated cost of the AI usage based on the response.
      */
     public function record(
         ?User $user,
@@ -119,6 +140,13 @@ class AiUsageLogger
         return $cost;
     }
 
+    /**
+     * Release a previously reserved quota, making the tokens available for use again.
+     *
+     * @param AiQuotaReservation $reservation The reservation to release.
+     *
+     * @return void
+     */
     public function release(AiQuotaReservation $reservation): void
     {
         if ($reservation->scopeKeys === [] || $reservation->tokens === 0) {
@@ -131,6 +159,13 @@ class AiUsageLogger
             ->decrement('reserved_tokens', $reservation->tokens);
     }
 
+    /**
+     * Estimate the cost of the AI usage based on the response's token counts and the configured rates for the provider.
+     *
+     * @param AiResponse $response The response from the AI provider, containing token counts and other details.
+     *
+     * @return float The estimated cost of the AI usage.
+     */
     public function estimateCost(AiResponse $response): float
     {
         $rates = config('ai.providers.'.$response->provider.'.cost_per_1k');
@@ -145,7 +180,13 @@ class AiUsageLogger
         return round($prompt + $completion, 6);
     }
 
-    /** @return array<string, int> */
+    /**
+     * Get the daily quota limits for the user and globally. This method retrieves the configured limits from the application settings.
+     *
+     * @param User|null $user The user for whom to retrieve the quota limits. If null, only global limits are returned.
+     *
+     * @return array<string, int> An associative array where keys are scope identifiers (e.g., 'global', 'user:{id}') and values are the corresponding token limits.
+     */
     private function quotaLimits(?User $user): array
     {
         $limits = [];

@@ -17,6 +17,15 @@ use Inertia\Inertia;
 
 class TransactionController extends Controller
 {
+    /**
+     * Store a newly created transaction in storage.
+     *
+     * @param StoreTransactionRequest $request The validated request containing the new transaction data.
+     * @param Position $position The position model to which the transaction will be added.
+     * @param CreateTransaction $action The action to create a new transaction.
+     *
+     * @return RedirectResponse A redirect response back to the previous page with a success message or error.
+     */
     public function store(
         StoreTransactionRequest $request,
         Position $position,
@@ -29,6 +38,15 @@ class TransactionController extends Controller
         return back();
     }
 
+    /**
+     * Update the specified transaction in storage.
+     *
+     * @param UpdateTransactionRequest $request The validated request containing the updated transaction data.
+     * @param Transaction $transaction The transaction model to be updated.
+     * @param UpdateTransaction $action The action to update the transaction.
+     *
+     * @return RedirectResponse A redirect response back to the previous page with a success message or error.
+     */
     public function update(
         UpdateTransactionRequest $request,
         Transaction $transaction,
@@ -41,6 +59,15 @@ class TransactionController extends Controller
         return back();
     }
 
+    /**
+     * Remove the specified transaction from storage.
+     *
+     * @param Request $request The incoming request.
+     * @param Transaction $transaction The transaction model to be deleted.
+     * @param DeleteTransaction $action The action to delete the transaction.
+     *
+     * @return RedirectResponse A redirect response back to the previous page with a success message or error.
+     */
     public function destroy(
         Request $request,
         Transaction $transaction,

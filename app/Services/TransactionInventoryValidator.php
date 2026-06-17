@@ -10,6 +10,13 @@ use Illuminate\Validation\ValidationException;
 
 class TransactionInventoryValidator
 {
+    /**
+     * Validates the transaction inventory for a given position.
+     *
+     * @param Position $position The position for which to validate the transaction inventory.
+     *
+     * @throws ValidationException If the transaction inventory is invalid (e.g., insufficient quantity).
+     */
     public function validate(Position $position): void
     {
         $quantity = 0.0;

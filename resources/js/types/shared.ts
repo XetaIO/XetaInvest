@@ -4,7 +4,7 @@ export type SharedData = {
     name: string;
     locale: 'fr' | 'en';
     auth: {
-        user: User;
+        user: User | null;
     };
     sidebarOpen: boolean;
     registrationEnabled: boolean;

@@ -1,5 +1,6 @@
+@php($isLandingPage = ($page['component'] ?? null) === 'welcome')
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['dark' => $isLandingPage || ($appearance ?? 'system') == 'dark'])>
 
     <head>
         <meta charset="utf-8">
@@ -9,6 +10,12 @@
         <script>
             (function () {
                 const appearance = '{{ $appearance ?? "system" }}';
+                const isLandingPage = @js($isLandingPage);
+
+                if (isLandingPage) {
+                    document.documentElement.classList.add('dark');
+                    return;
+                }
 
                 if (appearance === 'system') {
                     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -23,11 +30,11 @@
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html {
-                background-color: oklch(1 0 0);
+                background-color: {{ $isLandingPage ? '#050806' : 'oklch(1 0 0)' }};
             }
 
             html.dark {
-                background-color: oklch(0.145 0 0);
+                background-color: {{ $isLandingPage ? '#050806' : 'oklch(0.145 0 0)' }};
             }
         </style>
 

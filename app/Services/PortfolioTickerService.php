@@ -35,9 +35,12 @@ class PortfolioTickerService
     }
 
     /**
-     * Build the ticker payload for a user. Returns null on API failure or when no symbols are available.
+     * Builds the portfolio ticker data for a given user, including their portfolio symbols and market indices if necessary.
+     *
+     * @param User $user The user for whom to build the ticker.
      *
      * @return array<int, array{symbol: string, name: string, currency: string, price: float, change: float, change_percent: float, sparkline: array<int, float>}>|null
+     *         An array of ticker items or null if no data could be fetched.
      */
     public function buildFor(User $user): ?array
     {
@@ -109,9 +112,11 @@ class PortfolioTickerService
     }
 
     /**
-     * Unique uppercase symbols across all portfolios of the user.
+     * Collects all unique symbols from the user's portfolios, ensuring they are uppercase and trimmed.
      *
-     * @return array<int, string>
+     * @param User $user The user whose portfolio symbols are to be collected.
+     *
+     * @return array An array of unique, uppercase symbols from the user's portfolios.
      */
     protected function collectUserSymbols(User $user): array
     {
@@ -127,10 +132,11 @@ class PortfolioTickerService
     }
 
     /**
-     * Resolve display names for the given symbols from the instruments table.
+     * Resolves the names of instruments based on their symbols. If a symbol does not have a corresponding name in the database, it will be omitted from the result.
      *
-     * @param  array<int, string>  $symbols
-     * @return array<string, string>
+     * @param array $symbols An array of symbols for which to resolve names.
+     *
+     * @return array An associative array mapping symbols to their corresponding names.
      */
     protected function resolveNames(array $symbols): array
     {

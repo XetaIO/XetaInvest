@@ -24,7 +24,13 @@ class AiChatService
     }
 
     /**
-     * Process a user message in a chat session and return the assistant reply (the last AiChatMessage).
+     * Sends a message from the user to the AI chat session, processes the response, and handles any tool calls made by the AI.
+     *
+     * @param User $user The user sending the message.
+     * @param AiChatSession $session The chat session to which the message is sent.
+     * @param string $content The content of the user's message.
+     *
+     * @return AiChatMessage The assistant's response message.
      */
     public function sendMessage(User $user, AiChatSession $session, string $content): AiChatMessage
     {
@@ -133,7 +139,12 @@ class AiChatService
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * Builds the message history for the AI chat session, including system prompts and previous messages.
+     *
+     * @param User $user The user associated with the chat session.
+     * @param AiChatSession $session The chat session for which to build the message history.
+     *
+     * @return array An array of messages formatted for the AI model, including system prompts and previous messages.
      */
     protected function buildMessageHistory(User $user, AiChatSession $session): array
     {
@@ -182,8 +193,13 @@ class AiChatService
     }
 
     /**
-     * @param  array<string, mixed>  $args
-     * @return array<string, mixed>
+     * Executes a tool call made by the AI, handling any exceptions and logging errors.
+     *
+     * @param User $user The user for whom the tool is being executed.
+     * @param string $name The name of the tool to execute.
+     * @param array $args The arguments to pass to the tool.
+     *
+     * @return array The result of the tool execution, or an error message if the tool is unknown or fails.
      */
     protected function executeTool(User $user, string $name, array $args): array
     {
@@ -200,6 +216,13 @@ class AiChatService
         }
     }
 
+    /**
+     * Generates the system prompt for the AI chat session based on the user's locale.
+     *
+     * @param User $user The user for whom to generate the system prompt.
+     *
+     * @return string The system prompt string, tailored to the user's language preference.
+     */
     protected function systemPrompt(User $user): string
     {
         $language = $user->locale === 'en' ? 'English' : 'French';

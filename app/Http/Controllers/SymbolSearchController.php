@@ -12,6 +12,14 @@ use Illuminate\Support\Facades\Log;
 
 class SymbolSearchController extends Controller
 {
+    /**
+     * Handle the symbol search request and return matching symbols.
+     *
+     * @param SearchSymbolsRequest $request The validated request containing the search query.
+     * @param FinanceQueryClient $client Service to perform the symbol search.
+     *
+     * @return JsonResponse A JSON response containing the search results.
+     */
     public function __invoke(SearchSymbolsRequest $request, FinanceQueryClient $client): JsonResponse
     {
         $query = trim((string) $request->validated('q', ''));

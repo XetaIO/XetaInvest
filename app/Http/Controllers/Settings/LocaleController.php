@@ -11,11 +11,17 @@ use Illuminate\Support\Facades\Cookie;
 
 class LocaleController extends Controller
 {
+    /**
+     * Update the user's preferred locale and set a cookie for future requests.
+     *
+     * @param  UpdateLocaleRequest  $request  The validated request containing the new locale.
+     * @return RedirectResponse A redirect response back to the previous page.
+     */
     public function update(UpdateLocaleRequest $request): RedirectResponse
     {
         $locale = $request->validated('locale');
 
-        $request->user()->update(['locale' => $locale]);
+        $request->user()?->update(['locale' => $locale]);
 
         Cookie::queue('locale', $locale, 60 * 24 * 365);
 

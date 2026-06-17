@@ -13,9 +13,6 @@ class StorePositionRequest extends FormRequest
         return $this->user()?->can('update', $this->route('portfolio')) ?? false;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [

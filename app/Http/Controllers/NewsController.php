@@ -12,6 +12,14 @@ use Inertia\Response;
 
 class NewsController extends Controller
 {
+    /**
+     * Display the news page with aggregated news articles based on the user's preferences and portfolio.
+     *
+     * @param Request $request The incoming HTTP request.
+     * @param NewsAggregator $aggregator Service to aggregate news articles for the user.
+     *
+     * @return Response An Inertia response rendering the news page with aggregated articles.
+     */
     public function show(Request $request, NewsAggregator $aggregator): Response
     {
         $user = $request->user();

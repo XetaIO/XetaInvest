@@ -15,6 +15,13 @@ class DeleteTransaction
     {
     }
 
+    /**
+     * Deletes the specified transaction and validates the associated position's inventory. It ensures that the position is locked for update during the deletion process to maintain data integrity.
+     *
+     * @param Transaction $transaction The transaction to be deleted.
+     *
+     * @return void
+     */
     public function handle(Transaction $transaction): void
     {
         DB::transaction(function () use ($transaction): void {

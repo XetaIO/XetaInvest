@@ -19,7 +19,12 @@ class PortfolioSnapshotRecorder
     }
 
     /**
-     * @return array{captured: int, skipped: int, failed: int}
+     * Records snapshots for all portfolios, optionally for a specific date and with a force option to bypass caching.
+     *
+     * @param CarbonInterface|null $date The date for which to record snapshots. Defaults to now if null.
+     * @param bool $force Whether to force fetching fresh data, bypassing any cached data.
+     *
+     * @return array An associative array containing counts of captured, skipped, and failed snapshots.
      */
     public function recordAllPortfolios(?CarbonInterface $date = null, bool $force = false): array
     {
@@ -54,6 +59,15 @@ class PortfolioSnapshotRecorder
         return ['captured' => $captured, 'skipped' => $skipped, 'failed' => $failed];
     }
 
+    /**
+     * Record a snapshot for a specific portfolio on a given date.
+     *
+     * @param Portfolio $portfolio The portfolio for which to record a snapshot.
+     * @param CarbonInterface $date The date for which to record the snapshot.
+     * @param bool $force Whether to force fetching fresh data, bypassing any cached data.
+     *
+     * @return PortfolioSnapshot|null The recorded snapshot or null if recording failed.
+     */
     public function recordPortfolio(Portfolio $portfolio, CarbonInterface $date, bool $force = false): ?PortfolioSnapshot
     {
         if (! $portfolio->relationLoaded('positions')) {

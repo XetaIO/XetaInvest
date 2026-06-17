@@ -11,11 +11,12 @@ use Illuminate\Support\Facades\DB;
 class SyncBudget
 {
     /**
-     * @param  array{
-     *     income: array{lines: array<int, array{name: string, amount: int}>},
-     *     investments: array{groups: array<int, array{name: string, lines: array<int, array{name: string, amount: int}>}>},
-     *     expenses: array{groups: array<int, array{name: string, lines: array<int, array{name: string, amount: int}>}>}
-     * }  $payload
+     * Synchronizes the budget with the provided payload. It deletes existing groups and lines, creates a new income group, and synchronizes investment and expense groups based on the payload.
+     *
+     * @param Budget $budget The budget instance to synchronize.
+     * @param array $payload The payload containing the budget data, including income, investments, and expenses.
+     *
+     * @return Budget|null The updated budget instance with its groups and lines, or null if the operation fails.
      */
     public function handle(Budget $budget, array $payload): Budget
     {
@@ -44,7 +45,13 @@ class SyncBudget
     }
 
     /**
-     * @param  array<int, array{name: string, lines: array<int, array{name: string, amount: int}>}>  $groups
+     * Synchronizes groups of a specific type (Investment or Expense) for the given budget. It creates new groups and their associated lines based on the provided data.
+     *
+     * @param Budget $budget The budget instance for which to synchronize groups.
+     * @param BudgetGroupType $type The type of groups to synchronize (Investment or Expense).
+     * @param array $groups The array of group data, each containing a name and an array of lines with their respective names and amounts.
+     *
+     * @return void
      */
     private function syncTypedGroups(Budget $budget, BudgetGroupType $type, array $groups): void
     {

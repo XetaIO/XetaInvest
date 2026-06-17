@@ -29,12 +29,30 @@ class SymbolPageDataBuilder
         'ytd' => ['1d', 'ytd'],
     ];
 
+    /**
+     * Default range for the chart if none is specified or if an invalid range is provided.
+     */
     public const DEFAULT_RANGE = '1mo';
 
+    /**
+     * Limit for the number of news articles to fetch for a symbol.
+     */
     public const NEWS_LIMIT = 3;
 
+    /**
+     * Limit for the number of recommendations to fetch for a symbol.
+     */
     public const RECOMMENDATIONS_LIMIT = 5;
 
+    /**
+     * Show the symbol page with quote, chart, news, and recommendations.
+     *
+     * @param Request $request The incoming HTTP request.
+     * @param string $symbol The symbol for which to display data.
+     * @param FinanceQueryClient $client The client used to fetch financial data.
+     *
+     * @return Response The Inertia response rendering the symbol page.
+     */
     public function show(Request $request, string $symbol, FinanceQueryClient $client): Response
     {
         $symbol = strtoupper(trim($symbol));
@@ -88,6 +106,15 @@ class SymbolPageDataBuilder
         ]);
     }
 
+    /**
+     * Fetches the chart points for a given symbol and range using the FinanceQueryClient.
+     *
+     * @param Request $request The incoming HTTP request.
+     * @param string $symbol The symbol for which to fetch chart points.
+     * @param FinanceQueryClient $client The client used to fetch financial data.
+     *
+     * @return array An array of chart points, each containing date, close price, and optionally open, high, low, and volume.
+     */
     public function chart(Request $request, string $symbol, FinanceQueryClient $client): JsonResponse
     {
         $symbol = strtoupper(trim($symbol));
@@ -115,7 +142,15 @@ class SymbolPageDataBuilder
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * Fetches chart points for a given symbol and range using the FinanceQueryClient.
+     *
+     * @param FinanceQueryClient $client The client used to fetch financial data.
+     * @param string $symbol The symbol for which to fetch chart points.
+     * @param string $range The range for which to fetch chart points (e.g., '1d', '5d', '1mo').
+     *
+     * @return array An array of chart points, each containing date, close price, and optionally open, high, low, and volume.
+     *
+     * @throws FinanceQueryException If there is an error fetching the chart data.
      */
     protected function fetchChartPoints(FinanceQueryClient $client, string $symbol, string $range): array
     {
@@ -161,8 +196,12 @@ class SymbolPageDataBuilder
     }
 
     /**
-     * @param  array<string, mixed>  $payload
-     * @return array<string, mixed>
+     * Normalizes the quote data for a given symbol, extracting relevant fields and ensuring consistent types.
+     *
+     * @param string $symbol The symbol for which the quote data is being normalized.
+     * @param array $payload The raw quote data fetched from the FinanceQueryClient.
+     *
+     * @return array An associative array containing normalized quote data for the symbol.
      */
     protected function normalizeQuote(string $symbol, array $payload): array
     {
@@ -287,8 +326,11 @@ class SymbolPageDataBuilder
     }
 
     /**
-     * @param  array<int, array<string, mixed>>  $rows
-     * @return array<int, array<string, mixed>>
+     * Normalizes the news articles for a given symbol, ensuring consistent structure and valid links.
+     *
+     * @param array $rows The raw news articles fetched from the FinanceQueryClient.
+     *
+     * @return array An array of normalized news articles, each containing title, link, source, image, and time.
      */
     protected function normalizeNews(array $rows): array
     {
@@ -318,8 +360,12 @@ class SymbolPageDataBuilder
     }
 
     /**
-     * @param  array<int, array{symbol: string, score: float|null}>  $recommendations
-     * @return array<int, array{symbol: string, name: string|null, score: float|null}>
+     * Enriches the recommendations for a given symbol by fetching additional details such as names from the FinanceQueryClient.
+     *
+     * @param FinanceQueryClient $client The client used to fetch financial data.
+     * @param array $recommendations The raw recommendations fetched from the FinanceQueryClient.
+     *
+     * @return array An array of enriched recommendations, each containing symbol, name, and score.
      */
     protected function enrichRecommendations(FinanceQueryClient $client, array $recommendations): array
     {
@@ -352,11 +398,25 @@ class SymbolPageDataBuilder
         }, $recommendations);
     }
 
+    /**
+     * Converts a value to a float if it is numeric, otherwise returns null.
+     *
+     * @param mixed $value The value to convert.
+     *
+     * @return float|null The converted float value or null if not numeric.
+     */
     protected function floatOrNull(mixed $value): ?float
     {
         return is_numeric($value) ? (float) $value : null;
     }
 
+    /**
+     * Converts a value to an integer if it is numeric, otherwise returns null.
+     *
+     * @param mixed $value The value to convert.
+     *
+     * @return int|null The converted integer value or null if not numeric.
+     */
     protected function intOrNull(mixed $value): ?int
     {
         return is_numeric($value) ? (int) $value : null;

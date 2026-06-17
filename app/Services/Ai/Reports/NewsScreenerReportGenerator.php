@@ -21,6 +21,11 @@ class NewsScreenerReportGenerator extends BaseReportGenerator
         parent::__construct($manager, $usage);
     }
 
+    /**
+     * Returns the type of the report being generated, which is 'news_screener' for this generator.
+     *
+     * @return string The report type as a string.
+     */
     public function type(): string
     {
         return AiReportType::NewsScreener->value;
@@ -31,11 +36,24 @@ class NewsScreenerReportGenerator extends BaseReportGenerator
         return null;
     }
 
+    /**
+     * Returns the purpose of the report, which is 'report_news_screener' for this generator.
+     *
+     * @return string The purpose of the report as a string.
+     */
     protected function purpose(): string
     {
         return 'report_news_screener';
     }
 
+    /**
+     * Builds the messages to be sent to the AI for generating the news screener report, including system and user messages with relevant context.
+     *
+     * @param User $user The user for whom the report is being generated.
+     * @param mixed $scope The scope of the report, which is not used in this generator.
+     *
+     * @return array An array of messages formatted for the AI chat.
+     */
     protected function buildMessages(User $user, mixed $scope): array
     {
         $defaults = config('ai.screener_defaults');

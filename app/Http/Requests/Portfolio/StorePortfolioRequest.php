@@ -15,9 +15,6 @@ class StorePortfolioRequest extends FormRequest
         return $this->user()->can('create', Portfolio::class);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [

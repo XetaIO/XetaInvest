@@ -4,48 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Services\PortfolioStatistics;
+use App\Services\BuildStatisticsPageData;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class StatisticsController extends Controller
 {
-    /**
-     * Display the statistics page with portfolio information and computed statistics.
-     *
-     * @param Request $request The incoming HTTP request.
-     * @param PortfolioStatistics $stats Service to compute portfolio statistics.
-     *
-     * @return Response An Inertia response rendering the statistics page with necessary data.
-     */
-    public function show(Request $request, PortfolioStatistics $stats): Response
+    public function show(Request $request, BuildStatisticsPageData $builder): Response
     {
-        $user = $request->user();
-
-        $portfolios = $user->portfolios()
-            ->orderByDesc('is_default')
-            ->orderBy('name')
-            ->get(['id', 'name', 'is_default']);
-
-        $param = (string) $request->query('portfolio', 'all');
-        $scope = 'all';
-        $portfolio = null;
-
-        if ($param !== 'all' && ctype_digit($param)) {
-            $portfolio = $user->portfolios()->whereKey((int) $param)->first();
-            if (! $portfolio) {
-                abort(404);
-            }
-            $scope = (string) $portfolio->id;
-        }
-
-        $payload = $stats->compute($user, $portfolio, $request->boolean('refresh'));
-
-        return Inertia::render('statistics', [
-            'portfolios' => $portfolios,
-            'scope' => $scope,
-            'stats' => $payload,
-        ]);
+        return Inertia::render('statistics', $builder->build($request->user(), $request));
     }
 }

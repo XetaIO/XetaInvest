@@ -49,13 +49,16 @@ app/
 ├── Concerns/                  # Shared traits
 ├── Enums/{Domain}/            # Backed PHP enums with label()
 ├── Http/
-│   ├── Controllers/           # Minimal controllers — delegate to Actions
+│   ├── Controllers/           # Minimal controllers — delegate to Actions or Build*PageData
 │   ├── Controllers/Api/       # JSON API endpoints
 │   ├── Requests/{Domain}/     # Form Requests (validation + authorize via Policy)
 │   └── Middleware/            # SetLocale, etc.
-├── Models/                    # Eloquent models
+├── Models/                    # Eloquent models (scopes such as AiReport::todayFor)
 ├── Policies/                  # Authorization (one Policy per model)
 └── Services/                  # Business logic, calculators, external API clients
+    ├── Build*PageData.php     # Inertia page payload builders (return array)
+    ├── PortfolioSelector.php  # Portfolio list + scope resolution
+    ├── PortfolioMarketDataFetcher.php
     └── Ai/                    # AI layer: Providers, Chat, Reports, Tools
 ```
 
@@ -117,19 +120,39 @@ resources/js/
 
 ### Controllers
 ```php
-// ✅ Minimal — delegates to an Action
-public function store(StorePortfolioRequest $request): RedirectResponse
+// ✅ Minimal — delegates to an Action via DI
+public function store(StorePortfolioRequest $request, CreatePortfolio $action): RedirectResponse
 {
-    (new CreatePortfolio)->handle($request->user(), $request->validated());
+    $action->handle($request->user(), $request->validated());
     return back();
 }
+```
 
-// ❌ Avoid — business logic inside the controller
-public function store(Request $request): RedirectResponse
+### Page data builders (`Build*PageData`)
+
+Read routes assemble Inertia props through dedicated builders in `app/Services/`:
+
+| Builder | Page |
+|---|---|
+| `BuildDashboardPageData` | dashboard |
+| `BuildStatisticsPageData` | statistics |
+| `BuildWatchlistPageData` | watchlist |
+| `BuildSymbolPageData` | symbol |
+
+Builders return plain arrays; controllers call `Inertia::render()`. Shared helpers:
+
+- `PortfolioSelector` — portfolio list + scope resolution (dashboard vs statistics)
+- `PortfolioMarketDataFetcher` — quotes + FX for loaded portfolios
+- `AiReport::scopeTodayFor()` — today's AI report by type/scope
+
+```php
+// ✅ Thin controller + array builder
+public function index(Request $request, BuildWatchlistPageData $builder): Response
 {
-    $portfolio = new Portfolio();
-    $portfolio->name = $request->name;
-    // ...
+    return Inertia::render(
+        'watchlist',
+        $builder->build($request->user(), (string) $request->query('watchlist', '')),
+    );
 }
 ```
 
@@ -146,10 +169,10 @@ public function store(Request $request): RedirectResponse
 
 ### Actions
 ```php
-// Action pattern: single-purpose class
+// Action pattern: single-purpose class with typed array shapes
 class CreatePortfolio
 {
-    /** @param array<string, mixed> $data */
+    /** @param array{name: string, is_default?: bool} $data */
     public function handle(User $user, array $data): Portfolio
     {
         // ...
@@ -192,10 +215,6 @@ class CreatePortfolio
 ```
 tests/
 ├── Feature/           # HTTP / integration tests (controllers, policies, middleware)
-│   ├── Ai/
-│   ├── Auth/
-│   ├── Settings/
-│   └── *.php
 ├── Unit/              # Unit tests (services, calculators, parsers)
 ├── Pest.php           # Global config + helpers
 └── TestCase.php

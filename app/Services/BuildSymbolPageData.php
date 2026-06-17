@@ -5,13 +5,9 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Exceptions\FinanceQueryException;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Inertia\Inertia;
-use Inertia\Response;
 
-class SymbolPageDataBuilder
+class BuildSymbolPageData
 {
     /**
      * Mapping (range => [interval, range]) for the FinanceQuery chart endpoint.
@@ -29,31 +25,16 @@ class SymbolPageDataBuilder
         'ytd' => ['1d', 'ytd'],
     ];
 
-    /**
-     * Default range for the chart if none is specified or if an invalid range is provided.
-     */
     public const DEFAULT_RANGE = '1mo';
 
-    /**
-     * Limit for the number of news articles to fetch for a symbol.
-     */
     public const NEWS_LIMIT = 3;
 
-    /**
-     * Limit for the number of recommendations to fetch for a symbol.
-     */
     public const RECOMMENDATIONS_LIMIT = 5;
 
     /**
-     * Show the symbol page with quote, chart, news, and recommendations.
-     *
-     * @param Request $request The incoming HTTP request.
-     * @param string $symbol The symbol for which to display data.
-     * @param FinanceQueryClient $client The client used to fetch financial data.
-     *
-     * @return Response The Inertia response rendering the symbol page.
+     * @return array<string, mixed>
      */
-    public function show(Request $request, string $symbol, FinanceQueryClient $client): Response
+    public function build(string $symbol, FinanceQueryClient $client): array
     {
         $symbol = strtoupper(trim($symbol));
 
@@ -86,13 +67,9 @@ class SymbolPageDataBuilder
         }
 
         $range = self::DEFAULT_RANGE;
-        $points = [];
+        $points = $quote !== null ? $this->fetchChartPoints($client, $symbol, $range) : [];
 
-        if ($quote !== null) {
-            $points = $this->fetchChartPoints($client, $symbol, $range);
-        }
-
-        return Inertia::render('symbol', [
+        return [
             'symbol' => $symbol,
             'quote' => $quote ? $this->normalizeQuote($symbol, $quote) : null,
             'quote_error' => $quoteError,
@@ -103,65 +80,38 @@ class SymbolPageDataBuilder
             'news' => $news,
             'recommendations' => $recommendations,
             'available_ranges' => array_keys(self::RANGES),
-        ]);
+        ];
     }
 
     /**
-     * Fetches the chart points for a given symbol and range using the FinanceQueryClient.
+     * @return array{symbol: string, range: string, points: array<int, array<string, mixed>>}
      *
-     * @param Request $request The incoming HTTP request.
-     * @param string $symbol The symbol for which to fetch chart points.
-     * @param FinanceQueryClient $client The client used to fetch financial data.
-     *
-     * @return array An array of chart points, each containing date, close price, and optionally open, high, low, and volume.
+     * @throws FinanceQueryException
      */
-    public function chart(Request $request, string $symbol, FinanceQueryClient $client): JsonResponse
+    public function buildChart(string $symbol, string $range, FinanceQueryClient $client): array
     {
         $symbol = strtoupper(trim($symbol));
-        $range = (string) $request->query('range', self::DEFAULT_RANGE);
 
         if (! isset(self::RANGES[$range])) {
             $range = self::DEFAULT_RANGE;
         }
 
-        try {
-            $points = $this->fetchChartPoints($client, $symbol, $range);
-        } catch (FinanceQueryException $e) {
-            Log::warning('Symbol chart fetch failed', ['symbol' => $symbol, 'range' => $range, 'error' => $e->getMessage()]);
-
-            return response()->json([
-                'message' => 'Chart unavailable.',
-            ], 503);
-        }
-
-        return response()->json([
+        return [
             'symbol' => $symbol,
             'range' => $range,
-            'points' => $points,
-        ]);
+            'points' => $this->fetchChartPoints($client, $symbol, $range),
+        ];
     }
 
     /**
-     * Fetches chart points for a given symbol and range using the FinanceQueryClient.
+     * @return array<int, array<string, mixed>>
      *
-     * @param FinanceQueryClient $client The client used to fetch financial data.
-     * @param string $symbol The symbol for which to fetch chart points.
-     * @param string $range The range for which to fetch chart points (e.g., '1d', '5d', '1mo').
-     *
-     * @return array An array of chart points, each containing date, close price, and optionally open, high, low, and volume.
-     *
-     * @throws FinanceQueryException If there is an error fetching the chart data.
+     * @throws FinanceQueryException
      */
     protected function fetchChartPoints(FinanceQueryClient $client, string $symbol, string $range): array
     {
         [$interval, $apiRange] = self::RANGES[$range];
-
-        try {
-            $payload = $client->chart($symbol, $interval, $apiRange);
-        } catch (FinanceQueryException $e) {
-            throw $e;
-        }
-
+        $payload = $client->chart($symbol, $interval, $apiRange);
         $candles = $payload['candles'] ?? $payload['data'] ?? $payload;
 
         if (! is_array($candles)) {
@@ -196,12 +146,8 @@ class SymbolPageDataBuilder
     }
 
     /**
-     * Normalizes the quote data for a given symbol, extracting relevant fields and ensuring consistent types.
-     *
-     * @param string $symbol The symbol for which the quote data is being normalized.
-     * @param array $payload The raw quote data fetched from the FinanceQueryClient.
-     *
-     * @return array An associative array containing normalized quote data for the symbol.
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
      */
     protected function normalizeQuote(string $symbol, array $payload): array
     {
@@ -220,7 +166,6 @@ class SymbolPageDataBuilder
         };
 
         return [
-            // Identity
             'symbol' => (string) ($get('symbol') ?? $symbol),
             'name' => $get('name', 'longName', 'shortName'),
             'short_name' => $get('shortName'),
@@ -230,8 +175,6 @@ class SymbolPageDataBuilder
             'currency_symbol' => $get('currencySymbol'),
             'type' => $get('quoteType', 'type'),
             'market_state' => $get('marketState'),
-
-            // Profile
             'sector' => $get('sector', 'sectorDisp'),
             'industry' => $get('industry', 'industryDisp'),
             'country' => $get('country'),
@@ -239,8 +182,6 @@ class SymbolPageDataBuilder
             'website' => $get('website'),
             'long_business_summary' => $get('longBusinessSummary'),
             'full_time_employees' => $this->intOrNull($get('fullTimeEmployees')),
-
-            // Price
             'price' => $this->floatOrNull($get('price', 'regularMarketPrice', 'currentPrice')),
             'change' => $this->floatOrNull($get('change', 'regularMarketChange')),
             'change_percent' => $this->floatOrNull($get('changePercent', 'regularMarketChangePercent', 'percentChange')),
@@ -250,8 +191,6 @@ class SymbolPageDataBuilder
             'day_low' => $this->floatOrNull($get('dayLow', 'regularMarketDayLow')),
             'bid' => $this->floatOrNull($get('bid')),
             'ask' => $this->floatOrNull($get('ask')),
-
-            // 52w / averages / all-time
             'fifty_two_week_high' => $this->floatOrNull($get('fiftyTwoWeekHigh', 'yearHigh')),
             'fifty_two_week_low' => $this->floatOrNull($get('fiftyTwoWeekLow', 'yearLow')),
             'fifty_two_week_change' => $this->floatOrNull($payload['52WeekChange'] ?? null),
@@ -259,13 +198,9 @@ class SymbolPageDataBuilder
             'two_hundred_day_average' => $this->floatOrNull($get('twoHundredDayAverage')),
             'all_time_high' => $this->floatOrNull($get('allTimeHigh')),
             'all_time_low' => $this->floatOrNull($get('allTimeLow')),
-
-            // Volume
             'volume' => $this->intOrNull($get('volume', 'regularMarketVolume')),
             'avg_volume' => $this->intOrNull($get('averageVolume', 'averageDailyVolume3Month')),
             'avg_volume_10d' => $this->intOrNull($get('averageDailyVolume10Day', 'averageVolume10days')),
-
-            // Valuation
             'market_cap' => $this->floatOrNull($get('marketCap')),
             'enterprise_value' => $this->floatOrNull($get('enterpriseValue')),
             'pe' => $this->floatOrNull($get('pe', 'trailingPE', 'peRatio')),
@@ -275,8 +210,6 @@ class SymbolPageDataBuilder
             'book_value' => $this->floatOrNull($get('bookValue')),
             'enterprise_to_revenue' => $this->floatOrNull($get('enterpriseToRevenue')),
             'enterprise_to_ebitda' => $this->floatOrNull($get('enterpriseToEbitda')),
-
-            // Profitability
             'eps' => $this->floatOrNull($get('eps', 'trailingEps', 'epsTrailingTwelveMonths')),
             'forward_eps' => $this->floatOrNull($get('forwardEps')),
             'ebitda' => $this->floatOrNull($get('ebitda')),
@@ -290,8 +223,6 @@ class SymbolPageDataBuilder
             'revenue_growth' => $this->floatOrNull($get('revenueGrowth')),
             'revenue_per_share' => $this->floatOrNull($get('revenuePerShare')),
             'gross_profits' => $this->floatOrNull($get('grossProfits')),
-
-            // Financial health
             'total_cash' => $this->floatOrNull($get('totalCash')),
             'total_cash_per_share' => $this->floatOrNull($get('totalCashPerShare')),
             'total_debt' => $this->floatOrNull($get('totalDebt')),
@@ -300,22 +231,14 @@ class SymbolPageDataBuilder
             'quick_ratio' => $this->floatOrNull($get('quickRatio')),
             'free_cashflow' => $this->floatOrNull($get('freeCashflow')),
             'operating_cashflow' => $this->floatOrNull($get('operatingCashflow')),
-
-            // Shares
             'shares_outstanding' => $this->floatOrNull($get('sharesOutstanding', 'impliedSharesOutstanding')),
             'float_shares' => $this->floatOrNull($get('floatShares')),
             'held_percent_insiders' => $this->floatOrNull($get('heldPercentInsiders')),
             'held_percent_institutions' => $this->floatOrNull($get('heldPercentInstitutions')),
-
-            // Dividends
             'dividend_rate' => $this->floatOrNull($get('dividendRate', 'trailingAnnualDividendRate')),
             'dividend_yield' => $this->floatOrNull($get('dividendYield', 'trailingAnnualDividendYield')),
             'payout_ratio' => $this->floatOrNull($get('payoutRatio')),
-
-            // Risk
             'beta' => $this->floatOrNull($get('beta')),
-
-            // Analyst
             'target_mean_price' => $this->floatOrNull($get('targetMeanPrice')),
             'target_high_price' => $this->floatOrNull($get('targetHighPrice')),
             'target_low_price' => $this->floatOrNull($get('targetLowPrice')),
@@ -326,11 +249,8 @@ class SymbolPageDataBuilder
     }
 
     /**
-     * Normalizes the news articles for a given symbol, ensuring consistent structure and valid links.
-     *
-     * @param array $rows The raw news articles fetched from the FinanceQueryClient.
-     *
-     * @return array An array of normalized news articles, each containing title, link, source, image, and time.
+     * @param  array<int, mixed>  $rows
+     * @return array<int, array<string, mixed>>
      */
     protected function normalizeNews(array $rows): array
     {
@@ -360,12 +280,8 @@ class SymbolPageDataBuilder
     }
 
     /**
-     * Enriches the recommendations for a given symbol by fetching additional details such as names from the FinanceQueryClient.
-     *
-     * @param FinanceQueryClient $client The client used to fetch financial data.
-     * @param array $recommendations The raw recommendations fetched from the FinanceQueryClient.
-     *
-     * @return array An array of enriched recommendations, each containing symbol, name, and score.
+     * @param  array<int, array<string, mixed>>  $recommendations
+     * @return array<int, array<string, mixed>>
      */
     protected function enrichRecommendations(FinanceQueryClient $client, array $recommendations): array
     {
@@ -373,7 +289,7 @@ class SymbolPageDataBuilder
             return [];
         }
 
-        $symbols = array_map(static fn (array $r): string => $r['symbol'], $recommendations);
+        $symbols = array_map(static fn (array $row): string => $row['symbol'], $recommendations);
 
         try {
             $quotes = $client->quotes($symbols);
@@ -398,25 +314,11 @@ class SymbolPageDataBuilder
         }, $recommendations);
     }
 
-    /**
-     * Converts a value to a float if it is numeric, otherwise returns null.
-     *
-     * @param mixed $value The value to convert.
-     *
-     * @return float|null The converted float value or null if not numeric.
-     */
     protected function floatOrNull(mixed $value): ?float
     {
         return is_numeric($value) ? (float) $value : null;
     }
 
-    /**
-     * Converts a value to an integer if it is numeric, otherwise returns null.
-     *
-     * @param mixed $value The value to convert.
-     *
-     * @return int|null The converted integer value or null if not numeric.
-     */
     protected function intOrNull(mixed $value): ?int
     {
         return is_numeric($value) ? (int) $value : null;

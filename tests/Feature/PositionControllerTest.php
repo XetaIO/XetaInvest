@@ -86,3 +86,13 @@ test('user can delete a position', function () {
 
     expect(Position::find($position->id))->toBeNull();
 });
+
+test('user cannot delete another user position', function () {
+    $other = User::factory()->create();
+    $instrument = Instrument::factory()->create();
+    $position = Position::factory()->forPortfolio($this->portfolio)->forInstrument($instrument)->create();
+
+    $this->actingAs($other)
+        ->delete(route('positions.destroy', $position))
+        ->assertForbidden();
+});

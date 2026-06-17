@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\AiReportType;
 use App\Models\AiReport;
 use App\Services\NewsAggregator;
 use Illuminate\Http\Request;
@@ -47,12 +48,7 @@ class NewsController extends Controller
                 'links' => $paginator->linkCollection()->toArray(),
             ],
             'available_symbols' => $result['available_symbols'],
-            'aiNewsReport' => AiReport::query()
-                ->where('user_id', $user->id)
-                ->where('type', 'news_screener')
-                ->whereDate('generated_for_date', today())
-                ->latest()
-                ->first(),
+            'aiNewsReport' => AiReport::query()->todayFor($user, AiReportType::NewsScreener)->first(),
             'scope' => [
                 'symbol' => $symbol !== null && in_array(strtoupper($symbol), $result['available_symbols'], true)
                     ? strtoupper($symbol)

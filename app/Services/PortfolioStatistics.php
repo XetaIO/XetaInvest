@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Exceptions\FinanceQueryException;
 use App\Models\Portfolio;
 use App\Models\PortfolioSnapshot;
 use App\Models\User;
@@ -18,8 +17,8 @@ class PortfolioStatistics
     public const HISTORY_DAYS = 365;
 
     public function __construct(
-        protected FinanceQueryClient $client,
         protected PortfolioCalculator $calculator,
+        protected PortfolioMarketDataFetcher $marketData,
     ) {
     }
 
@@ -62,33 +61,10 @@ class PortfolioStatistics
 
         $portfolios = $query->get();
 
-        $symbols = $portfolios
-            ->flatMap(fn ($p) => $p->positions->map(fn ($pos) => strtoupper($pos->instrument->symbol)))
-            ->unique()
-            ->values()
-            ->all();
-
-        $quotes = [];
-        $fxRates = ['EUR' => 1.0];
-        $error = null;
-
-        if (! empty($symbols)) {
-            try {
-                $quotes = $this->client->quotes($symbols, $forceRefresh);
-
-                $currencies = $portfolios
-                    ->flatMap(fn ($p) => $p->positions->map(fn ($pos) => strtoupper($pos->instrument->currency ?? 'USD')))
-                    ->unique();
-
-                foreach ($currencies as $cur) {
-                    if (! isset($fxRates[$cur])) {
-                        $fxRates[$cur] = $this->client->fxRate($cur, 'EUR');
-                    }
-                }
-            } catch (FinanceQueryException $e) {
-                $error = $e->getMessage();
-            }
-        }
+        $market = $this->marketData->fetch($portfolios, $forceRefresh);
+        $quotes = $market['quotes'];
+        $fxRates = $market['fxRates'];
+        $error = $market['error'];
 
         $totalInvested = 0.0;
         $totalCurrent = 0.0;

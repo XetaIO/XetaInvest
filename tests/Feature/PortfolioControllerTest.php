@@ -54,6 +54,24 @@ test('user cannot manage another user portfolio', function () {
         ->assertForbidden();
 });
 
+test('user cannot delete another user portfolio', function () {
+    $other = User::factory()->create();
+    $portfolio = Portfolio::factory()->forUser($other)->create();
+
+    $this->actingAs($this->user)
+        ->delete(route('portfolios.destroy', $portfolio))
+        ->assertForbidden();
+});
+
+test('user cannot set default on another user portfolio', function () {
+    $other = User::factory()->create();
+    $portfolio = Portfolio::factory()->forUser($other)->create();
+
+    $this->actingAs($this->user)
+        ->patch(route('portfolios.default', $portfolio))
+        ->assertForbidden();
+});
+
 test('duplicate name within same user is rejected', function () {
     Portfolio::factory()->forUser($this->user)->create(['name' => 'Same']);
 

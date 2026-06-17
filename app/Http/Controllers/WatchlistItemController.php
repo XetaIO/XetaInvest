@@ -6,12 +6,12 @@ namespace App\Http\Controllers;
 
 use App\Actions\WatchlistItem\AddWatchlistItem;
 use App\Actions\WatchlistItem\DeleteWatchlistItem;
+use App\Http\Requests\WatchlistItem\DeleteWatchlistItemRequest;
 use App\Http\Requests\WatchlistItem\StoreWatchlistItemRequest;
 use App\Models\Watchlist;
 use App\Models\WatchlistItem;
 use App\Models\WatchlistSection;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class WatchlistItemController extends Controller
@@ -54,11 +54,10 @@ class WatchlistItemController extends Controller
      * @return RedirectResponse A redirect response to the previous page with a success message.
      */
     public function destroy(
-        Request $request,
+        DeleteWatchlistItemRequest $request,
         WatchlistItem $item,
         DeleteWatchlistItem $action,
     ): RedirectResponse {
-        $this->authorize('delete', $item);
         $action->handle($item);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.watchlist_item.removed')]);

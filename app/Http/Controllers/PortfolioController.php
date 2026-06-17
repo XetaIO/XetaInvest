@@ -8,11 +8,12 @@ use App\Actions\Portfolio\CreatePortfolio;
 use App\Actions\Portfolio\DeletePortfolio;
 use App\Actions\Portfolio\SetDefaultPortfolio;
 use App\Actions\Portfolio\UpdatePortfolio;
+use App\Http\Requests\Portfolio\DeletePortfolioRequest;
+use App\Http\Requests\Portfolio\SetDefaultPortfolioRequest;
 use App\Http\Requests\Portfolio\StorePortfolioRequest;
 use App\Http\Requests\Portfolio\UpdatePortfolioRequest;
 use App\Models\Portfolio;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class PortfolioController extends Controller
@@ -53,11 +54,10 @@ class PortfolioController extends Controller
     }
 
     public function destroy(
-        Request $request,
+        DeletePortfolioRequest $request,
         Portfolio $portfolio,
         DeletePortfolio $action,
     ): RedirectResponse {
-        $this->authorize('delete', $portfolio);
         $action->handle($request->user(), $portfolio);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.portfolio.deleted')]);
@@ -75,11 +75,10 @@ class PortfolioController extends Controller
      * @return RedirectResponse A redirect response back to the previous page with a success message.
      */
     public function setDefault(
-        Request $request,
+        SetDefaultPortfolioRequest $request,
         Portfolio $portfolio,
         SetDefaultPortfolio $action,
     ): RedirectResponse {
-        $this->authorize('update', $portfolio);
         $action->handle($request->user(), $portfolio);
 
         return back();

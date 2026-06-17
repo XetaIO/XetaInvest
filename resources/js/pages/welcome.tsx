@@ -83,7 +83,7 @@ function FeatureSection({
                                         key={feature}
                                         className="flex items-center gap-3 text-sm text-white/65"
                                     >
-                                        <span className="flex size-5 items-center justify-center rounded-full border border-emerald-400/25 bg-emerald-400/[0.06] text-emerald-400">
+                                        <span className="flex size-5 items-center justify-center rounded-full border border-emerald-400/25 bg-emerald-400/6 text-emerald-400">
                                             <span className="size-1 rounded-full bg-current" />
                                         </span>
                                         {feature}
@@ -404,17 +404,17 @@ export default function Welcome() {
                 <main id="top">
                     <section className="relative flex min-h-[92vh] items-center overflow-hidden pt-28 pb-20">
                         <div className="landing-hero-grid absolute inset-0 opacity-45" />
-                        <div className="landing-orb absolute top-[-18rem] left-1/2 size-[48rem] -translate-x-1/2 rounded-full bg-emerald-400/[0.075] blur-[120px]" />
+                        <div className="landing-orb absolute -top-72 left-1/2 size-192 -translate-x-1/2 rounded-full bg-emerald-400/7.5 blur-[120px]" />
                         <div className="relative mx-auto w-full max-w-7xl px-5 sm:px-8">
                             <Reveal className="mx-auto max-w-5xl text-center">
-                                <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.045] px-4 py-2 font-mono text-[9px] tracking-[0.18em] text-emerald-300 uppercase">
+                                <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/4.5 px-4 py-2 font-mono text-[9px] tracking-[0.18em] text-emerald-300 uppercase">
                                     <span className="size-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399]" />
                                     {t('landing.hero.badge')}
                                 </div>
                                 <h1 className="text-5xl leading-[0.96] font-semibold tracking-[-0.06em] text-white sm:text-7xl lg:text-[6.6rem]">
                                     {t('landing.hero.title_start')}
                                     <br />
-                                    <span className="bg-gradient-to-r from-emerald-300 via-emerald-400 to-teal-500 bg-clip-text text-transparent">
+                                    <span className="bg-linear-to-r from-emerald-300 via-emerald-400 to-teal-500 bg-clip-text text-transparent">
                                         {t('landing.hero.title_accent')}
                                     </span>
                                 </h1>
@@ -429,7 +429,7 @@ export default function Welcome() {
                                     />
                                     <a
                                         href="#features"
-                                        className="inline-flex h-12 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.025] px-6 text-sm font-medium text-white/70 transition hover:border-white/20 hover:bg-white/[0.05] hover:text-white focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:outline-none"
+                                        className="inline-flex h-12 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/2.5 px-6 text-sm font-medium text-white/70 transition hover:border-white/20 hover:bg-white/5 hover:text-white focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:outline-none"
                                     >
                                         {t('landing.cta.discover')}
                                         <ArrowDown className="size-4" />
@@ -447,8 +447,8 @@ export default function Welcome() {
                         </div>
                     </section>
 
-                    <section className="border-y border-white/[0.055] bg-white/[0.012]">
-                        <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-white/[0.055] px-5 sm:grid-cols-5 sm:px-8">
+                    <section className="border-y border-white/5.5 bg-white/[0.012]">
+                        <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-white/5.5 px-5 sm:grid-cols-5 sm:px-8">
                             {assets.map(([label, AssetIcon], index) => (
                                 <Reveal
                                     key={label}
@@ -470,7 +470,7 @@ export default function Welcome() {
                         ))}
                     </div>
 
-                    <section className="relative overflow-hidden border-t border-white/[0.055] py-28 sm:py-36">
+                    <section className="relative overflow-hidden border-t border-white/5.5 py-28 sm:py-36">
                         <div className="absolute inset-x-[20%] top-1/2 h-56 -translate-y-1/2 rounded-full bg-emerald-400/[0.07] blur-[100px]" />
                         <Reveal className="relative mx-auto max-w-4xl px-5 text-center sm:px-8">
                             <p className="font-mono text-[10px] tracking-[0.2em] text-emerald-400 uppercase">
@@ -491,7 +491,7 @@ export default function Welcome() {
                     </section>
                 </main>
 
-                <footer className="border-t border-white/[0.055] py-8">
+                <footer className="border-t border-white/5.5 py-8">
                     <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 px-5 sm:flex-row sm:px-8">
                         <img
                             src="/images/logo-brand-dark-mode.png"

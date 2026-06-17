@@ -4,12 +4,15 @@
 
 - Laravel 13, PHP 8.3+, Inertia 3, PostgreSQL 16+.
 - Controllers only coordinate requests, Actions/Services, responses, and flashes.
-- Use one Form Request per write operation; authorize through model policies.
+- Use one Form Request per write operation (including delete); authorize through model policies.
+- Assemble Inertia page props with `Build*PageData` services that return arrays.
+- Reuse `PortfolioSelector`, `PortfolioMarketDataFetcher`, and `AiReport::scopeTodayFor()` where applicable.
 - Put reusable domain calculations and external integrations in Services.
-- Put single-purpose mutations in `app/Actions/{Domain}`.
+- Put single-purpose mutations in `app/Actions/{Domain}` with PHPDoc array shapes on `$data`.
 - Use typed model relationships and `casts()` methods.
 - Enforce critical invariants in both application code and the database.
 - Serialize quota, limit, default-selection, and ordered-list writes with transactions and locks.
+- Resolve AI drivers through the container (`AiManager` + `OpenAiProvider` binding).
 
 ## AI
 
@@ -32,6 +35,7 @@
 ## Tests And CI
 
 - Cover happy path, authorization, validation, and edge cases.
+- Add focused tests under `tests/Unit/` for pure service logic (calculators, validators, parsers).
 - Run feature tests against PostgreSQL in CI.
 - Run Pint, Prettier, ESLint, TypeScript, Vitest, production build, Composer audit, and npm audit.
 - CI checks formatting without rewriting repository files.

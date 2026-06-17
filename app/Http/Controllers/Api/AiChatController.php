@@ -8,7 +8,9 @@ use App\Actions\Ai\CreateChatSession;
 use App\Actions\Ai\DeleteChatSession;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ai\CreateChatSessionRequest;
+use App\Http\Requests\Ai\DeleteChatSessionRequest;
 use App\Http\Requests\Ai\SendChatMessageRequest;
+use App\Http\Requests\Ai\ShowChatMessagesRequest;
 use App\Models\AiChatSession;
 use App\Models\User;
 use App\Services\Ai\Chat\AiChatService;
@@ -62,10 +64,8 @@ class AiChatController extends Controller
      *
      * @return JsonResponse A JSON response containing the list of messages for the specified chat session.
      */
-    public function messages(Request $request, AiChatSession $session): JsonResponse
+    public function messages(ShowChatMessagesRequest $request, AiChatSession $session): JsonResponse
     {
-        $this->authorize('view', $session);
-
         $messages = $session->messages()
             ->orderBy('id')
             ->get([
@@ -87,8 +87,6 @@ class AiChatController extends Controller
      */
     public function sendMessage(SendChatMessageRequest $request, AiChatSession $session, AiChatService $service): JsonResponse
     {
-        $this->authorize('update', $session);
-
         try {
             /** @var User $user */
             $user = $request->user();
@@ -119,11 +117,10 @@ class AiChatController extends Controller
      * @return JsonResponse A JSON response indicating the success of the deletion operation.
      */
     public function destroySession(
-        Request $request,
+        DeleteChatSessionRequest $request,
         AiChatSession $session,
         DeleteChatSession $action,
     ): JsonResponse {
-        $this->authorize('delete', $session);
         $action->handle($session);
 
         return response()->json(['data' => true]);

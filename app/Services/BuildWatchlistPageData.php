@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\AiReportType;
 use App\Models\AiReport;
 use App\Models\Position;
 use App\Models\User;
@@ -69,12 +70,7 @@ class BuildWatchlistPageData
             'watchlists' => $watchlists,
             'activeWatchlistId' => $active['id'] ?? null,
             'positions' => $this->positionsBySymbol($user->id, $symbols),
-            'aiWatchlistReport' => AiReport::query()
-                ->where('user_id', $user->id)
-                ->where('type', 'watchlist')
-                ->whereDate('generated_for_date', today())
-                ->latest()
-                ->first(),
+            'aiWatchlistReport' => AiReport::query()->todayFor($user, AiReportType::Watchlist)->first(),
             'limits' => [
                 'maxPerUser' => Watchlist::MAX_PER_USER,
                 'maxItems' => Watchlist::MAX_ITEMS,

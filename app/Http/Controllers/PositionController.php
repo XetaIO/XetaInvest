@@ -6,11 +6,11 @@ namespace App\Http\Controllers;
 
 use App\Actions\Position\CreatePosition;
 use App\Actions\Position\DeletePosition;
+use App\Http\Requests\Position\DeletePositionRequest;
 use App\Http\Requests\Position\StorePositionRequest;
 use App\Models\Portfolio;
 use App\Models\Position;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class PositionController extends Controller
@@ -50,11 +50,10 @@ class PositionController extends Controller
      * @return RedirectResponse A redirect response back to the previous page with a success message.
      */
     public function destroy(
-        Request $request,
+        DeletePositionRequest $request,
         Position $position,
         DeletePosition $action,
     ): RedirectResponse {
-        $this->authorize('delete', $position);
         $action->handle($position);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.position.deleted')]);

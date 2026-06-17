@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\AiReportStatus;
 use App\Enums\AiReportType;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -47,5 +48,26 @@ class AiReport extends Model
     public function scope(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeTodayFor(
+        Builder $query,
+        User $user,
+        AiReportType $type,
+        ?int $scopeId = null,
+    ): Builder {
+        $query->where('user_id', $user->id)
+            ->where('type', $type)
+            ->whereDate('generated_for_date', today());
+
+        if ($scopeId !== null) {
+            $query->where('scope_id', $scopeId);
+        }
+
+        return $query->latest();
     }
 }

@@ -7,11 +7,16 @@ namespace App\Services\Ai;
 use App\Services\Ai\Contracts\AiProvider;
 use App\Services\Ai\Exceptions\AiException;
 use App\Services\Ai\Providers\OpenAiProvider;
+use Illuminate\Contracts\Container\Container;
 
 class AiManager
 {
     /** @var array<string, AiProvider> */
     protected array $providers = [];
+
+    public function __construct(private readonly Container $container)
+    {
+    }
 
     /**
      * Get the AI provider instance by name. If no name is provided, the default provider is used.
@@ -49,7 +54,7 @@ class AiManager
         $driver = (string) ($config['driver'] ?? $name);
 
         return match ($driver) {
-            'openai' => new OpenAiProvider($config),
+            'openai' => $this->container->make(OpenAiProvider::class, ['config' => $config]),
             default => throw new AiException(sprintf('Unknown AI driver [%s].', $driver)),
         };
     }

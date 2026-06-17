@@ -61,9 +61,8 @@ function FeatureSection({
         >
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
                 <div
-                    className={`grid items-center gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:gap-16 ${
-                        reverse ? 'lg:grid-cols-[1.18fr_.82fr]' : ''
-                    }`}
+                    className={`grid items-center gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:gap-16 ${reverse ? 'lg:grid-cols-[1.18fr_.82fr]' : ''
+                        }`}
                 >
                     <Reveal className={reverse ? 'lg:order-2' : ''}>
                         <div className="max-w-xl">
@@ -83,7 +82,7 @@ function FeatureSection({
                                         key={feature}
                                         className="flex items-center gap-3 text-sm text-white/65"
                                     >
-                                        <span className="flex size-5 items-center justify-center rounded-full border border-emerald-400/25 bg-emerald-400/[0.06] text-emerald-400">
+                                        <span className="flex size-5 items-center justify-center rounded-full border border-emerald-400/25 bg-emerald-400/6 text-emerald-400">
                                             <span className="size-1 rounded-full bg-current" />
                                         </span>
                                         {feature}
@@ -135,11 +134,10 @@ function LanguageToggle() {
                     key={locale}
                     type="button"
                     onClick={() => changeLocale(locale)}
-                    className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase transition focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:outline-none ${
-                        activeLocale === locale
+                    className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase transition focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:outline-none ${activeLocale === locale
                             ? 'bg-emerald-400 text-[#03110c]'
                             : 'text-white/45 hover:cursor-pointer hover:text-white'
-                    }`}
+                        }`}
                     aria-pressed={activeLocale === locale}
                 >
                     {locale}
@@ -491,7 +489,7 @@ export default function Welcome() {
                     </section>
                 </main>
 
-                <footer className="border-t border-white/[0.055] py-8">
+                <footer className="border-t border-white/5.5 py-8">
                     <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 px-5 sm:flex-row sm:px-8">
                         <img
                             src="/images/logo-brand-dark-mode.png"

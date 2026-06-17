@@ -1,6 +1,6 @@
-import { Head, router, setLayoutProps } from '@inertiajs/react';
+import { Head, setLayoutProps } from '@inertiajs/react';
 import { AlertTriangle, Plus, RefreshCw } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AiReportCard } from '@/components/ai/ai-report-card';
 import { AddInvestmentDialog } from '@/components/portfolio/add-investment-dialog';
@@ -10,7 +10,7 @@ import { PositionRow } from '@/components/portfolio/position-row';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { AUTO_REFRESH_INTERVAL_MS } from '@/lib/constants';
+import { useDashboardRefresh } from '@/hooks/use-dashboard-refresh';
 import { formatEur, formatPercent, formatTime } from '@/lib/format';
 import { dashboard } from '@/routes';
 import type { DashboardProps } from '@/types/portfolio';
@@ -27,43 +27,9 @@ export default function Dashboard({
         breadcrumbs: [{ title: t('dashboard.title'), href: dashboard() }],
     });
     const [addOpen, setAddOpen] = useState(false);
-    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const portfolioId = active?.portfolio.id;
-
-    useEffect(() => {
-        if (!portfolioId) {
-            return;
-        }
-
-        const id = window.setInterval(() => {
-            if (document.visibilityState !== 'visible') {
-                return;
-            }
-
-            router.reload({ only: ['active'] });
-        }, AUTO_REFRESH_INTERVAL_MS);
-
-        return () => window.clearInterval(id);
-    }, [portfolioId]);
-
-    const refresh = () => {
-        if (!portfolioId) {
-            return;
-        }
-
-        setIsRefreshing(true);
-        router.visit(
-            dashboard({
-                query: { portfolio: String(portfolioId), refresh: '1' },
-            }).url,
-            {
-                preserveScroll: true,
-                only: ['active'],
-                onFinish: () => setIsRefreshing(false),
-            },
-        );
-    };
+    const { isRefreshing, refresh } = useDashboardRefresh(portfolioId);
 
     return (
         <>

@@ -7,12 +7,12 @@ namespace App\Http\Controllers;
 use App\Actions\Transaction\CreateTransaction;
 use App\Actions\Transaction\DeleteTransaction;
 use App\Actions\Transaction\UpdateTransaction;
+use App\Http\Requests\Transaction\DeleteTransactionRequest;
 use App\Http\Requests\Transaction\StoreTransactionRequest;
 use App\Http\Requests\Transaction\UpdateTransactionRequest;
 use App\Models\Position;
 use App\Models\Transaction;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class TransactionController extends Controller
@@ -69,12 +69,10 @@ class TransactionController extends Controller
      * @return RedirectResponse A redirect response back to the previous page with a success message or error.
      */
     public function destroy(
-        Request $request,
+        DeleteTransactionRequest $request,
         Transaction $transaction,
         DeleteTransaction $action,
     ): RedirectResponse {
-        $this->authorize('delete', $transaction);
-
         $action->handle($transaction);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.transaction.deleted')]);

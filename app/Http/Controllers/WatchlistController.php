@@ -8,6 +8,7 @@ use App\Actions\Watchlist\CreateWatchlist;
 use App\Actions\Watchlist\DeleteWatchlist;
 use App\Actions\Watchlist\UpdateWatchlist;
 use App\Actions\Watchlist\ReorderWatchlist;
+use App\Http\Requests\Watchlist\DeleteWatchlistRequest;
 use App\Http\Requests\Watchlist\ReorderWatchlistRequest;
 use App\Http\Requests\Watchlist\StoreWatchlistRequest;
 use App\Http\Requests\Watchlist\UpdateWatchlistRequest;
@@ -84,11 +85,10 @@ class WatchlistController extends Controller
      * @return RedirectResponse A redirect response to the watchlists index page with a success message.
      */
     public function destroy(
-        Request $request,
+        DeleteWatchlistRequest $request,
         Watchlist $watchlist,
         DeleteWatchlist $action,
     ): RedirectResponse {
-        $this->authorize('delete', $watchlist);
         $action->handle($watchlist);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('messages.watchlist.deleted')]);

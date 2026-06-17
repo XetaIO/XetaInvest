@@ -13,7 +13,8 @@ test('login page shares registrationEnabled prop as true when enabled', function
     config(['fortify.registration_enabled' => true]);
 
     $this->get(route('login'))
-        ->assertInertia(fn (Assert $page) => $page
+        ->assertInertia(
+            fn (Assert $page) => $page
             ->component('auth/login')
             ->where('registrationEnabled', true)
         );
@@ -23,7 +24,8 @@ test('login page shares registrationEnabled prop as false when disabled', functi
     config(['fortify.registration_enabled' => false]);
 
     $this->get(route('login'))
-        ->assertInertia(fn (Assert $page) => $page
+        ->assertInertia(
+            fn (Assert $page) => $page
             ->component('auth/login')
             ->where('registrationEnabled', false)
         );

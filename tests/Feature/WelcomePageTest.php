@@ -10,7 +10,8 @@ test('guest sees the public landing page', function (): void {
 
     $this->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
+        ->assertInertia(
+            fn (Assert $page) => $page
             ->component('welcome')
             ->where('registrationEnabled', true)
         );
@@ -21,7 +22,8 @@ test('landing page reflects closed registration', function (): void {
 
     $this->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
+        ->assertInertia(
+            fn (Assert $page) => $page
             ->component('welcome')
             ->where('registrationEnabled', false)
         );

@@ -27,5 +27,8 @@ describe('LandingCta', () => {
         expect(
             screen.getByRole('link', { name: /installer le projet/i }),
         ).toHaveAttribute('href', 'https://github.com/XetaIO/XetaInvest');
+        expect(
+            screen.getByRole('link', { name: /installer le projet/i }),
+        ).toHaveAttribute('target', '_blank');
     });
 });

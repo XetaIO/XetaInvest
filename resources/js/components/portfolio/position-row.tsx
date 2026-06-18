@@ -94,7 +94,7 @@ export function PositionRow({ position, transactionTypes }: Props) {
                     <CollapsibleTrigger asChild>
                         <button
                             type="button"
-                            className="flex w-full items-center justify-between gap-4 p-4 text-left hover:bg-accent/50"
+                            className="flex w-full items-center justify-between gap-4 p-4 text-left hover:bg-accent/50 hover:cursor-pointer"
                         >
                             <div className="flex min-w-0 items-center gap-3">
                                 <ChevronDown

@@ -252,6 +252,7 @@ export function PositionsTreemap({
                         data={treemapData}
                         dataKey="value"
                         content={<TreemapCell />}
+                        animationDuration={500}
                     >
                         <Tooltip content={<CustomTooltip />} />
                     </Treemap>

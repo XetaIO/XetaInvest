@@ -118,6 +118,10 @@ class BuildSymbolPageData
             return [];
         }
 
+        if (isset($candles['nodes']) && is_array($candles['nodes'])) {
+            $candles = $candles['nodes'];
+        }
+
         $points = [];
 
         foreach ($candles as $row) {

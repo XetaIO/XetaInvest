@@ -18,7 +18,7 @@ test('user can add a new position with multiple buy lines', function () {
         '*finance-query.com/v2/quotes*' => Http::response([
             'errors' => [],
             'quotes' => [
-                'AAPL' => [
+                [
                     'symbol' => 'AAPL', 'longName' => 'Apple Inc.', 'currency' => 'USD',
                     'exchange' => 'NMS', 'exchangeName' => 'NasdaqGS', 'quoteType' => 'EQUITY',
                     'regularMarketPrice' => 200.0, 'regularMarketPreviousClose' => 195.0,

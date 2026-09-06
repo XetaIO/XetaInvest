@@ -135,7 +135,7 @@ class FinanceQueryClient
 
         if (! empty($toFetch)) {
             $payload = $this->get('/v2/quotes', ['symbols' => implode(',', $toFetch)]);
-            $fetched = $payload['quotes'] ?? [];
+            $fetched = $this->indexBySymbol($payload['quotes'] ?? []);
 
             foreach ($toFetch as $symbol) {
                 if (isset($fetched[$symbol])) {
@@ -290,15 +290,11 @@ class FinanceQueryClient
                 'range' => $range,
             ]);
 
-            $sparks = is_array($payload) ? ($payload['sparks'] ?? []) : [];
+            $sparks = $this->indexBySymbol(is_array($payload) ? ($payload['sparks'] ?? []) : []);
 
             $result = [];
 
             foreach ($sparks as $symbol => $data) {
-                if (! is_array($data)) {
-                    continue;
-                }
-
                 $closes = array_values(array_filter(
                     $data['closes'] ?? [],
                     static fn ($v): bool => is_numeric($v),
@@ -308,7 +304,7 @@ class FinanceQueryClient
                     continue;
                 }
 
-                $result[strtoupper((string) $symbol)] = [
+                $result[$symbol] = [
                     'closes' => array_map(static fn ($v): float => (float) $v, $closes),
                     'timestamps' => array_map(static fn ($v): int => (int) $v, $data['timestamps'] ?? []),
                     'meta' => is_array($data['meta'] ?? null) ? $data['meta'] : [],
@@ -336,15 +332,14 @@ class FinanceQueryClient
             return 1.0;
         }
 
-        $symbol = $from.$to.'=X';
-        $key = sprintf('fq:fx:%s', $symbol);
+        $key = sprintf('fq:fx:%s%s', $from, $to);
 
         /** @var float|null $rate */
         $rate = Cache::get($key);
 
         if ($rate === null) {
-            $payload = $this->get('/v2/quotes', ['symbols' => $symbol]);
-            $price = $payload['quotes'][$symbol]['regularMarketPrice'] ?? null;
+            $payload = $this->get('/v2/forex/'.$from.'/'.$to);
+            $price = $payload['price'] ?? $payload['bid'] ?? $payload['ask'] ?? null;
 
             if (is_numeric($price) && (float) $price > 0.0) {
                 $rate = (float) $price;
@@ -381,6 +376,7 @@ class FinanceQueryClient
      */
     public function screener(array $payload, bool $force = false): array
     {
+        $payload = $this->normalizeScreenerPayload($payload);
         $key = 'fq:screener:'.md5(json_encode($payload, JSON_THROW_ON_ERROR));
 
         if ($force) {
@@ -390,6 +386,87 @@ class FinanceQueryClient
         return Cache::remember($key, $this->newsTtl, function () use ($payload): array {
             return $this->post('/v2/screeners/custom', $payload);
         });
+    }
+
+    /**
+     * Index a Finance Query collection by uppercase symbol.
+     *
+     * Accepts a list of objects, a map keyed by symbol, or a Relay connection with `nodes`.
+     *
+     * @param  mixed  $items
+     * @return array<string, array<string, mixed>>
+     */
+    protected function indexBySymbol(mixed $items): array
+    {
+        if (! is_array($items)) {
+            return [];
+        }
+
+        if (isset($items['nodes']) && is_array($items['nodes'])) {
+            $items = $items['nodes'];
+        }
+
+        $indexed = [];
+
+        foreach ($items as $key => $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+
+            $symbol = $item['symbol'] ?? (is_string($key) ? $key : null);
+
+            if (! is_string($symbol) || $symbol === '') {
+                continue;
+            }
+
+            $indexed[strtoupper($symbol)] = $item;
+        }
+
+        return $indexed;
+    }
+
+    /**
+     * Map legacy screener fields onto the Finance Query v3 custom-screener body.
+     *
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    protected function normalizeScreenerPayload(array $payload): array
+    {
+        if (isset($payload['limit']) && ! isset($payload['size'])) {
+            $payload['size'] = $payload['limit'];
+        }
+
+        unset($payload['limit']);
+
+        if (isset($payload['sort']) && is_array($payload['sort'])) {
+            if (! isset($payload['sortField']) && isset($payload['sort']['field'])) {
+                $payload['sortField'] = $payload['sort']['field'];
+            }
+
+            if (! isset($payload['sortType']) && isset($payload['sort']['direction'])) {
+                $payload['sortType'] = strtoupper((string) $payload['sort']['direction']);
+            }
+        }
+
+        unset($payload['sort']);
+
+        if (isset($payload['sortType']) && is_string($payload['sortType'])) {
+            $payload['sortType'] = strtoupper($payload['sortType']);
+        }
+
+        if (isset($payload['fields']) && is_array($payload['fields'])) {
+            $payload['fields'] = implode(',', array_values(array_filter(
+                $payload['fields'],
+                static fn ($field): bool => is_string($field) && $field !== '',
+            )));
+        }
+
+        if (($payload['fields'] ?? null) === '') {
+            unset($payload['fields']);
+        }
+
+        return $payload;
     }
 
     /**

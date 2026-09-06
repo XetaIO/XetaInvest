@@ -44,8 +44,8 @@ test('quotes endpoint returns batched quotes', function () {
         '*finance-query.com/v2/quotes*' => Http::response([
             'errors' => [],
             'quotes' => [
-                'AAPL' => ['symbol' => 'AAPL', 'regularMarketPrice' => 200.0],
-                'MSFT' => ['symbol' => 'MSFT', 'regularMarketPrice' => 400.0],
+                ['symbol' => 'AAPL', 'regularMarketPrice' => 200.0],
+                ['symbol' => 'MSFT', 'regularMarketPrice' => 400.0],
             ],
         ]),
     ]);

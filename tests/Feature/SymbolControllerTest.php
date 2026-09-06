@@ -52,8 +52,8 @@ function fakeSymbolQuote(): void
         ]),
         '*finance-query.com/v2/quotes*' => Http::response([
             'quotes' => [
-                'MSFT' => ['symbol' => 'MSFT', 'longName' => 'Microsoft Corp.'],
-                'GOOG' => ['symbol' => 'GOOG', 'shortName' => 'Alphabet'],
+                ['symbol' => 'MSFT', 'longName' => 'Microsoft Corp.'],
+                ['symbol' => 'GOOG', 'shortName' => 'Alphabet'],
             ],
         ]),
     ]);
@@ -121,4 +121,27 @@ test('chart endpoint falls back to default range when invalid', function () {
     $this->actingAs($this->user)->getJson('/symbol/AAPL/chart?range=invalid')
         ->assertOk()
         ->assertJsonPath('range', '1mo');
+});
+
+test('chart endpoint reads candles from a Relay nodes payload', function () {
+    Http::fake([
+        '*finance-query.com/v2/chart/AAPL*' => Http::response([
+            'symbol' => 'AAPL',
+            'interval' => '1d',
+            'range' => '1mo',
+            'candles' => [
+                'nodes' => [
+                    ['timestamp' => 1704067200, 'close' => 180.0, 'open' => 179.0, 'high' => 181.0, 'low' => 178.5, 'volume' => 1000000],
+                    ['timestamp' => 1704153600, 'close' => 182.5, 'open' => 180.5, 'high' => 183.0, 'low' => 180.0, 'volume' => 1200000],
+                ],
+                'pageInfo' => ['hasNextPage' => false],
+            ],
+        ]),
+    ]);
+
+    $this->actingAs($this->user)->getJson('/symbol/AAPL/chart?range=1mo')
+        ->assertOk()
+        ->assertJsonCount(2, 'points')
+        ->assertJsonPath('points.0.close', 180)
+        ->assertJsonPath('points.1.close', 182.5);
 });

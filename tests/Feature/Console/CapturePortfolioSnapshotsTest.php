@@ -55,12 +55,17 @@ function fakeFinanceQueryOk(): void
             $quotes = [];
             foreach ($requested as $sym) {
                 if (isset($available[$sym])) {
-                    $quotes[$sym] = $available[$sym];
+                    $quotes[] = $available[$sym];
                 }
             }
 
             return Http::response(['errors' => [], 'quotes' => $quotes]);
         },
+        '*finance-query.com/v2/forex/*' => Http::response([
+            'price' => 0.9,
+            'baseCurrency' => 'USD',
+            'quoteCurrency' => 'EUR',
+        ]),
     ]);
 }
 

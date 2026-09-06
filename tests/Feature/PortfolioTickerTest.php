@@ -19,7 +19,7 @@ function fakeSparkResponse(array $symbols, array $overrides = []): array
     $sparks = [];
 
     foreach ($symbols as $symbol) {
-        $sparks[$symbol] = $overrides[$symbol] ?? [
+        $sparks[] = $overrides[$symbol] ?? [
             'symbol' => $symbol,
             'closes' => [100.0, 101.0, 102.0, 101.5, 103.0],
             'timestamps' => [1, 2, 3, 4, 5],

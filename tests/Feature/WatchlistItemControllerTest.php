@@ -31,16 +31,25 @@ test('user can add an existing instrument to a watchlist', function () {
 
 test('user can add a new symbol that resolves via finance query', function () {
     Http::fake([
-        '*finance-query.com/v1/search*' => Http::response([
-            ['symbol' => 'TSLA', 'name' => 'Tesla', 'exchange' => 'NMS', 'type' => 'EQUITY'],
+        '*finance-query.com/v2/lookup*' => Http::response([
+            'quotes' => [
+                [
+                    'symbol' => 'TSLA',
+                    'shortName' => 'Tesla',
+                    'exchange' => 'NMS',
+                    'quoteType' => 'EQUITY',
+                ],
+            ],
         ]),
         '*finance-query.com/v2/quotes*' => Http::response([
-            [
-                'symbol' => 'TSLA',
-                'name' => 'Tesla Inc.',
-                'exchange' => 'NMS',
-                'quote_type' => 'EQUITY',
-                'currency' => 'usd',
+            'quotes' => [
+                [
+                    'symbol' => 'TSLA',
+                    'name' => 'Tesla Inc.',
+                    'exchange' => 'NMS',
+                    'quoteType' => 'EQUITY',
+                    'currency' => 'usd',
+                ],
             ],
         ]),
     ]);

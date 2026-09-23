@@ -1,0 +1,74 @@
+[workspace]
+
+[package]
+name = "xeta_invest"
+version = "0.1.0"
+edition = "2024"
+publish = false
+default-run = "xeta_invest-cli"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[workspace.dependencies]
+loco-rs = { version = "1.1", features = ["cache_redis"] }
+
+[dependencies]
+loco-rs = { workspace = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1" }
+tokio = { version = "1.45", default-features = false, features = [
+  "rt-multi-thread",
+  "macros",
+  "sync",
+  "time",
+] }
+async-trait = { version = "0.1" }
+axum = { version = "0.8", features = ["ws"] }
+futures = { version = "0.3" }
+tracing = { version = "0.1" }
+migration = { path = "migration" }
+sea-orm = { version = "2.0", features = [
+  "sqlx-postgres",
+  "runtime-tokio-rustls",
+  "macros",
+  "with-rust_decimal",
+] }
+chrono = { version = "0.4" }
+validator = { version = "0.20", features = ["derive"] }
+uuid = { version = "1.6", features = ["v4"] }
+rust_decimal = { version = "1", features = ["serde", "serde-with-float"] }
+# ts-rs derives the TypeScript bindings for the `dtos` (the typed JSON API
+# contract). Present for every db app; the SPA frontend consumes the exports,
+# and a headless app can still emit them for external consumers.
+ts-rs = { version = "12", features = ["chrono-impl", "serde-compat", "no-serde-warnings"] }
+include_dir = { version = "0.7" }
+time = { version = "0.3" }
+finance-query = "3"
+# Both `ring` and `aws-lc-rs` land in the graph (finance-query WSS + other TLS).
+# rustls 0.23 then refuses to auto-pick a backend; we install `ring` at boot.
+rustls = { version = "0.23", default-features = false, features = ["std", "tls12", "ring"] }
+
+[[bin]]
+name = "xeta_invest-cli"
+path = "src/bin/main.rs"
+required-features = []
+[[bin]]
+name = "tool"
+path = "src/bin/tool.rs"
+required-features = []
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+# Loco/Sea-ORM idioms: `users::UsersModel`, `Entity::find_owned`, …
+module_name_repetitions = "allow"
+# Handlers and actions forward `loco_rs::Error`; documenting each is noise.
+missing_errors_doc = "allow"
+
+[dev-dependencies]
+loco-rs = { workspace = true, features = ["testing"] }
+serial_test = { version = "3.1.1" }
+rstest = { version = "0.25" }
+insta = { version = "1.34", features = ["redactions", "yaml", "filters"] }

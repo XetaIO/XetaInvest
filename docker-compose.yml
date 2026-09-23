@@ -1,0 +1,58 @@
+# Self-host stack: Postgres + Redis + the Loco app (`LOCO_ENV=production`).
+# Local `cargo loco start` still uses InMem cache (no Redis required).
+#
+#   docker compose up --build
+#
+# Override secrets with a `.env` next to this file, or the environment:
+#   JWT_SECRET, HOST, MAILER_HOST, MAILER_USER, MAILER_PASSWORD
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: xeta_invest
+      POSTGRES_USER: xeta
+      POSTGRES_PASSWORD: xeta
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U xeta -d xeta_invest"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    ports:
+      - "5150:5150"
+    environment:
+      LOCO_ENV: production
+      DATABASE_URL: postgres://xeta:xeta@db:5432/xeta_invest
+      REDIS_URL: redis://redis:6379
+      REDIS_POOL_SIZE: "10"
+      JWT_SECRET: ${JWT_SECRET:-changeme-in-production}
+      HOST: ${HOST:-http://localhost:5150}
+      MAILER_HOST: ${MAILER_HOST:-localhost}
+      MAILER_PORT: ${MAILER_PORT:-587}
+      MAILER_USER: ${MAILER_USER:-unused}
+      MAILER_PASSWORD: ${MAILER_PASSWORD:-unused}
+
+volumes:
+  postgres_data:

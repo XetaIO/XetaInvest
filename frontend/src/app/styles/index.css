@@ -1,0 +1,469 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-*: initial;
+    --font-outfit: Outfit, sans-serif;
+
+    --breakpoint-*: initial;
+    --breakpoint-2xsm: 375px;
+    --breakpoint-xsm: 425px;
+    --breakpoint-3xl: 2000px;
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-2xl: 1536px;
+
+    --text-title-2xl: 72px;
+    --text-title-2xl--line-height: 90px;
+    --text-title-xl: 60px;
+    --text-title-xl--line-height: 72px;
+    --text-title-lg: 48px;
+    --text-title-lg--line-height: 60px;
+    --text-title-md: 36px;
+    --text-title-md--line-height: 44px;
+    --text-title-sm: 30px;
+    --text-title-sm--line-height: 38px;
+    --text-theme-xl: 20px;
+    --text-theme-xl--line-height: 30px;
+    --text-theme-sm: 14px;
+    --text-theme-sm--line-height: 20px;
+    --text-theme-xs: 12px;
+    --text-theme-xs--line-height: 18px;
+
+    --color-current: currentColor;
+    --color-transparent: transparent;
+    --color-white: #ffffff;
+    --color-black: #101828;
+
+    --color-brand-25: var(--color-emerald-25);
+    --color-brand-50: var(--color-emerald-50);
+    --color-brand-100: var(--color-emerald-100);
+    --color-brand-200: var(--color-emerald-200);
+    --color-brand-300: var(--color-emerald-300);
+    --color-brand-400: var(--color-emerald-400);
+    --color-brand-500: var(--color-emerald-500);
+    --color-brand-600: var(--color-emerald-600);
+    --color-brand-700: var(--color-emerald-700);
+    --color-brand-800: var(--color-emerald-800);
+    --color-brand-900: var(--color-emerald-900);
+    --color-brand-950: var(--color-emerald-950);
+
+    --color-blue-light-25: #f5fbff;
+    --color-blue-light-50: #f0f9ff;
+    --color-blue-light-100: #e0f2fe;
+    --color-blue-light-200: #b9e6fe;
+    --color-blue-light-300: #7cd4fd;
+    --color-blue-light-400: #36bffa;
+    --color-blue-light-500: #0ba5ec;
+    --color-blue-light-600: #0086c9;
+    --color-blue-light-700: #026aa2;
+    --color-blue-light-800: #065986;
+    --color-blue-light-900: #0b4a6f;
+    --color-blue-light-950: #062c41;
+
+    --color-gray-25: #fcfcfd;
+    --color-gray-50: #f9fafb;
+    --color-gray-100: #f2f4f7;
+    --color-gray-200: #e4e7ec;
+    --color-gray-300: #d0d5dd;
+    --color-gray-400: #98a2b3;
+    --color-gray-500: #667085;
+    --color-gray-600: #475467;
+    --color-gray-700: #344054;
+    --color-gray-800: #1d2939;
+    --color-gray-900: #101828;
+    --color-gray-950: #0c111d;
+    --color-gray-dark: #1a2231;
+
+    --color-orange-25: #fffaf5;
+    --color-orange-50: #fff6ed;
+    --color-orange-100: #ffead5;
+    --color-orange-200: #fddcab;
+    --color-orange-300: #feb273;
+    --color-orange-400: #fd853a;
+    --color-orange-500: #fb6514;
+    --color-orange-600: #ec4a0a;
+    --color-orange-700: #c4320a;
+    --color-orange-800: #9c2a10;
+    --color-orange-900: #7e2410;
+    --color-orange-950: #511c10;
+
+    --color-success-25: #f6fef9;
+    --color-success-50: #ecfdf3;
+    --color-success-100: #d1fadf;
+    --color-success-200: #a6f4c5;
+    --color-success-300: #6ce9a6;
+    --color-success-400: #32d583;
+    --color-success-500: #12b76a;
+    --color-success-600: #039855;
+    --color-success-700: #027a48;
+    --color-success-800: #05603a;
+    --color-success-900: #054f31;
+    --color-success-950: #053321;
+
+    --color-error-25: #fffbfa;
+    --color-error-50: #fef3f2;
+    --color-error-100: #fee4e2;
+    --color-error-200: #fecdca;
+    --color-error-300: #fda29b;
+    --color-error-400: #f97066;
+    --color-error-500: #f04438;
+    --color-error-600: #d92d20;
+    --color-error-700: #b42318;
+    --color-error-800: #912018;
+    --color-error-900: #7a271a;
+    --color-error-950: #55160c;
+
+    --color-warning-25: #fffcf5;
+    --color-warning-50: #fffaeb;
+    --color-warning-100: #fef0c7;
+    --color-warning-200: #fedf89;
+    --color-warning-300: #fec84b;
+    --color-warning-400: #fdb022;
+    --color-warning-500: #f79009;
+    --color-warning-600: #dc6803;
+    --color-warning-700: #b54708;
+    --color-warning-800: #93370d;
+    --color-warning-900: #7a2e0e;
+    --color-warning-950: #4e1d09;
+
+    --color-theme-pink-500: #ee46bc;
+    --color-theme-purple-500: #7a5af8;
+
+    --shadow-theme-md:
+        0px 4px 8px -2px rgba(16, 24, 40, 0.1),
+        0px 2px 4px -2px rgba(16, 24, 40, 0.06);
+    --shadow-theme-lg:
+        0px 12px 16px -4px rgba(16, 24, 40, 0.08),
+        0px 4px 6px -2px rgba(16, 24, 40, 0.03);
+    --shadow-theme-sm:
+        0px 1px 3px 0px rgba(16, 24, 40, 0.1),
+        0px 1px 2px 0px rgba(16, 24, 40, 0.06);
+    --shadow-theme-xs: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+    --shadow-theme-xl:
+        0px 20px 24px -4px rgba(16, 24, 40, 0.08),
+        0px 8px 8px -4px rgba(16, 24, 40, 0.03);
+    --shadow-datepicker: -5px 0 0 #262d3c, 5px 0 0 #262d3c;
+    --shadow-focus-ring: 0px 0px 0px 4px rgba(70, 95, 255, 0.12);
+    --shadow-slider-navigation:
+        0px 1px 2px 0px rgba(16, 24, 40, 0.1),
+        0px 1px 3px 0px rgba(16, 24, 40, 0.1);
+    --shadow-tooltip:
+        0px 4px 6px -2px rgba(16, 24, 40, 0.05),
+        -8px 0px 20px 8px rgba(16, 24, 40, 0.05);
+
+    --drop-shadow-4xl:
+        0 35px 35px rgba(0, 0, 0, 0.25), 0 45px 65px rgba(0, 0, 0, 0.15);
+
+    --z-index-1: 1;
+    --z-index-9: 9;
+    --z-index-99: 99;
+    --z-index-999: 999;
+    --z-index-9999: 9999;
+    --z-index-99999: 99999;
+    --z-index-999999: 999999;
+}
+
+@layer components {
+    .app-shell {
+        min-height: 100dvh;
+    }
+    .site-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #94a3b8;
+    }
+    .site-header nav,
+    .theme-select {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1rem;
+    }
+    .page {
+        max-width: 72rem;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+    .auth-page {
+        max-width: 28rem;
+    }
+}
+
+@utility menu-item {
+    @apply relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-theme-sm font-medium;
+}
+
+@utility menu-item-inactive {
+    @apply text-gray-700 group-hover:text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300;
+}
+
+@utility menu-item-icon {
+    @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400;
+}
+
+@utility menu-item-icon-active {
+    @apply text-brand-500 dark:text-brand-400;
+}
+
+@utility menu-item-icon-size {
+    & svg {
+        @apply size-6!;
+    }
+}
+
+@utility menu-item-icon-inactive {
+    @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300;
+}
+
+@utility menu-item-arrow {
+    @apply relative;
+}
+
+@utility menu-item-arrow-active {
+    @apply rotate-180 text-brand-500 dark:text-brand-400;
+}
+
+@utility menu-item-arrow-inactive {
+    @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300;
+}
+
+@utility menu-dropdown-item {
+    @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-theme-sm font-medium;
+}
+
+@utility menu-dropdown-item-inactive {
+    @apply text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5;
+}
+
+@utility menu-dropdown-badge {
+    @apply block rounded-full px-2.5 py-0.5 text-xs font-medium text-brand-500 uppercase dark:text-brand-400;
+}
+
+@utility menu-dropdown-badge-active {
+    @apply bg-brand-100 dark:bg-brand-500/20;
+}
+
+@utility menu-dropdown-badge-inactive {
+    @apply bg-brand-50 group-hover:bg-brand-100 dark:bg-brand-500/15 dark:group-hover:bg-brand-500/20;
+}
+
+@utility no-scrollbar {
+    /* Chrome, Safari and Opera */
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+@utility custom-scrollbar {
+    &::-webkit-scrollbar {
+        @apply size-1.5;
+    }
+
+    &::-webkit-scrollbar-track {
+        @apply rounded-full;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        @apply rounded-full bg-gray-200 dark:bg-neutral-700;
+    }
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-neutral-700;
+}
+
+/* ==========================================================================
+   XetaInvest Custom Components
+   ========================================================================== */
+
+@layer components {
+    /* --------------------------------------------------------------------------
+     Alert Components
+     -------------------------------------------------------------------------- */
+    .alert-error {
+        @apply mx-6 mt-4 rounded-lg bg-error-50 p-4 text-sm text-error-600 dark:bg-error-500/10 dark:text-error-400;
+    }
+
+    .alert-success {
+        @apply mx-6 mt-4 rounded-lg bg-success-50 p-4 text-sm text-success-600 dark:bg-success-500/10 dark:text-success-400;
+    }
+
+    .alert-warning {
+        @apply mx-6 mt-4 rounded-lg bg-warning-50 p-4 text-sm text-warning-600 dark:bg-warning-500/10 dark:text-warning-400;
+    }
+
+    /* --------------------------------------------------------------------------
+     Card Components
+     -------------------------------------------------------------------------- */
+    .card-base {
+        @apply rounded-2xl border border-gray-200 bg-white dark:border-white/5 dark:bg-mist-950;
+    }
+
+    .card-header {
+        @apply flex flex-col gap-4 border-b border-gray-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/5;
+    }
+
+    .card-header-title {
+        @apply text-base font-medium text-gray-800 dark:text-white/90;
+    }
+
+    .card-header-subtitle {
+        @apply mt-1 text-sm text-gray-500 dark:text-gray-400;
+    }
+
+    .card-body {
+        @apply px-6 py-4;
+    }
+
+    .card-body-border {
+        @apply border-b border-gray-200 px-6 py-4 dark:border-white/5;
+    }
+
+    /* --------------------------------------------------------------------------
+     Table Components
+     -------------------------------------------------------------------------- */
+    .table-header-cell {
+        @apply px-6 py-3 text-sm font-medium text-gray-500 dark:text-gray-400;
+    }
+
+    .table-header-cell-left {
+        @apply px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400;
+    }
+
+    .table-header-cell-center {
+        @apply px-6 py-3 text-center text-sm font-medium text-gray-500 dark:text-gray-400;
+    }
+
+    .table-header-cell-right {
+        @apply px-6 py-3 text-right text-sm font-medium text-gray-500 dark:text-gray-400;
+    }
+
+    .table-body-cell {
+        @apply px-6 py-4;
+    }
+
+    .table-sortable-button {
+        @apply inline-flex items-center hover:text-gray-700 dark:hover:text-gray-200;
+    }
+
+    .table-row-border {
+        @apply border-b border-gray-100 dark:border-white/5;
+    }
+
+    .table-row-hover {
+        @apply border-b border-gray-100 hover:bg-gray-50 dark:border-white/5 dark:hover:bg-white/2;
+    }
+
+    .table-header-row-border {
+        @apply border-b border-gray-200 dark:border-white/5;
+    }
+
+    /* --------------------------------------------------------------------------
+     Input Components
+     -------------------------------------------------------------------------- */
+    .input-base {
+        @apply w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800;
+    }
+
+    .input-padding {
+        @apply px-4 py-2.5;
+    }
+
+    .input-with-left-icon {
+        @apply py-2.5 pr-4 pl-10;
+    }
+
+    .input-with-right-icon {
+        @apply py-2.5 pr-10 pl-4;
+    }
+
+    .input-with-both-icons {
+        @apply py-2.5 pr-10 pl-10;
+    }
+
+    /* --------------------------------------------------------------------------
+     Search Components
+     -------------------------------------------------------------------------- */
+    .search-icon {
+        @apply absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400;
+    }
+
+    .search-clear-button {
+        @apply absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300;
+    }
+
+    /* --------------------------------------------------------------------------
+     Skeleton Loading Components
+     -------------------------------------------------------------------------- */
+    .skeleton-base {
+        @apply animate-pulse rounded bg-gray-200 dark:bg-neutral-700;
+    }
+
+    .skeleton-text {
+        @apply h-4 animate-pulse rounded bg-gray-200 dark:bg-neutral-700;
+    }
+
+    .skeleton-badge {
+        @apply h-5 w-8 animate-pulse rounded-full bg-gray-200 dark:bg-neutral-700;
+    }
+
+    .skeleton-avatar {
+        @apply h-10 w-10 animate-pulse rounded-full bg-gray-200 dark:bg-neutral-700;
+    }
+
+    /* --------------------------------------------------------------------------
+     Empty State Components
+     -------------------------------------------------------------------------- */
+    .empty-state-container {
+        @apply flex flex-col items-center justify-center;
+    }
+
+    .empty-state-icon {
+        @apply mb-4 h-12 w-12 text-gray-300 dark:text-gray-600;
+    }
+
+    .empty-state-clear-button {
+        @apply mt-2 text-sm text-brand-500 hover:text-brand-600;
+    }
+
+    /* --------------------------------------------------------------------------
+     Link Components
+     -------------------------------------------------------------------------- */
+    .link-primary {
+        @apply font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300;
+    }
+
+    .link-subtle {
+        @apply text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200;
+    }
+}
+
+/* ==========================================================================
+   XetaSuite Third-party libraries CSS
+   ========================================================================== */
+
+/* React Toastify - Position below header */
+:root {
+    --toastify-toast-top: 94px !important;
+    --toastify-color-dark: #262626 !important;
+    --toastify-text-color-dark: var(--color-gray-300) !important;
+}
+
+.Toastify__toast {
+    @apply border border-gray-200 dark:border-white/5;
+}

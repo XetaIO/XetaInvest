@@ -1,4 +1,5 @@
 mod instruments;
+mod portfolio_snapshots;
 mod portfolios;
 mod positions;
 mod transactions;

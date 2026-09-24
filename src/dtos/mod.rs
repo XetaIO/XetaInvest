@@ -4,6 +4,7 @@ pub mod dashboard;
 pub mod market;
 pub mod portfolios;
 pub mod positions;
+pub mod statistics;
 pub mod symbol;
 pub mod transactions;
 pub mod watchlists;

@@ -16,10 +16,10 @@ use migration::Migrator;
 
 use crate::{
     controllers,
-    initializers::{market_data::MarketDataInitializer, price_stream::PriceStreamInitializer},
+    initializers::{market_data, price_stream::PriceStreamInitializer},
     models::_entities::{
-        instruments, portfolios, positions, transactions, users, watchlist_items,
-        watchlist_sections, watchlists,
+        instruments, portfolio_snapshots, portfolios, positions, transactions, users,
+        watchlist_items, watchlist_sections, watchlists,
     },
     tasks,
 };
@@ -51,10 +51,13 @@ impl Hooks for App {
     }
 
     async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
-        Ok(vec![
-            Box::new(MarketDataInitializer),
-            Box::new(PriceStreamInitializer),
-        ])
+        Ok(vec![Box::new(PriceStreamInitializer)])
+    }
+
+    /// Runs for every command (server, worker, task), unlike initializers.
+    async fn after_context(ctx: AppContext) -> Result<AppContext> {
+        market_data::register(&ctx)?;
+        Ok(ctx)
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
@@ -64,6 +67,7 @@ impl Hooks for App {
             .add_route(controllers::positions::routes())
             .add_route(controllers::transactions::routes())
             .add_route(controllers::dashboard::routes())
+            .add_route(controllers::statistics::routes())
             .add_route(controllers::symbol_search::routes())
             .add_route(controllers::quotes::routes())
             .add_route(controllers::stream::routes())
@@ -78,6 +82,7 @@ impl Hooks for App {
     fn register_tasks(tasks: &mut Tasks) {
         // tasks-inject (do not remove)
         tasks.register(tasks::user_create::UserCreate);
+        tasks.register(tasks::portfolio_snapshot::PortfolioSnapshot);
     }
 
     /// Children first so foreign keys never block the truncate.
@@ -88,6 +93,7 @@ impl Hooks for App {
         truncate_table(&ctx.db, transactions::Entity).await?;
         truncate_table(&ctx.db, positions::Entity).await?;
         truncate_table(&ctx.db, instruments::Entity).await?;
+        truncate_table(&ctx.db, portfolio_snapshots::Entity).await?;
         truncate_table(&ctx.db, portfolios::Entity).await?;
         truncate_table(&ctx.db, users::Entity).await?;
         Ok(())

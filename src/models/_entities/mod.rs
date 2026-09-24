@@ -3,6 +3,7 @@
 pub mod prelude;
 
 pub mod instruments;
+pub mod portfolio_snapshots;
 pub mod portfolios;
 pub mod positions;
 pub mod transactions;

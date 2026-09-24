@@ -6,7 +6,10 @@
         "save": "Save",
         "changeLanguage": "Change language",
         "selectLanguage": "Select language",
-        "languageChangeError": "Unable to change language. Please try again."
+        "languageChangeError": "Unable to change language. Please try again.",
+        "refresh": "Refresh",
+        "other": "Other",
+        "no_data": "No data."
     },
     "errors": {
         "not_found": "Page not found",
@@ -429,7 +432,56 @@
         }
     },
     "statistics": {
-        "pnl": "Total P&L"
+        "pnl": "Total P&L",
+        "title": "Statistics",
+        "select_portfolio": "Select a portfolio",
+        "all_portfolios": "All my portfolios",
+        "no_positions": "No positions to analyse for this scope.",
+        "quote_error_title": "Quotes unavailable",
+        "stat_details": "{{instruments}} instruments · {{positions}} positions",
+        "history_portfolio": "Value and invested capital over time",
+        "history_all": "Cumulative value of all your portfolios",
+        "alloc_by_instrument": "By instrument",
+        "alloc_instrument_desc": "Each asset's share of total value",
+        "alloc_by_currency": "By currency",
+        "alloc_currency_desc": "Exposure by listing currency",
+        "alloc_by_type": "By asset type",
+        "alloc_type_desc": "Stocks / ETF / others mix",
+        "alloc_by_portfolio": "By portfolio",
+        "alloc_portfolio_desc": "Each portfolio's weight in total",
+        "top_gainers": "Top gainers",
+        "top_gainers_desc": "Best P&L in percentage",
+        "top_losers": "Top losers",
+        "top_losers_desc": "Largest losses in percentage",
+        "no_gainers": "No positions in profit.",
+        "no_losers": "No positions in loss.",
+        "detail_title": "By instrument detail",
+        "col_name": "Name",
+        "col_symbol": "Symbol",
+        "col_currency": "Currency",
+        "col_value": "Value",
+        "col_allocation": "Allocation",
+        "col_pnl": "P&L",
+        "col_pnl_pct": "P&L %",
+        "treemap_title": "Positions map",
+        "treemap_desc": "Size proportional to value",
+        "history_chart": {
+            "title": "Value evolution",
+            "label_value": "Value",
+            "label_invested": "Invested",
+            "no_history": "No history yet. Daily snapshots are captured every evening."
+        },
+        "types": {
+            "stock": "Stock",
+            "equity": "Stock",
+            "etf": "ETF",
+            "mutualfund": "Fund",
+            "cryptocurrency": "Crypto",
+            "currency": "Currency",
+            "index": "Index",
+            "future": "Future",
+            "option": "Option"
+        }
     },
     "budget": {
         "income": "Income",

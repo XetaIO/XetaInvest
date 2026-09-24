@@ -6,7 +6,10 @@
         "save": "Enregistrer",
         "changeLanguage": "Changer de langue",
         "selectLanguage": "Choisir une langue",
-        "languageChangeError": "Impossible de changer de langue. Veuillez réessayer."
+        "languageChangeError": "Impossible de changer de langue. Veuillez réessayer.",
+        "refresh": "Actualiser",
+        "other": "Autres",
+        "no_data": "Aucune donnée."
     },
     "errors": {
         "not_found": "Page non trouvée",
@@ -429,7 +432,56 @@
         }
     },
     "statistics": {
-        "pnl": "P&L total"
+        "pnl": "P&L total",
+        "title": "Statistiques",
+        "select_portfolio": "Choisir un portefeuille",
+        "all_portfolios": "Tous mes portefeuilles",
+        "no_positions": "Aucune position à analyser sur ce périmètre.",
+        "quote_error_title": "Cours indisponibles",
+        "stat_details": "{{instruments}} instruments · {{positions}} positions",
+        "history_portfolio": "Valeur et capital investi au fil du temps",
+        "history_all": "Valeur cumulée de tous vos portefeuilles",
+        "alloc_by_instrument": "Répartition par instrument",
+        "alloc_instrument_desc": "Part de chaque actif dans la valeur totale",
+        "alloc_by_currency": "Répartition par devise",
+        "alloc_currency_desc": "Exposition par devise de cotation",
+        "alloc_by_type": "Répartition par type d'actif",
+        "alloc_type_desc": "Mix Actions / ETF / autres",
+        "alloc_by_portfolio": "Répartition par portefeuille",
+        "alloc_portfolio_desc": "Poids de chaque portefeuille dans le total",
+        "top_gainers": "Top gagnants",
+        "top_gainers_desc": "Meilleurs P&L en pourcentage",
+        "top_losers": "Top perdants",
+        "top_losers_desc": "Plus fortes baisses en pourcentage",
+        "no_gainers": "Aucune position en plus-value.",
+        "no_losers": "Aucune position en moins-value.",
+        "detail_title": "Détail par instrument",
+        "col_name": "Nom",
+        "col_symbol": "Symbole",
+        "col_currency": "Devise",
+        "col_value": "Valeur",
+        "col_allocation": "Allocation",
+        "col_pnl": "P&L",
+        "col_pnl_pct": "P&L %",
+        "treemap_title": "Carte des positions",
+        "treemap_desc": "Taille proportionnelle à la valeur",
+        "history_chart": {
+            "title": "Évolution de la valeur",
+            "label_value": "Valeur",
+            "label_invested": "Investi",
+            "no_history": "Pas encore d'historique. Les snapshots quotidiens sont capturés chaque soir."
+        },
+        "types": {
+            "stock": "Action",
+            "equity": "Action",
+            "etf": "ETF",
+            "mutualfund": "Fonds",
+            "cryptocurrency": "Crypto",
+            "currency": "Devise",
+            "index": "Indice",
+            "future": "Future",
+            "option": "Option"
+        }
     },
     "budget": {
         "income": "Revenus",

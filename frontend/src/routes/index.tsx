@@ -39,6 +39,11 @@ const WatchlistPage = lazy(() =>
         default: module.WatchlistPage,
     })),
 );
+const StatisticsPage = lazy(() =>
+    import('../features/Statistics/views/StatisticsPage').then((module) => ({
+        default: module.StatisticsPage,
+    })),
+);
 const NotFoundPage = lazy(
     () => import('../shared/components/errors/NotFoundPage'),
 );
@@ -56,6 +61,7 @@ export const guestRoutes: RouteObject[] = [
 
 export const protectedRoutes: RouteObject[] = [
     { path: 'dashboard', element: <Dashboard /> },
+    { path: 'statistics', element: <StatisticsPage /> },
     { path: 'watchlists', element: <WatchlistPage /> },
     { path: 'symbol/:symbol', element: <SymbolPage /> },
 ];

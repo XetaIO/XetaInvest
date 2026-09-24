@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod portfolio_snapshots;
 pub mod portfolios;
 pub mod positions;
 pub mod transactions;

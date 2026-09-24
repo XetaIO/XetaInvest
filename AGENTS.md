@@ -46,6 +46,35 @@ cargo loco task <name>      # run a task
 cargo loco doctor           # check the environment
 ```
 
+## Background jobs, scheduler and Docker
+
+Two processes run from the same binary/image (see `docker-compose.yml`):
+
+- `app`: `start` (HTTP only). It runs the migrations and opens the Yahoo
+  price stream (`PriceStreamInitializer::after_routes`, server processes only).
+- `worker`: `start --worker --scheduler`. It processes the Redis queue jobs
+  (mails, through Loco's `MailerWorker`) and runs the cron jobs from the
+  `scheduler:` section of `config/*.yaml`.
+
+Following the Loco doctrine, recurring work is a **task plus a `scheduler:`
+entry**: the scheduler spawns the task as a sub-process and the task does the
+work itself. Background workers are for deferred work triggered by a request
+(e.g. mails). In tests, `workers.mode` is `ForegroundBlocking`, so jobs run
+inline.
+
+The scheduler runs `portfolio:snapshot` daily at 21:30 UTC. The task captures
+every portfolio, logs each failure without stopping, prints a summary and exits
+with an error when any portfolio failed.
+
+```
+cargo loco start --worker --scheduler         # local worker + cron (needs Redis)
+cargo loco task portfolio:snapshot [date:2026-09-24] [portfolio:1] [force:true]
+cargo loco scheduler --list                   # show cron jobs
+```
+
+To redo a capture, run the task again (`task portfolio:snapshot date:…`).
+Snapshots are upserted per `(portfolio_id, captured_on)`, so re-running is safe.
+
 ## Learn more
 
 - Framework agent guide: https://loco.rs/AGENTS.md

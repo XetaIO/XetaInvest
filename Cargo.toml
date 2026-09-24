@@ -10,7 +10,7 @@ default-run = "xeta_invest-cli"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
-loco-rs = { version = "1.1", features = ["cache_redis"] }
+loco-rs = { version = "1.2", features = ["cache_redis", "worker_redis"] }
 
 [dependencies]
 loco-rs = { workspace = true }

@@ -213,7 +213,7 @@ fn ratio(part: Decimal, base: Decimal) -> Decimal {
 }
 
 /// `part / base * 100`, or `0` when the base is not positive.
-fn percent(part: Decimal, base: Decimal) -> Decimal {
+pub(crate) fn percent(part: Decimal, base: Decimal) -> Decimal {
     ratio(part, base) * Decimal::ONE_HUNDRED
 }
 

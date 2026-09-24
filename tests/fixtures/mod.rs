@@ -5,8 +5,8 @@ use rust_decimal::Decimal;
 use sea_orm::{ActiveEnum, ActiveModelTrait, ActiveValue::Set, DatabaseConnection};
 use xeta_invest::models::{
     _entities::{
-        instruments, portfolios, positions, transactions, watchlist_items, watchlist_sections,
-        watchlists,
+        instruments, portfolio_snapshots, portfolios, positions, transactions, watchlist_items,
+        watchlist_sections, watchlists,
     },
     transactions::TransactionKind,
 };
@@ -84,6 +84,31 @@ pub(crate) async fn transaction(
     .insert(db)
     .await
     .expect("transaction")
+}
+
+/// Daily snapshot of `portfolio_id` (P&L is `value - invested`).
+pub(crate) async fn snapshot(
+    db: &DatabaseConnection,
+    portfolio_id: i64,
+    captured_on: NaiveDate,
+    invested: &str,
+    value: &str,
+) -> portfolio_snapshots::Model {
+    let invested = invested.parse::<Decimal>().unwrap();
+    let value = value.parse::<Decimal>().unwrap();
+    portfolio_snapshots::ActiveModel {
+        portfolio_id: Set(portfolio_id),
+        captured_on: Set(captured_on),
+        invested_eur: Set(invested),
+        current_value_eur: Set(value),
+        pnl_eur: Set(value - invested),
+        position_count: Set(1),
+        quote_error: Set(false),
+        ..Default::default()
+    }
+    .insert(db)
+    .await
+    .expect("snapshot")
 }
 
 pub(crate) async fn watchlist(

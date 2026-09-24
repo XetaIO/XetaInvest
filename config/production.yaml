@@ -55,7 +55,7 @@ workers:
   #   - BackgroundQueue - Workers operate asynchronously in the background, processing queued.
   #   - ForegroundBlocking - Workers operate in the foreground and block until tasks are completed.
   #   - BackgroundAsync - Workers operate asynchronously in the background, processing tasks with async capabilities.
-  mode: BackgroundAsync
+  mode: BackgroundQueue
 
 # Mailer Configuration.
 mailer:
@@ -128,6 +128,28 @@ cache:
   kind: Redis
   uri: <%= get_env(name="REDIS_URL") %>
   max_size: <%= get_env(name="REDIS_POOL_SIZE", default="10") %>
+
+# Queue configuration (`start --worker` pulls jobs from it). Required by the
+# `MailerWorker`: without it, welcome and password-reset mails are never sent.
+queue:
+  kind: Redis
+  uri: <%= get_env(name="REDIS_URL") %>
+  dangerously_flush: false # never flush pending jobs in production
+  num_workers: <%= get_env(name="WORKER_CONCURRENCY", default="2") %> # concurrent job handlers
+
+# Scheduler (`start --scheduler`, or `cargo loco scheduler`). Each run spawns
+# `xeta_invest-cli task portfolio:snapshot`, which captures the snapshots itself.
+# Cron has 7 fields (sec min hour day month weekday year) and runs in UTC:
+# 21:30 UTC = 22:30 Paris in winter, 23:30 in summer — always after the US
+# close, on the same calendar day as in Paris.
+scheduler:
+  output: stdout
+  jobs:
+    portfolio_snapshot:
+      run: "portfolio:snapshot"
+      schedule: "0 30 21 * * * *"
+      tags: ["snapshots"]
+      output: stdout
 
 # Application settings (read by `MarketDataSettings`).
 settings:

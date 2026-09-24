@@ -3,8 +3,26 @@
 #
 #   docker compose up --build
 #
+# Two processes run from the same image:
+#   app    — HTTP server only (`start`); runs the migrations.
+#   worker — mailer jobs + scheduler (daily `portfolio:snapshot`)
+#            (`start --worker --scheduler`).
+#
 # Override secrets with a `.env` next to this file, or the environment:
 #   JWT_SECRET, HOST, MAILER_HOST, MAILER_USER, MAILER_PASSWORD
+
+# Environment shared by `app` and `worker` (the config is rendered at boot).
+x-app-env: &app-env
+  LOCO_ENV: production
+  DATABASE_URL: postgres://xeta:xeta@db:5432/xeta_invest
+  REDIS_URL: redis://redis:6379
+  REDIS_POOL_SIZE: "10"
+  JWT_SECRET: ${JWT_SECRET:-changeme-in-production}
+  HOST: ${HOST:-http://localhost:5150}
+  MAILER_HOST: ${MAILER_HOST:-localhost}
+  MAILER_PORT: ${MAILER_PORT:-587}
+  MAILER_USER: ${MAILER_USER:-unused}
+  MAILER_PASSWORD: ${MAILER_PASSWORD:-unused}
 
 services:
   redis:
@@ -35,6 +53,8 @@ services:
 
   app:
     build: .
+    image: xeta_invest:latest
+    command: ["start"]
     depends_on:
       redis:
         condition: service_healthy
@@ -43,16 +63,25 @@ services:
     ports:
       - "5150:5150"
     environment:
-      LOCO_ENV: production
-      DATABASE_URL: postgres://xeta:xeta@db:5432/xeta_invest
-      REDIS_URL: redis://redis:6379
-      REDIS_POOL_SIZE: "10"
-      JWT_SECRET: ${JWT_SECRET:-changeme-in-production}
-      HOST: ${HOST:-http://localhost:5150}
-      MAILER_HOST: ${MAILER_HOST:-localhost}
-      MAILER_PORT: ${MAILER_PORT:-587}
-      MAILER_USER: ${MAILER_USER:-unused}
-      MAILER_PASSWORD: ${MAILER_PASSWORD:-unused}
+      <<: *app-env
+
+  worker:
+    # Same build as `app` (served from the layer cache), never pulled.
+    build: .
+    image: xeta_invest:latest
+    command: ["start", "--worker", "--scheduler"]
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      # Started after `app`, which owns the migrations.
+      app:
+        condition: service_started
+    environment:
+      <<: *app-env
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-2}
+      DB_AUTO_MIGRATE: "false"
 
 volumes:
   postgres_data:

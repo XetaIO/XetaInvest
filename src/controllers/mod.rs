@@ -4,6 +4,7 @@ pub mod http;
 pub mod portfolios;
 pub mod positions;
 pub mod quotes;
+pub mod statistics;
 pub mod stream;
 pub mod symbol_search;
 pub mod symbols;

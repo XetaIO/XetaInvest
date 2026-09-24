@@ -11,6 +11,7 @@ mod m20260917_112529_watchlists;
 mod m20260917_112950_watchlist_sections;
 mod m20260917_113318_watchlist_items;
 mod m20260923_084323_harden_portfolios_and_transactions;
+mod m20260924_090000_portfolio_snapshots;
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -26,6 +27,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20260917_112950_watchlist_sections::Migration),
             Box::new(m20260917_113318_watchlist_items::Migration),
             Box::new(m20260923_084323_harden_portfolios_and_transactions::Migration),
+            Box::new(m20260924_090000_portfolio_snapshots::Migration),
             // inject-above (do not remove this comment)
         ]
     }

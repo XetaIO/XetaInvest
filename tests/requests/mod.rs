@@ -4,6 +4,7 @@ mod portfolios;
 mod positions;
 mod prepare_data;
 mod quotes;
+mod statistics;
 mod stream;
 mod symbol_search;
 mod symbols;

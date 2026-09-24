@@ -1,8 +1,8 @@
 use super::_entities::portfolios::Column;
 pub use super::_entities::portfolios::{ActiveModel, Entity, Model};
-use sea_orm::QueryOrder;
 use sea_orm::entity::prelude::*;
 use sea_orm::sea_query::Expr;
+use sea_orm::{QueryOrder, QuerySelect};
 pub type Portfolios = Entity;
 
 /// Max portfolios per user.
@@ -25,6 +25,22 @@ impl ActiveModelBehavior for ActiveModel {
 }
 
 impl Entity {
+    /// Lists the id of every portfolio, all users included (batch jobs).
+    ///
+    /// Returns ids in ascending order.
+    pub async fn list_ids<C>(db: &C) -> Result<Vec<i64>, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        Entity::find()
+            .select_only()
+            .column(Column::Id)
+            .order_by_asc(Column::Id)
+            .into_tuple()
+            .all(db)
+            .await
+    }
+
     /// Lists a user's portfolios (default first, then name).
     ///
     /// Returns owned rows.

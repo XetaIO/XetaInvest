@@ -1,0 +1,31 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "plugins": ["typescript", "unicorn", "oxc", "react", "import"],
+    "categories": {
+        "correctness": "error"
+    },
+    "options": {
+        "typeAware": true
+    },
+    "ignorePatterns": ["dist", "src/bindings/**"],
+    "rules": {
+        "typescript/no-explicit-any": "error",
+        "typescript/consistent-type-imports": "error",
+        "react/react-in-jsx-scope": "off",
+        "react/rules-of-hooks": "error",
+        "react/exhaustive-deps": "warn",
+        "react/set-state-in-effect": "off",
+        "react/refs": "off"
+    },
+    "env": {
+        "builtin": true
+    },
+    "overrides": [
+        {
+            "files": ["**/*.test.ts", "**/*.test.tsx"],
+            "rules": {
+                "typescript/unbound-method": "off"
+            }
+        }
+    ]
+}

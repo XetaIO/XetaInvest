@@ -1,0 +1,10 @@
+- api_key: lo-7f0d34c7-7ccf-4abd-ac27-bc1726a21a7d
+  created_at: 2026-09-23T13:07:17.224025+00:00
+  email: emeric@xetaravel.com
+  email_verification_sent_at: 2026-09-23T13:07:17.671018+00:00
+  email_verification_token: c806f62c-887c-46fb-985c-305ccd0b499b
+  id: 1
+  name: Emeric
+  password: $argon2id$v=19$m=19456,t=2,p=1$hZXBrYSq/luKhlMLbPH4yQ$bqXEqEKUIacPzufDyW6C+NXrlnKrjzGmvz6BzjCQ8CY
+  pid: a92b1054-a54a-422a-bd61-bbd422d2bf98
+  updated_at: 2026-09-23T13:07:17.224025+00:00

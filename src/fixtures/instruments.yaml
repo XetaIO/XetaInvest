@@ -1,0 +1,180 @@
+- created_at: 2026-09-23T13:08:59.714098+00:00
+  currency: EUR
+  exchange: PAR
+  id: 1
+  last_synced_at: 2026-09-23T13:08:59.713196+00:00
+  name: Amundi PEA S&P 500 UCITS ETF Ac
+  quote_type: etf
+  symbol: PSP5.PA
+  updated_at: 2026-09-23T13:08:59.714098+00:00
+- created_at: 2026-09-23T13:14:44.338264+00:00
+  currency: EUR
+  exchange: PAR
+  id: 2
+  last_synced_at: 2026-09-23T13:14:44.337498+00:00
+  name: Amundi PEA Emergent (MSCI Emerg
+  quote_type: etf
+  symbol: PAEEM.PA
+  updated_at: 2026-09-23T13:14:44.338264+00:00
+- created_at: 2026-09-23T13:15:43.720698+00:00
+  currency: EUR
+  exchange: PAR
+  id: 3
+  last_synced_at: 2026-09-23T13:15:43.719997+00:00
+  name: Amundi PEA Nasdaq-100 UCITS ETF
+  quote_type: etf
+  symbol: PUST.PA
+  updated_at: 2026-09-23T13:15:43.720698+00:00
+- created_at: 2026-09-23T13:20:14.140019+00:00
+  currency: EUR
+  exchange: PAR
+  id: 4
+  last_synced_at: 2026-09-23T13:20:14.139232+00:00
+  name: KALRAY
+  quote_type: equity
+  symbol: ALKAL.PA
+  updated_at: 2026-09-23T13:20:14.140019+00:00
+- created_at: 2026-09-23T13:21:04.156074+00:00
+  currency: EUR
+  exchange: PAR
+  id: 5
+  last_synced_at: 2026-09-23T13:21:04.155193+00:00
+  name: STMICROELECTRONICS
+  quote_type: equity
+  symbol: STMPA.PA
+  updated_at: 2026-09-23T13:21:04.156074+00:00
+- created_at: 2026-09-23T13:26:19.802+00:00
+  currency: USD
+  exchange: NMS
+  id: 6
+  last_synced_at: 2026-09-23T13:26:19.801187+00:00
+  name: Alphabet Inc.
+  quote_type: equity
+  symbol: GOOG
+  updated_at: 2026-09-23T13:26:19.802+00:00
+- created_at: 2026-09-23T13:27:31.299562+00:00
+  currency: USD
+  exchange: NIM
+  id: 7
+  last_synced_at: 2026-09-23T13:27:31.298822+00:00
+  name: NASDAQ-100
+  quote_type: index
+  symbol: ^NDX
+  updated_at: 2026-09-23T13:27:31.299562+00:00
+- created_at: 2026-09-23T13:27:42.907092+00:00
+  currency: USD
+  exchange: SNP
+  id: 8
+  last_synced_at: 2026-09-23T13:27:42.906337+00:00
+  name: S&P 500
+  quote_type: index
+  symbol: ^GSPC
+  updated_at: 2026-09-23T13:27:42.907092+00:00
+- created_at: 2026-09-23T13:27:59.555728+00:00
+  currency: EUR
+  exchange: PAR
+  id: 9
+  last_synced_at: 2026-09-23T13:27:59.554973+00:00
+  name: CAC 40
+  quote_type: index
+  symbol: ^FCHI
+  updated_at: 2026-09-23T13:27:59.555728+00:00
+- created_at: 2026-09-23T13:28:28.346798+00:00
+  currency: USD
+  exchange: NMS
+  id: 10
+  last_synced_at: 2026-09-23T13:28:28.346043+00:00
+  name: "Space Exploration Technologies "
+  quote_type: equity
+  symbol: SPCX
+  updated_at: 2026-09-23T13:28:28.346798+00:00
+- created_at: 2026-09-23T13:28:35.587496+00:00
+  currency: USD
+  exchange: NMS
+  id: 11
+  last_synced_at: 2026-09-23T13:28:35.586763+00:00
+  name: NVIDIA Corporation
+  quote_type: equity
+  symbol: NVDA
+  updated_at: 2026-09-23T13:28:35.587496+00:00
+- created_at: 2026-09-23T13:28:41.793175+00:00
+  currency: USD
+  exchange: NMS
+  id: 12
+  last_synced_at: 2026-09-23T13:28:41.792379+00:00
+  name: Tesla, Inc.
+  quote_type: equity
+  symbol: TSLA
+  updated_at: 2026-09-23T13:28:41.793175+00:00
+- created_at: 2026-09-23T13:28:49.247297+00:00
+  currency: USD
+  exchange: NMS
+  id: 13
+  last_synced_at: 2026-09-23T13:28:49.246554+00:00
+  name: Amazon.com, Inc.
+  quote_type: equity
+  symbol: AMZN
+  updated_at: 2026-09-23T13:28:49.247297+00:00
+- created_at: 2026-09-23T13:28:56.144511+00:00
+  currency: USD
+  exchange: NMS
+  id: 14
+  last_synced_at: 2026-09-23T13:28:56.143798+00:00
+  name: Meta Platforms, Inc.
+  quote_type: equity
+  symbol: META
+  updated_at: 2026-09-23T13:28:56.144511+00:00
+- created_at: 2026-09-23T13:29:01.884372+00:00
+  currency: USD
+  exchange: NMS
+  id: 15
+  last_synced_at: 2026-09-23T13:29:01.883638+00:00
+  name: Apple Inc.
+  quote_type: equity
+  symbol: AAPL
+  updated_at: 2026-09-23T13:29:01.884372+00:00
+- created_at: 2026-09-23T13:29:07.858455+00:00
+  currency: USD
+  exchange: NMS
+  id: 16
+  last_synced_at: 2026-09-23T13:29:07.857728+00:00
+  name: Microsoft Corporation
+  quote_type: equity
+  symbol: MSFT
+  updated_at: 2026-09-23T13:29:07.858455+00:00
+- created_at: 2026-09-23T13:30:04.904675+00:00
+  currency: USD
+  exchange: NMS
+  id: 17
+  last_synced_at: 2026-09-23T13:30:04.903612+00:00
+  name: Advanced Micro Devices, Inc.
+  quote_type: equity
+  symbol: AMD
+  updated_at: 2026-09-23T13:30:04.904675+00:00
+- created_at: 2026-09-23T13:30:09.958151+00:00
+  currency: USD
+  exchange: NMS
+  id: 18
+  last_synced_at: 2026-09-23T13:30:09.957078+00:00
+  name: Intel Corporation
+  quote_type: equity
+  symbol: INTC
+  updated_at: 2026-09-23T13:30:09.958151+00:00
+- created_at: 2026-09-23T13:30:14.826849+00:00
+  currency: USD
+  exchange: NMS
+  id: 19
+  last_synced_at: 2026-09-23T13:30:14.826098+00:00
+  name: Micron Technology, Inc.
+  quote_type: equity
+  symbol: MU
+  updated_at: 2026-09-23T13:30:14.826849+00:00
+- created_at: 2026-09-24T18:37:24.915451+00:00
+  currency: USD
+  exchange: NMS
+  id: 20
+  last_synced_at: 2026-09-24T18:37:24.913664+00:00
+  name: IREN LIMITED
+  quote_type: equity
+  symbol: IREN
+  updated_at: 2026-09-24T18:37:24.915451+00:00
